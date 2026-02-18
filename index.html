@@ -1,274 +1,32 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Redliner | Support for Critical Law Firm Workflows</title>
-    <style>
-        :root {
-            --primary-blue: #0a2540;
-            --accent-blue: #007aff;
-            --text-gray: #425466;
-            --bg-light: #f6f9fc;
-            --white: #ffffff;
-            --border-color: #e6ebf1;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            line-height: 1.6;
-            color: var(--primary-blue);
-            margin: 0;
-            background-color: var(--white);
-        }
-
-        /* Navigation */
-        nav {
-            background: var(--white);
-            padding: 1rem 5%;
-            border-bottom: 1px solid var(--border-color);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .logo {
-            font-weight: 700;
-            font-size: 1.5rem;
-            letter-spacing: -0.5px;
-        }
-
-        /* Hero Section */
-        header {
-            padding: 80px 5% 60px;
-            background: radial-gradient(circle at top right, #f0f4f8, var(--white));
-            text-align: center;
-        }
-
-        header h1 {
-            font-size: 3.5rem;
-            margin-bottom: 1rem;
-            color: var(--primary-blue);
-        }
-
-        .hero-sub {
-            font-size: 1.25rem;
-            color: var(--text-gray);
-            max-width: 800px;
-            margin: 0 auto 2rem;
-        }
-
-        .app-store-badge {
-            display: inline-block;
-            background: #000;
-            color: white;
-            padding: 12px 24px;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: 600;
-        }
-
-        /* Main Content Containers */
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-            padding: 40px 20px;
-        }
-
-        section {
-            margin-bottom: 100px;
-            padding-top: 40px;
-        }
-
-        .card-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-            margin-top: 2rem;
-        }
-
-        .card {
-            background: var(--bg-light);
-            padding: 2rem;
-            border-radius: 12px;
-            border: 1px solid var(--border-color);
-        }
-
-        /* Typography */
-        h2 {
-            font-size: 2.5rem;
-            border-bottom: 2px solid var(--accent-blue);
-            display: inline-block;
-            margin-bottom: 1.5rem;
-        }
-
-        h3 {
-            font-size: 1.5rem;
-            color: var(--accent-blue);
-            margin-top: 2rem;
-        }
-
-        h4 {
-            font-size: 1.1rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-top: 1.5rem;
-        }
-
-        .valuation-box {
-            background: var(--primary-blue);
-            color: var(--white);
-            padding: 2rem;
-            border-radius: 12px;
-            margin-top: 2rem;
-        }
-
-        .conclusion-text {
-            font-style: italic;
-            font-weight: 600;
-            color: var(--accent-blue);
-        }
-
-        footer {
-            background: var(--bg-light);
-            padding: 60px 5%;
-            border-top: 1px solid var(--border-color);
-        }
-
-        /* Utility Classes */
-        .tag {
-            background: #e1effe;
-            color: var(--accent-blue);
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 600;
-        }
-    </style>
+    <link rel="stylesheet" href="style.css">
+    <title>Redliner | Legal Workflow Support</title>
 </head>
 <body>
-
     <nav>
-        <div class="logo">Redliner</div>
-        <div class="tag">Available on Mac OS</div>
-    </nav>
-
-    <header>
-        <h1>Redliner</h1>
-        <p class="hero-sub">Redliner is a Mac OS app that has been developed to support critical law firm workflows.</p>
-        <ul style="list-style: none; padding: 0; display: flex; justify-content: center; gap: 20px; font-weight: 500;">
-            <li>• Version Control</li>
-            <li>• Redlining</li>
-            <li>• Machine Learning</li>
-        </ul>
-        <p>The app has been approved and is available for sale on the Apple App Store.</p>
-    </header>
-
-    <div class="container">
-        
-        <section id="version-control">
-            <h2>Version Control</h2>
-            <h3>Background</h3>
-            <p>Version control is important in the context of any corporate transaction. When one party sends a document to another party, that party will either accept the document in the form in which it was sent or else return a revised document. This revised document is a new version of the prior document. The ability to track these versions is an important part of corporate transactional work for lawyers.</p>
-            
-            <h3>Market</h3>
-            <p>Most law firms use iManage for version control. Whereas Git is the gold standard for version control in software development, terms like "branching," "commit history" and "pull request" are not used in corporate transactional practices. Git is a better approach to version control than iManage in the technical sense that it allows for more robust workflows. At the same time, Git carries an unfamiliar vernacular and requires some amount of learning on the part of user.</p>
-
-            <h3>Redliner</h3>
-            <p>Redliner takes a dual-track approach to version control. The "base" version is designed to be familiar to users. It simply replicates the functionality that attorneys expect. This is a "save down-version up" functionality; users expect to snapshot documents at particular moments in time, and for versions to be distinguished from one another on the basis of authorship. A law firm will expect its "version" of a document to be the version that shows its changes and no others.</p>
-            <p>A second track is being developed. This track will use Git. Since most corporate attorneys are unfamiliar with Git and since there does not currently exist an implementation of Git to attorney workloads, the development of this track will follow closely with the distribution of the base track, so that users may gain incremental familiarity with Git in a discoverable manner.</p>
-
-            <div class="valuation-box">
-                <h3>Valuation</h3>
-                <p>To our knowledge, there does not currently exist a market for version control software for corporate attorneys. We believe that the market for document management software is driven in large part by the need for version control functionality. For this reason, we believe that version control software can be valued on the basis of comparisons to document management systems.</p>
-                <p>The most commonly used document-management system among attorneys is iManage. While pricing information is not available online, some reports have estimated pricing to be between $50 and $75 per user, per month. The midpoint of these two numbers is $62.50/user/month. The top 100 law firms in the world by revenue have a combined total of 159,946 lawyers; the total number of potential users is thus approximately 160,000. The market for this product is approximated as the product of the number of potential users and the midpoint price per user, per month, for a total $120 million per year in potential earnings before interest and taxes.</p>
-                <p class="conclusion-text">Conclusion: The market for version control software for large law firms, if measured at a 15x multiple to the maximum earnings figure estimated above, is approximately $1.8 billion.</p>
-            </div>
-        </section>
-
-        <section id="redlining">
-            <h2>Redlining</h2>
-            <h3>Background</h3>
-            <p>Corporate transactional workflows often involve exchanges of documents. An important part of these workflows is the ability to reason as to the changes between one document and another. These changes are shown on documents that are known as "redlines." In any corporate transaction, dozens if not hundreds of redlines may be exchanged. Redlines are an essential component of corporate transactional workflows.</p>
-
-            <h3>Market</h3>
-            <p>Most law firms use Litera to produce redlines. Litera is a private equity-backed legal technology company. The company has pursued an aggressive M&A strategy. It has acquired all of the companies that sold redlining software as of 2017, and is used by 99 of the top 100 law firms in the world today. It is therefore in a position to set pricing at favorable levels and to maintain such pricing levels in its discretion.</p>
-
-            <h3>Redliner</h3>
-            <p>Redliner competes most directly with Litera Compare. The primary margins for competition are:</p>
-            
-            <div class="card-grid">
-                <div class="card">
-                    <h4>Data Security</h4>
-                    <p>Redliner is safe. The ability to make copies of user documents, whether for redlining or for any other reason, presents a natural security threat. Companies that market redlining software may seek to make inappropriate use of customer data. Google has blocked Litera products from being installed on Google Workspace accounts this reason.</p>
-                    <p>Redliner has been designed with data security in mind. Redlines are produced entirely on device. The product does not depend in any way on "cloud" software and does not save, send or recieve any user data whatsoever. Our fully on-device system is more secure than Litera's cloud-based solution.</p>
-                </div>
-                <div class="card">
-                    <h4>Performance</h4>
-                    <p>Redliner is fast. In its current iteration, Redliner can compare 300-page documents in under one-tenth of one second. This compares favorably to Litera's product, which has been observed in practice to take more than two seconds, for a difference in excess of one full order of magnitude.</p>
-                    <p>An upgrade is anticipated in the coming weeks. With the coming upgrade, this performance difference is expected will increase significantly. Redliner is expected to produce redlines hundreds of times faster than the competing Litera product.</p>
-                </div>
-                <div class="card">
-                    <h4>Accuracy</h4>
-                    <p>Redliner is accurate. In its current iteration, the product tracks differences using a difference algorithm that is considered to the gold standard in computer science. This algorithm is known as the Myers' diff algorithm. It was developed by Eugene Myers in 1986. The algorithm is implemented in Redliner using an adaptation of the same software that is used by Google in its Google Workspace products.</p>
-                </div>
-            </div>
-
-            <div class="valuation-box">
-                <h3>Valuation</h3>
-                <p>Market size for a redlining product is determined with reference to the competing product, which is Litera Compare. Litera Compare sells for $1,900/year, or approximately $158/month. Assuming 160,000 users, the market for this product, estimated on the basis of earnings before interest and taxes, is approximately $303.4 million.</p>
-                <p class="conclusion-text">Conclusion: The market for redlining software for large law firms, if measured at a 15x multiple to the maximum earnings figure estimated above, is approximately $3 billion.</p>
-            </div>
-        </section>
-
-        <section id="machine-learning">
-            <h2>Machine Learning</h2>
-            <h3>Background</h3>
-            <p>Most law firms do not create machine learning datasets. Creating such datasets takes time. Redliner solves this problem by allowing users to combine document-editing and dataset-creating processes into a single process.</p>
-
-            <h3>Market</h3>
-            <p>Most law firms are organized as pass-through entities. Lawyers are also especially likely to understand the incentives that may be available to them as a result of the recent passage of the One Big Beautiful Bill Act ("OBBBA"). These incentives include the incentive to develop software to the extent creditable under Section 41 of the Internal Revenue Code and to the extent expensible under Section 174A of the Internal Revenue Code (26 U.S.C. § 174A - "Domestic research or experimental expenditures").</p>
-
-            <div class="card-grid">
-                <div class="card">
-                    <h4>Section 41 Tax Credits</h4>
-                    <p>Section 41 of the Internal Revenue Code (26 U.S.C. § 41 - "Credit for Increasing Research Activities", as amended by OBBBA, "Section 41") provides tax credits for certain research activities. These include activities relating to the production of machine learning datasets or artificial intelligence software generally. This software is expected to be particularly valuable.</p>
-                    <p>We believe that law firms stand to benefit from Section 41. Law firms have no assets other than the human capital that is possessed by their attorneys. When these attorneys leave, they take their human capital with them. We believe that these departures present a significant challenge to the economics of any large law firm, and that Section 41 tax credits provide large law firms with a further incentive to institutionalize the knowledge of their workers into datasets or other tangible forms. When these datasets are recorded into hardware, they are easy to value for accounting purposes. Software that assists large law firms with this task is expected to be of value to the extent it is essentially self-financing.</p>
-                </div>
-                <div class="card">
-                    <h4>Immediate Tax Expensing</h4>
-                    <p>Section 174A of the Internal Revenue Code (26 U.S.C. § 174A - "Domestic research or experimental expenditures", as amended by OBBBA, "Section 174A") provides for the immediate expensing of domestic research or experimental activities. These include activities relating to the production of machine learning datasets or artificial intelligence software generally. This software is expected to be particularly valuable. Law firms may benefit from Section 174A because they are structured as pass-through entities and because they are engaged in work that is of a type that is particularly well suited to the production of machine learning datasets and of artificial intelligence software generally for use in their own practices. In particular, the value of machine learning datasets and artificial intelligence software generally to law firms is increased by the extent to which such software is relatively easy to value for accounting purposes. Software that assists law firms with the creation of such datasets and such software more generally is therefore expected to be of value to the extent it is essentially self-financing.</p>
-                </div>
-            </div>
-
-            <h3>Redliner</h3>
-            <p>Redliner is an app that is principally designed to allow law firms to produce tax assets in the form of high-quality, hardware-bound machine learning datasets and artificial intelligence software. Of particular importance that law firm users are able to produce these tax assets without doing work that they do not already do.</p>
-            
-            <h4>Section 41: Creditable Intelligence</h4>
-            <p>Redliner is designed to allow law firms to create tax attributes for themselves in the form of artificial intellence assets. Because these assets are developed solely within the scope of a iCloud account, and because law firms already create such iCloud accounts for their attorneys, Redliner requires little to no incremental hardware investment or expenditure on the part of law firms. Law firms already provide their users with iPhones. Such iPhones come with iCloud accounts that are not identical to the user's personal iCloud account. Such iCloud accounts are controlled by the firms and not by the indvidual attorneys.</p>
-
-            <h4>Section 174A: Expensible Training</h4>
-            <p>As amended by OBBBA, Section 174A allows for the immediate expensing of domestic research and experimental expenditures. This creates an incentive for large law firms to institutionalize their human capital into hardware forms. Because these activities are directed toward the production of artificial intelligence software and machine learning datasets, they may easily qualify as domestic research. Redliner makes this qualification invisible to the user, and thereby further eases the path toward the institutionalization of human capital.</p>
-
-            <div class="valuation-box">
-                <h3>Valuation</h3>
-                <p>The top 100 law firms in the world by revenue earned a combined total of approximately $176.5 billion in 2025. The average law firm earns a profit margin of approximately 50 percent. Partners at the top 100 law firms in the world may therefore have earned approximately $88.22 billion in profits in 2025. If federal, state and local income taxes were approximately 40 percent of earnings, then these partners may have paid approximately $35.2 billion in taxes in 2025. If the combined effects of changes to Section 41 and Section 174A under OBBBA allow law firm partners to offset 40 percent of these taxes, then the total market size for software that assists law firm partners in achiving such offsets is approximately $14.1 billion. If such software is priced at 10 percent of the achievable offset, then the earnings supportable by such software is $1.41 billion.</p>
-                <p class="conclusion-text">Conclusion: The market for machine learning software for large law firms, if measured at a 15x multiple to the earnings figure estimated above, is approximately $21.18 billion.</p>
-            </div>
-        </section>
-
-    </div>
-
-    <footer>
-        <div class="container">
-            <h2>Financials</h2>
-            <p>As estimated above, the value of software of the type currently packaged into Redliner is approximately $21.18 + $3 + $1.8 billion, for a total of $25.98 billion.</p>
-            <p>The magnitude of this figure is consistent with the current administration's stated interest in supporting investment into the development of artificial intelligence-related technology in the United States. The existence of software for redlining, versioning and document management indicates that lawyers at top law firms will use competing software if suitably incentivized to do so. The suitability of the incentive to use Redliner is based on the size of the tax offset available to users. The absence of software that provides a similar bundling of tax benefits with enterprise software suggests that, if a first-mover advantage exists, Redliner will be the product that captures it.</p>
+        <div class="logo"><strong>Redliner</strong></div>
+        <div class="nav-links">
+            <a href="version-control/">Version Control</a>
+            <a href="redlining/">Redlining</a>
+            <a href="machine-learning/">Machine Learning</a>
+            <a href="valuation/">Valuation</a>
+            <a href="about/">About</a>
         </div>
-    </footer>
-
+    </nav>
+    <div class="container">
+        <h1>Redliner</h1>
+        <p class="hero-sub">A Mac OS app developed to support critical law firm workflows through version control, redlining, and machine learning[cite: 3, 4, 5].</p>
+        <div class="valuation-highlight">
+            <p>The app is approved and available for sale on the Apple App Store[cite: 6].</p>
+        </div>
+        <h2>Core Capabilities</h2>
+        <ul>
+            <li><strong>Automated Tax Assets:</strong> Produce hardware-bound machine learning datasets without extra work[cite: 74].</li>
+            <li><strong>On-Device Security:</strong> Processing happens entirely on your machine, not the cloud[cite: 41].</li>
+            <li><strong>Performance:</strong> Compare 300-page documents in under one-tenth of a second[cite: 43].</li>
+        </ul>
+    </div>
 </body>
 </html>
