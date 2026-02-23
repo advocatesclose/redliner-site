@@ -32,28 +32,18 @@ This software is expected to be particularly valuable. Law firms may benefit fro
 ## Redliner
             
 Redliner is designed to allow law firms to produce tax assets in the form of high-quality, hardware-bound machine learning datasets and artificial intelligence software. These datasets can be created in Redliner without additional work by the user. 
-
-<div class="box">
-            
+           
 ### Section 41: Creditable Intelligence
             
 Redliner is designed to allow law firms to create tax attributes for themselves in the form of artificial intellence assets. Because these assets are developed solely within the scope of a iCloud account, and because law firms already create such iCloud accounts for their attorneys, Redliner requires little to no incremental hardware investment or expenditure on the part of law firms. Law firms already provide their users with iPhones. Such iPhones come with iCloud accounts that are not identical to the user's personal iCloud account. Such iCloud accounts are controlled by the firms and not by the indvidual attorneys.
-</div>
-
-<div class="box">
             
 ### Section 174A: Expensible Training
             
 As amended by OBBBA, Section 174A allows for the immediate expensing of domestic research and experimental expenditures. This creates an incentive for large law firms to institutionalize their human capital into hardware forms. Because these activities are directed toward the production of artificial intelligence software and machine learning datasets, they may easily qualify as domestic research. Redliner makes this qualification invisible to the user, and thereby further eases the path toward the institutionalization of human capital.
-</div>
 
-<div class="valuation-box">
-
-            ## Valuation
-                
+## Valuation
 
 The top 100 law firms in the world by revenue earned a combined total of approximately $176.5 billion in 2025. The average law firm earns a profit margin of approximately 50 percent. Partners at the top 100 law firms in the world may therefore have earned approximately $88.22 billion in profits in 2025. If federal, state and local income taxes were approximately 40 percent of earnings, then these partners may have paid approximately $35.2 billion in taxes in 2025. If the combined effects of changes to Section 41 and Section 174A under OBBBA allow law firm partners to offset 40 percent of these taxes, then the total market size for software that assists law firm partners in achiving such offsets is approximately $14.1 billion. If such software is priced at 10 percent of the achievable offset, then the earnings supportable by such software is $1.41 billion.
             
-<p class="conclusion-text">Conclusion: The market for machine learning software for large law firms, if measured at a 15x multiple to the earnings figure estimated above, is approximately $21.18 billion.
-</p>      
-</div>    
+### Conclusion: 
+The market for machine learning software for large law firms, if measured at a 15x multiple to the earnings figure estimated above, is approximately $21.18 billion.
