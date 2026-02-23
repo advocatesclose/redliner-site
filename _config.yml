@@ -1,0 +1,18 @@
+# Site Settings
+title: Redliner
+description: Support for Critical Law Firm Workflows
+url: "https://yourusername.github.io" # Replace with your GitHub URL
+baseurl: "" # Leave empty if this is your main site
+
+# Analytics
+google_analytics: G-W6GL1XQQLV
+
+# Build Settings
+markdown: kramdown
+theme: jekyll-theme-minimal # A safe base, but your custom CSS will override it
+
+# Pagination (for your analysis papers/updates)
+plugins:
+  - jekyll-paginate
+paginate: 5
+paginate_path: "/analysis/page:num/"
