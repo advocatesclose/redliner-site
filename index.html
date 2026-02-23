@@ -156,6 +156,29 @@
             font-size: 0.85rem;
             font-weight: 600;
         }
+        
+        .hero-sub .automated-obbba {
+            display: block;
+            font-size: 5rem; /* Large and impactful */
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: -2px; 
+            line-height: 1;
+            margin: 20px 0;
+            
+            background: linear-gradient(180deg, var(--primary-blue) 0%, var(--accent-blue) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            
+            text-shadow: 0px 4px 10px rgba(0, 122, 255, 0.1);
+        }
+        
+        @media (max-width: 768px) {
+            .hero-sub .automated-obbba {
+                font-size: 3rem;
+                letter-spacing: -1px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -167,7 +190,7 @@
 
     <header>
         <h1>Redliner</h1>
-        <p class="hero-sub">Redliner is a Mac OS app that has been developed to support critical law firm workflows.</p>
+        <p class="hero-sub">Redliner automates OBBBA.</p>
         <ul style="list-style: none; padding: 0; display: flex; justify-content: center; gap: 20px; font-weight: 500;">
             <li>• Version Control</li>
             <li>• Redlining</li>
