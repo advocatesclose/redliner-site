@@ -1,25 +1,21 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ page.title }} | {{ site.title }}</title>
-    
+    <title>{{ page.title }}</title>
     <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}">
-
-    <script async src="https://www.googletagmanager.com/gtag/js?id={{ site.google_analytics }}"></script>
+    
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-W6GL1XQQLV"></script>
     <script>
         window.dataLayer = window.dataLayer || [];
         function gtag(){dataLayer.push(arguments);}
         gtag('js', new Date());
-        gtag('config', '{{ site.google_analytics }}');
+        gtag('config', 'G-W6GL1XQQLV');
     </script>
 </head>
 <body>
-
     <nav>
-        <div class="logo">{{ site.title }}</div>
-        <div class="tag">Available on Mac OS</div>
+        <div class="logo">Redliner</div>
     </nav>
 
     <div class="container">
@@ -27,10 +23,7 @@
     </div>
 
     <footer>
-        <div class="container">
-            <p>© {{ "now" | date: "%Y" }} Javaad Ali, Esq. New York.</p>
-        </div>
+        <p>© {{ "now" | date: "%Y" }} {{ site.title }} Javaad Ali, Esq. New York.</p>
     </footer>
-
 </body>
 </html>
