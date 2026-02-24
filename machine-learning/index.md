@@ -31,11 +31,11 @@ This software is expected to be particularly valuable. Law firms may benefit fro
 
 ## Redliner
             
-Redliner is designed to allow law firms to produce tax assets in the form of high-quality, hardware-bound machine learning datasets and artificial intelligence software. These datasets can be created in Redliner without additional work by the user. 
+Redliner generates machine learning datasets from the changes that are made to documents by users of the app. These datasets are created by the user--the app merely records the user's changes to a document into a format suitable for machine learning. These datasets can be created in Redliner without additional work by the user. The dataset is encrypted and tied to the device on which it is created so that, even if the identity of the user changes over time, if the identity of the iCloud account that is tied to the device remains unchanged, then the database be retained by the device. A valid login will permit access to the app's data from within the app (only).
            
 ### Section 41: Creditable Intelligence
             
-Redliner is designed to allow law firms to create tax attributes for themselves in the form of artificial intellence assets. Because these assets are developed solely within the scope of a iCloud account, and because law firms already create such iCloud accounts for their attorneys, Redliner requires little to no incremental hardware investment or expenditure on the part of law firms. Law firms already provide their users with iPhones. Such iPhones come with iCloud accounts that are not identical to the user's personal iCloud account. Such iCloud accounts are controlled by the firms and not by the indvidual attorneys.
+Redliner is designed to allow lawyers to create tax attributes in the form of artificial intellence assets. Because these assets are developed solely within the app, the dataset follows the device(s) on which it is created. Firms may thereby source high quality machine learning datasets from work that is already done by associates on firm-owned machines. The dataset is encrypted on the device, so that the device is a physical asset the value of which may be increased by associate time that is logged to that device. 
             
 ### Section 174A: Expensible Training
             
