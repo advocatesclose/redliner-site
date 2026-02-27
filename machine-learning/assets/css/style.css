@@ -1,0 +1,159 @@
+/* --- GLOBAL VARIABLES (:root) --- 
+   Think of these as your "theme settings." Changing a color here 
+   updates it everywhere it's used in the code below. */
+:root {
+    --gh-blue: #0969da;      /* Primary brand color (links/buttons) */
+    --gh-dark: #24292f;      /* Deep dark gray for text and nav background */
+    --gh-gray: #57606a;      /* Lighter gray for secondary text/subheadings */
+    --gh-bg: #ffffff;        /* Main page background (white) */
+    --gh-border: #d0d7de;    /* Light gray for borders and lines */
+    --subtle-bg: #f6f8fa;    /* Off-white background for the banner/hero */
+    --success-green: #1a7f37;/* Green used for positive conclusions/success states */
+}
+
+/* --- BODY SETTINGS --- 
+   These styles apply to the entire page. */
+body {
+    /* REQUIREMENT 2: This is your primary font stack. 
+       It uses the system's default sans-serif for speed and clarity. */
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+    line-height: 1.5;         /* Space between lines of text for readability */
+    color: var(--gh-dark);    /* Sets the main text color using our variable */
+    margin: 0;                /* Removes the default browser margin around the page */
+    background-color: var(--gh-bg); /* Sets the page background to white */
+}
+
+/* --- NAVIGATION BAR --- */
+nav {
+    background: var(--gh-dark); /* Dark background for the top bar */
+    color: white;               /* Makes the nav text white */
+    padding: 1rem 10%;          /* 1rem top/bottom, 10% space on the sides */
+    display: flex;              /* Enables Flexbox layout to align items side-by-side */
+    justify-content: space-between; /* Pushes logo to the left and links to the right */
+    align-items: center;        /* Centers items vertically within the nav bar */
+}
+
+/* Specific style for the Logo text in the nav */
+.logo { 
+    font-weight: 600;           /* Makes the logo text semi-bold */
+    font-size: 1.25rem;         /* Slightly larger than body text */
+    letter-spacing: -0.5px;     /* Tightens the space between letters */
+}
+
+/* --- HERO / BANNER SECTION --- */
+.hero {
+    /* Control the vertical size of your banner here (80px top/bottom) */
+    padding: 80px 10%; 
+    border-bottom: 1px solid var(--gh-border); /* Adds a thin line at the bottom */
+    background: var(--subtle-bg);               /* Light gray banner background */
+    text-align: center;                         /* Centers all text inside the banner */
+    
+    /* REQUIREMENT 2: Explicitly ensures the banner uses the body font */
+    font-family: inherit; 
+}
+
+/* REQUIREMENT 1: The Main Banner Heading */
+.hero h1 { 
+    padding: 0;            /* Removed all internal padding */
+    margin-top: 0;         /* Also removed top margin to keep it tight to the top */
+    margin-bottom: 0.5rem; /* Space between the heading and the sub-text */
+    font-size: 3rem;       /* Large title size */
+    font-weight: 600;      /* Semi-bold weight */
+}
+
+/* Sub-text underneath the hero heading */
+.hero-sub { 
+    font-size: 1.5rem; 
+    color: var(--gh-gray); 
+    max-width: 900px;      /* Prevents text from stretching too wide on desktops */
+    margin: 0 auto 1.5rem; /* Centers the block and adds space below it */
+}
+
+/* --- CONTENT STRUCTURE --- */
+.container { 
+    max-width: 1012px;     /* Standard GitHub content width */
+    margin: 0 auto;        /* Centers the content on the screen */
+    padding: 40px 20px;    /* Adds space around the content so it doesn't touch screen edges */
+}
+
+/* Adds vertical breathing room between different sections of the page */
+section { margin-bottom: 80px; }
+
+/* Secondary Headings */
+h2 { 
+    font-size: 2rem; 
+    border-bottom: 1px solid var(--gh-border); /* Adds the "GitHub-style" underline */
+    padding-bottom: 0.3rem; 
+    margin-top: 40px; 
+}
+
+/* Small Headings (usually used inside cards or sections) */
+h3 { color: var(--gh-blue); font-size: 1.5rem; margin-top: 2rem; }
+
+/* --- GRID SYSTEM --- 
+   Used to create columns for cards or features. */
+.card-grid {
+    display: grid; 
+    /* Creates columns that automatically adjust. 
+       minmax(300px, 1fr) means: "Try to be 300px wide, but grow to fill space." */
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;           /* Space between the cards */
+    margin: 2rem 0; 
+}
+
+/* Individual Card Styling */
+.card {
+    border: 1px solid var(--gh-border); /* Border around the card */
+    border-radius: 6px;                 /* Rounded corners */
+    padding: 24px;                      /* Internal space inside the card */
+    background: var(--gh-bg);           /* White card background */
+}
+
+/* --- SPECIAL STYLING --- */
+
+/* Highlighted Box for valuations or key data */
+.valuation-box {
+    background: #f0f7ff;        /* Light blue background */
+    border: 1px solid #c2e0ff;  /* Slightly darker blue border */
+    padding: 2rem; 
+    border-radius: 6px; 
+    margin: 2rem 0; 
+}
+
+/* Text used for final results or summaries */
+.conclusion-text {
+    color: var(--success-green); 
+    font-weight: 600; 
+    border-left: 4px solid var(--success-green); /* Adds a thick green bar on the left */
+    padding-left: 1rem;         /* Space between the green bar and the text */
+}
+
+/* Button Styling */
+.btn {
+    background-color: var(--gh-blue); 
+    color: white; 
+    padding: 12px 20px; 
+    border-radius: 6px; 
+    text-decoration: none;      /* Removes the default link underline */
+    font-weight: 500; 
+    display: inline-block;      /* Allows padding and margins to work correctly */
+}
+
+/* --- FOOTER --- */
+footer { 
+    background: var(--gh-dark); 
+    color: #8b949e;             /* Muted gray text for footer */
+    padding: 4rem 10%; 
+}
+
+/* Heading inside the footer */
+footer h2 { color: white; border-color: #30363d; }
+
+/* --- MOBILE RESPONSIVENESS --- */
+@media (max-width: 768px) {
+    /* On small screens, shrink the hero heading so it doesn't overflow */
+    .hero h1 { font-size: 2rem; }
+    
+    /* Reduce side spacing on mobile to give content more room */
+    nav { padding: 1rem 5%; }
+}
