@@ -1,297 +1,897 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Redliner</title>
-    <style>
-        :root {
-            --primary-blue: #0a2540;
-            --accent-blue: #007aff;
-            --text-gray: #425466;
-            --bg-light: #f6f9fc;
-            --white: #ffffff;
-            --border-color: #e6ebf1;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Atlas — The Document OS for the Machine Learning Age</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=DM+Mono:wght@300;400;500&family=Instrument+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0d0d0e;
+    --paper: #f5f2eb;
+    --cream: #ede9df;
+    --red: #c8302a;
+    --blue: #1e4f9c;
+    --gold: #b8902a;
+    --muted: #7a7570;
+    --rule: #d4cfc4;
+  }
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            line-height: 1.6;
-            color: var(--primary-blue);
-            margin: 0;
-            background-color: var(--white);
-        }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-        /* Navigation */
-        nav {
-            background: var(--white);
-            padding: 1rem 5%;
-            border-bottom: 1px solid var(--border-color);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+  html { scroll-behavior: smooth; }
 
-        .logo {
-            font-weight: 700;
-            font-size: 1.5rem;
-            letter-spacing: -0.5px;
-        }
+  body {
+    background-color: var(--paper);
+    color: var(--ink);
+    font-family: 'Instrument Sans', sans-serif;
+    font-size: 16px;
+    line-height: 1.65;
+    overflow-x: hidden;
+  }
 
-        /* Hero Section */
-        header {
-            padding: 80px 5% 60px;
-            background: radial-gradient(circle at top right, #f0f4f8, var(--white));
-            text-align: center;
-        }
+  /* ── NOISE TEXTURE OVERLAY ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 999;
+    opacity: 0.5;
+  }
 
-        header h1 {
-            font-size: 3.5rem;
-            margin-bottom: 1rem;
-            color: var(--primary-blue);
-        }
+  /* ── MASTHEAD ── */
+  .masthead {
+    border-bottom: 2px solid var(--ink);
+    padding: 18px 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    background: var(--paper);
+    z-index: 100;
+    animation: slideDown 0.6s ease both;
+  }
 
-        .hero-sub {
-            font-size: 1.25rem;
-            color: var(--text-gray);
-            max-width: 800px;
-            margin: 0 auto 2rem;
-        }
+  @keyframes slideDown {
+    from { transform: translateY(-100%); opacity: 0; }
+    to   { transform: translateY(0);     opacity: 1; }
+  }
 
-        .app-store-badge {
-            display: inline-block;
-            background: #000;
-            color: white;
-            padding: 12px 24px;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: 600;
-        }
+  .masthead-logo {
+    font-family: 'Playfair Display', serif;
+    font-weight: 900;
+    font-size: 1.5rem;
+    letter-spacing: -0.02em;
+  }
 
-        /* Main Content Containers */
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-            padding: 40px 20px;
-        }
+  .masthead-logo span {
+    display: inline-block;
+    width: 8px; height: 8px;
+    background: var(--red);
+    border-radius: 50%;
+    margin-left: 3px;
+    vertical-align: middle;
+    position: relative;
+    top: -2px;
+  }
 
-        section {
-            margin-bottom: 100px;
-            padding-top: 40px;
-        }
+  .masthead-meta {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    text-align: right;
+  }
 
-        .card-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-            margin-top: 2rem;
-        }
+  /* ── HERO ── */
+  .hero {
+    padding: 0 60px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    min-height: 88vh;
+    border-bottom: 1px solid var(--rule);
+    overflow: hidden;
+  }
 
-        .card {
-            background: var(--bg-light);
-            padding: 2rem;
-            border-radius: 12px;
-            border: 1px solid var(--border-color);
-        }
+  .hero-left {
+    padding: 80px 60px 80px 0;
+    border-right: 1px solid var(--rule);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    animation: fadeUp 0.9s 0.2s ease both;
+  }
 
-        /* Typography */
-        h2 {
-            font-size: 2.5rem;
-            border-bottom: 2px solid var(--accent-blue);
-            display: inline-block;
-            margin-bottom: 1.5rem;
-        }
+  @keyframes fadeUp {
+    from { transform: translateY(40px); opacity: 0; }
+    to   { transform: translateY(0);    opacity: 1; }
+  }
 
-        h3 {
-            font-size: 1.5rem;
-            color: var(--accent-blue);
-            margin-top: 2rem;
-        }
+  .kicker {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--red);
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
 
-        h4 {
-            font-size: 1.1rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-top: 1.5rem;
-        }
+  .kicker::before {
+    content: '';
+    display: block;
+    width: 32px;
+    height: 1px;
+    background: var(--red);
+  }
 
-        .valuation-box {
-            background: var(--primary-blue);
-            color: var(--white);
-            padding: 2rem;
-            border-radius: 12px;
-            margin-top: 2rem;
-        }
+  .hero-headline {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(3rem, 5vw, 5.5rem);
+    font-weight: 900;
+    line-height: 1.0;
+    letter-spacing: -0.03em;
+    margin-bottom: 32px;
+  }
 
-        .conclusion-text {
-            font-style: italic;
-            font-weight: 600;
-            color: var(--accent-blue);
-        }
+  .hero-headline em {
+    font-style: italic;
+    color: var(--blue);
+  }
 
-        footer {
-            background: var(--bg-light);
-            padding: 60px 5%;
-            border-top: 1px solid var(--border-color);
-        }
+  .hero-subhead {
+    font-size: 1.05rem;
+    color: var(--muted);
+    max-width: 480px;
+    line-height: 1.7;
+    border-left: 3px solid var(--gold);
+    padding-left: 20px;
+    margin-bottom: 48px;
+  }
 
-        /* Utility Classes */
-        .tag {
-            background: #e1effe;
-            color: var(--accent-blue);
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 600;
-        }
-        
-        .hero-sub .automated-obbba {
-            display: block;
-            font-size: 5rem; /* Large and impactful */
-            font-weight: 900;
-            text-transform: uppercase;
-            letter-spacing: -2px; 
-            line-height: 1;
-            margin: 20px 0;
-            
-            background: linear-gradient(180deg, var(--primary-blue) 0%, var(--accent-blue) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            
-            text-shadow: 0px 4px 10px rgba(0, 122, 255, 0.1);
-        }
-        
-        @media (max-width: 768px) {
-            .hero-sub .automated-obbba {
-                font-size: 3rem;
-                letter-spacing: -1px;
-            }
-        }
-    </style>
+  .hero-cta {
+    display: inline-flex;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .btn-primary {
+    background: var(--ink);
+    color: var(--paper);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    padding: 14px 28px;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.2s, transform 0.15s;
+    display: inline-block;
+  }
+
+  .btn-primary:hover { background: var(--blue); transform: translateY(-2px); }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--ink);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    padding: 13px 28px;
+    border: 1px solid var(--ink);
+    cursor: pointer;
+    text-decoration: none;
+    transition: border-color 0.2s, color 0.2s, transform 0.15s;
+    display: inline-block;
+  }
+
+  .btn-ghost:hover { border-color: var(--blue); color: var(--blue); transform: translateY(-2px); }
+
+  /* ── HERO RIGHT ── */
+  .hero-right {
+    padding: 80px 0 80px 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: fadeUp 0.9s 0.45s ease both;
+  }
+
+  .doc-mockup {
+    width: 100%;
+    max-width: 420px;
+    background: white;
+    border: 1px solid var(--rule);
+    box-shadow: 12px 16px 0 var(--rule), 24px 32px 0 rgba(0,0,0,0.05);
+    overflow: hidden;
+    position: relative;
+  }
+
+  .doc-topbar {
+    background: var(--ink);
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .doc-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .doc-dot.r { background: #c8302a; }
+  .doc-dot.y { background: #b8902a; }
+  .doc-dot.g { background: #2a8c4e; }
+
+  .doc-title {
+    margin-left: auto;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    color: rgba(255,255,255,0.45);
+    letter-spacing: 0.1em;
+  }
+
+  .doc-body {
+    padding: 28px 24px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    line-height: 1.9;
+    color: #333;
+  }
+
+  .doc-line { display: block; margin-bottom: 4px; }
+  .doc-heading { font-weight: 500; font-size: 0.8rem; color: var(--ink); margin-bottom: 8px; display: block; }
+
+  .redline-del {
+    color: var(--red);
+    text-decoration: line-through;
+    background: rgba(200,48,42,0.07);
+    padding: 0 2px;
+  }
+
+  .redline-ins {
+    color: var(--blue);
+    text-decoration: underline;
+    background: rgba(30,79,156,0.07);
+    padding: 0 2px;
+  }
+
+  .tag-chip {
+    display: inline-block;
+    font-size: 0.58rem;
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 2px 7px;
+    border-radius: 2px;
+    margin-left: 6px;
+    vertical-align: middle;
+    position: relative;
+    top: -1px;
+  }
+
+  .tag-risk { background: rgba(200,48,42,0.1); color: var(--red); }
+  .tag-date { background: rgba(30,79,156,0.1); color: var(--blue); }
+  .tag-clause { background: rgba(184,144,42,0.1); color: var(--gold); }
+
+  .cursor-blink {
+    display: inline-block;
+    width: 2px; height: 12px;
+    background: var(--ink);
+    margin-left: 2px;
+    vertical-align: middle;
+    animation: blink 1.1s step-end infinite;
+  }
+
+  @keyframes blink {
+    50% { opacity: 0; }
+  }
+
+  /* ── SECTION DIVIDER ── */
+  .section-rule {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    padding: 0 60px;
+    margin: 0;
+  }
+
+  .section-rule-line { flex: 1; height: 1px; background: var(--rule); }
+  .section-rule-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.66rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 14px 24px;
+    border-left: 1px solid var(--rule);
+    border-right: 1px solid var(--rule);
+  }
+
+  /* ── FEATURE GRID ── */
+  .features {
+    padding: 80px 60px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    border-bottom: 1px solid var(--rule);
+    animation: fadeUp 0.8s 0.1s ease both;
+    animation-play-state: paused;
+  }
+
+  .features.visible { animation-play-state: running; }
+
+  .feature-card {
+    padding: 48px 40px;
+    border-right: 1px solid var(--rule);
+    position: relative;
+    transition: background 0.3s;
+  }
+
+  .feature-card:last-child { border-right: none; }
+  .feature-card:hover { background: var(--cream); }
+
+  .feature-number {
+    font-family: 'Playfair Display', serif;
+    font-size: 5rem;
+    font-weight: 900;
+    color: var(--rule);
+    line-height: 1;
+    margin-bottom: 20px;
+    transition: color 0.3s;
+  }
+
+  .feature-card:hover .feature-number { color: var(--blue); opacity: 0.25; }
+
+  .feature-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 14px;
+    line-height: 1.2;
+  }
+
+  .feature-desc {
+    font-size: 0.9rem;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+
+  .feature-tag {
+    display: inline-block;
+    margin-top: 20px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--red);
+    border-bottom: 1px solid var(--red);
+    padding-bottom: 2px;
+  }
+
+  /* ── COMPARISON TABLE ── */
+  .comparison-section {
+    padding: 80px 60px;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .section-header {
+    margin-bottom: 56px;
+  }
+
+  .section-eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--red);
+    margin-bottom: 14px;
+  }
+
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 3.5vw, 3.2rem);
+    font-weight: 900;
+    line-height: 1.1;
+    letter-spacing: -0.025em;
+  }
+
+  .comparison-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .comparison-table thead tr {
+    border-bottom: 2px solid var(--ink);
+  }
+
+  .comparison-table th {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 12px 24px 16px;
+    text-align: left;
+    color: var(--muted);
+  }
+
+  .comparison-table th.atlas-col { color: var(--blue); }
+
+  .comparison-table td {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--rule);
+    font-size: 0.92rem;
+    vertical-align: top;
+  }
+
+  .comparison-table tr:hover td { background: var(--cream); }
+
+  .comparison-table .old-way {
+    color: var(--muted);
+    text-decoration: line-through;
+    font-style: italic;
+  }
+
+  .comparison-table .new-way {
+    color: var(--ink);
+    font-weight: 500;
+  }
+
+  .comparison-table .new-way strong {
+    color: var(--blue);
+    font-weight: 600;
+  }
+
+  /* ── SPECS ── */
+  .specs-section {
+    padding: 80px 60px;
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 80px;
+    border-bottom: 1px solid var(--rule);
+    align-items: start;
+  }
+
+  .specs-label {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 3.5vw, 3.2rem);
+    font-weight: 900;
+    line-height: 1.1;
+    letter-spacing: -0.025em;
+    position: sticky;
+    top: 80px;
+  }
+
+  .specs-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+  }
+
+  .spec-item {
+    padding: 28px 0;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .spec-item:nth-child(odd) { padding-right: 40px; border-right: 1px solid var(--rule); }
+  .spec-item:nth-child(even) { padding-left: 40px; }
+
+  .spec-icon {
+    width: 36px; height: 36px;
+    margin-bottom: 14px;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .spec-icon svg { width: 22px; height: 22px; }
+
+  .spec-name {
+    font-family: 'Instrument Sans', sans-serif;
+    font-weight: 600;
+    font-size: 0.9rem;
+    margin-bottom: 6px;
+  }
+
+  .spec-detail {
+    font-size: 0.83rem;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  /* ── SECURITY CALLOUT ── */
+  .security-section {
+    margin: 0 60px;
+    border: 1px solid var(--ink);
+    padding: 56px 60px;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 48px;
+    align-items: center;
+    background: var(--ink);
+    color: var(--paper);
+    margin-bottom: 0;
+  }
+
+  .security-icon-wrap {
+    width: 80px; height: 80px;
+    border: 1px solid rgba(245,242,235,0.2);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .security-icon-wrap svg { width: 36px; height: 36px; stroke: var(--gold); fill: none; }
+
+  .security-content {}
+
+  .security-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.66rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 12px;
+  }
+
+  .security-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 14px;
+    line-height: 1.2;
+  }
+
+  .security-desc {
+    font-size: 0.9rem;
+    color: rgba(245,242,235,0.65);
+    line-height: 1.7;
+    max-width: 640px;
+  }
+
+  .security-badges {
+    display: flex;
+    gap: 12px;
+    margin-top: 24px;
+    flex-wrap: wrap;
+  }
+
+  .security-badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.63rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 7px 14px;
+    border: 1px solid rgba(245,242,235,0.2);
+    color: rgba(245,242,235,0.6);
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    padding: 40px 60px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid var(--rule);
+    margin-top: 60px;
+  }
+
+  .footer-logo {
+    font-family: 'Playfair Display', serif;
+    font-weight: 900;
+    font-size: 1.1rem;
+  }
+
+  .footer-note {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-align: right;
+  }
+
+  /* ── SCROLL REVEAL ── */
+  .reveal {
+    opacity: 0;
+    transform: translateY(32px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 900px) {
+    .masthead { padding: 14px 24px; }
+    .hero { grid-template-columns: 1fr; padding: 0 24px; min-height: auto; }
+    .hero-left { padding: 60px 0 40px; border-right: none; border-bottom: 1px solid var(--rule); }
+    .hero-right { padding: 40px 0 60px; }
+    .features { grid-template-columns: 1fr; padding: 40px 24px; }
+    .feature-card { border-right: none; border-bottom: 1px solid var(--rule); padding: 36px 0; }
+    .comparison-section, .specs-section { padding: 60px 24px; }
+    .specs-section { grid-template-columns: 1fr; gap: 40px; }
+    .specs-label { position: static; }
+    .specs-grid { grid-template-columns: 1fr; }
+    .spec-item:nth-child(odd) { padding-right: 0; border-right: none; }
+    .spec-item:nth-child(even) { padding-left: 0; }
+    .security-section { margin: 0 24px; padding: 36px 28px; grid-template-columns: 1fr; gap: 24px; }
+    footer { padding: 28px 24px; flex-direction: column; gap: 12px; text-align: center; }
+    .footer-note { text-align: center; }
+    .section-rule { padding: 0 24px; }
+  }
+</style>
 </head>
 <body>
 
-    <nav>
-        <div class="logo">Redliner</div>
-        <div class="tag">Available on Mac OS</div>
-    </nav>
+<!-- MASTHEAD -->
+<header class="masthead">
+  <div class="masthead-logo">Atlas<span></span></div>
+  <div class="masthead-meta">
+    Document OS<br>Machine Learning Age
+  </div>
+</header>
 
-    <header>
-        <h1>Redliner</h1>
-        <p class="hero-sub"></p>
-        <ul style="list-style: none; padding: 0; display: flex; justify-content: center; gap: 20px; font-weight: 500;">
-            <li>• Create machine learning datasets from changes made within the app</li>
-            <li>• Machine learning datasets are tax assets under OBBBA</li>
-            <li>• Creates documentation to support tax claims</li>
-        </ul>
-        <p>The app has been approved and is available for sale on the Apple App Store.</p>
-    </header>
-
-    <div class="container">
-        
-        <section id="version-control">
-            <h2>Version Control</h2>
-            <h3>Background</h3>
-            <p>Version control is important in the context of any corporate transaction. When one party sends a document to another party, that party will either accept the document in the form in which it was sent or else return a revised document. This revised document is a new version of the prior document. The ability to track these versions is an important part of corporate transactional work for lawyers.</p>
-            
-            <h3>Market</h3>
-            <p>Most law firms use iManage for version control. Whereas Git is the gold standard for version control in software development, terms like "branching," "commit history" and "pull request" are not used in corporate transactional practices. Git is a better approach to version control than iManage in the technical sense that it allows for more robust workflows. At the same time, Git carries an unfamiliar vernacular and requires some amount of learning on the part of user.</p>
-
-            <h3>Redliner</h3>
-            <p>Redliner takes a dual-track approach to version control. The "base" version is designed to be familiar to users. It simply replicates the functionality that attorneys expect. This is a "save down-version up" functionality; users expect to snapshot documents at particular moments in time, and for versions to be distinguished from one another on the basis of authorship. A law firm will expect its "version" of a document to be the version that shows its changes and no others.</p>
-            <p>A second track is being developed. This track will use Git. Since most corporate attorneys are unfamiliar with Git and since there does not currently exist an implementation of Git to attorney workloads, the development of this track will follow closely with the distribution of the base track, so that users may gain incremental familiarity with Git in a discoverable manner.</p>
-
-            <div class="valuation-box">
-                <h3>Valuation</h3>
-                <p>To our knowledge, there does not currently exist a market for version control software for corporate attorneys. We believe that the market for document management software is driven in large part by the need for version control functionality. For this reason, we believe that version control software can be valued on the basis of comparisons to document management systems.</p>
-                <p>The most commonly used document-management system among attorneys is iManage. While pricing information is not available online, some reports have estimated pricing to be between $50 and $75 per user, per month. The midpoint of these two numbers is $62.50/user/month. The top 100 law firms in the world by revenue have a combined total of 159,946 lawyers; the total number of potential users is thus approximately 160,000. The market for this product is approximated as the product of the number of potential users and the midpoint price per user, per month, for a total $120 million per year in potential earnings before interest and taxes.</p>
-                <p class="conclusion-text">Conclusion: The market for version control software for large law firms, if measured at a 15x multiple to the maximum earnings figure estimated above, is approximately $1.8 billion.</p>
-            </div>
-        </section>
-
-        <section id="redlining">
-            <h2>Redlining</h2>
-            <h3>Background</h3>
-            <p>Corporate transactional workflows often involve exchanges of documents. An important part of these workflows is the ability to reason as to the changes between one document and another. These changes are shown on documents that are known as "redlines." In any corporate transaction, dozens if not hundreds of redlines may be exchanged. Redlines are an essential component of corporate transactional workflows.</p>
-
-            <h3>Market</h3>
-            <p>Most law firms use Litera to produce redlines. Litera is a private equity-backed legal technology company. The company has pursued an aggressive M&A strategy. It has acquired all of the companies that sold redlining software as of 2017, and is used by 99 of the top 100 law firms in the world today. It is therefore in a position to set pricing at favorable levels and to maintain such pricing levels in its discretion.</p>
-
-            <h3>Redliner</h3>
-            <p>Redliner competes most directly with Litera Compare. The primary margins for competition are:</p>
-            
-            <div class="card-grid">
-                <div class="card">
-                    <h4>Data Security</h4>
-                    <p>Redliner is safe. The ability to make copies of user documents, whether for redlining or for any other reason, presents a natural security threat. Companies that market redlining software may seek to make inappropriate use of customer data. Google has blocked Litera products from being installed on Google Workspace accounts this reason.</p>
-                    <p>Redliner has been designed with data security in mind. Redlines are produced entirely on device. The product does not depend in any way on "cloud" software and does not save, send or recieve any user data whatsoever. Our fully on-device system is more secure than Litera's cloud-based solution.</p>
-                </div>
-                <div class="card">
-                    <h4>Performance</h4>
-                    <p>Redliner is fast. In its current iteration, Redliner can compare 300-page documents in under one-tenth of one second. This compares favorably to Litera's product, which has been observed in practice to take more than two seconds, for a difference in excess of one full order of magnitude.</p>
-                    <p>An upgrade is anticipated in the coming weeks. With the coming upgrade, this performance difference is expected will increase significantly. Redliner is expected to produce redlines hundreds of times faster than the competing Litera product.</p>
-                </div>
-                <div class="card">
-                    <h4>Accuracy</h4>
-                    <p>Redliner is accurate. In its current iteration, the product tracks differences using a difference algorithm that is considered to the gold standard in computer science. This algorithm is known as the Myers' diff algorithm. It was developed by Eugene Myers in 1986. The algorithm is implemented in Redliner using an adaptation of the same software that is used by Google in its Google Workspace products.</p>
-                </div>
-            </div>
-
-            <div class="valuation-box">
-                <h3>Valuation</h3>
-                <p>Market size for a redlining product is determined with reference to the competing product, which is Litera Compare. Litera Compare sells for $1,900/year, or approximately $158/month. Assuming 160,000 users, the market for this product, estimated on the basis of earnings before interest and taxes, is approximately $303.4 million.</p>
-                <p class="conclusion-text">Conclusion: The market for redlining software for large law firms, if measured at a 15x multiple to the maximum earnings figure estimated above, is approximately $3 billion.</p>
-            </div>
-        </section>
-
-        <section id="machine-learning">
-            <h2>Machine Learning</h2>
-            <h3>Background</h3>
-            <p>Most law firms do not create machine learning datasets. Creating such datasets takes time. Redliner solves this problem by allowing users to combine document-editing and dataset-creating processes into a single process.</p>
-
-            <h3>Market</h3>
-            <p>Most law firms are organized as pass-through entities. Lawyers are also especially likely to understand the incentives that may be available to them as a result of the recent passage of the One Big Beautiful Bill Act ("OBBBA"). These incentives include the incentive to develop software to the extent creditable under Section 41 of the Internal Revenue Code and to the extent expensible under Section 174A of the Internal Revenue Code (26 U.S.C. § 174A - "Domestic research or experimental expenditures").</p>
-
-            <div class="card-grid">
-                <div class="card">
-                    <h4>Section 41 Tax Credits</h4>
-                    <p>Section 41 of the Internal Revenue Code (26 U.S.C. § 41 - "Credit for Increasing Research Activities", as amended by OBBBA, "Section 41") provides tax credits for certain research activities. These include activities relating to the production of machine learning datasets or artificial intelligence software generally. This software is expected to be particularly valuable.</p>
-                    <p>We believe that law firms stand to benefit from Section 41. Law firms have no assets other than the human capital that is possessed by their attorneys. When these attorneys leave, they take their human capital with them. We believe that these departures present a significant challenge to the economics of any large law firm, and that Section 41 tax credits provide large law firms with a further incentive to institutionalize the knowledge of their workers into datasets or other tangible forms. When these datasets are recorded into hardware, they are easy to value for accounting purposes. Software that assists large law firms with this task is expected to be of value to the extent it is essentially self-financing.</p>
-                </div>
-                <div class="card">
-                    <h4>Immediate Tax Expensing</h4>
-                    <p>Section 174A of the Internal Revenue Code (26 U.S.C. § 174A - "Domestic research or experimental expenditures", as amended by OBBBA, "Section 174A") provides for the immediate expensing of domestic research or experimental activities. These include activities relating to the production of machine learning datasets or artificial intelligence software generally. This software is expected to be particularly valuable. Law firms may benefit from Section 174A because they are structured as pass-through entities and because they are engaged in work that is of a type that is particularly well suited to the production of machine learning datasets and of artificial intelligence software generally for use in their own practices. In particular, the value of machine learning datasets and artificial intelligence software generally to law firms is increased by the extent to which such software is relatively easy to value for accounting purposes. Software that assists law firms with the creation of such datasets and such software more generally is therefore expected to be of value to the extent it is essentially self-financing.</p>
-                </div>
-            </div>
-
-            <h3>Redliner</h3>
-            <p>Redliner is an app that is principally designed to allow law firms to produce tax assets in the form of high-quality, hardware-bound machine learning datasets and artificial intelligence software. Of particular importance that law firm users are able to produce these tax assets without doing work that they do not already do.</p>
-            
-            <h4>Section 41: Creditable Intelligence</h4>
-            <p>Redliner is designed to allow law firms to create tax attributes for themselves in the form of artificial intellence assets. Because these assets are developed solely within the scope of a iCloud account, and because law firms already create such iCloud accounts for their attorneys, Redliner requires little to no incremental hardware investment or expenditure on the part of law firms. Law firms already provide their users with iPhones. Such iPhones come with iCloud accounts that are not identical to the user's personal iCloud account. Such iCloud accounts are controlled by the firms and not by the indvidual attorneys.</p>
-
-            <h4>Section 174A: Expensible Training</h4>
-            <p>As amended by OBBBA, Section 174A allows for the immediate expensing of domestic research and experimental expenditures. This creates an incentive for large law firms to institutionalize their human capital into hardware forms. Because these activities are directed toward the production of artificial intelligence software and machine learning datasets, they may easily qualify as domestic research. Redliner makes this qualification invisible to the user, and thereby further eases the path toward the institutionalization of human capital.</p>
-
-            <div class="valuation-box">
-                <h3>Valuation</h3>
-                <p>The top 100 law firms in the world by revenue earned a combined total of approximately $176.5 billion in 2025. The average law firm earns a profit margin of approximately 50 percent. Partners at the top 100 law firms in the world may therefore have earned approximately $88.22 billion in profits in 2025. If federal, state and local income taxes were approximately 40 percent of earnings, then these partners may have paid approximately $35.2 billion in taxes in 2025. If the combined effects of changes to Section 41 and Section 174A under OBBBA allow law firm partners to offset 40 percent of these taxes, then the total market size for software that assists law firm partners in achiving such offsets is approximately $14.1 billion. If such software is priced at 10 percent of the achievable offset, then the earnings supportable by such software is $1.41 billion.</p>
-                <p class="conclusion-text">Conclusion: The market for machine learning software for large law firms, if measured at a 15x multiple to the earnings figure estimated above, is approximately $21.18 billion.</p>
-            </div>
-        </section>
-
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-left">
+    <p class="kicker">Professional Document Engine</p>
+    <h1 class="hero-headline">
+      Draft.<br>
+      Redline.<br>
+      <em>Learn.</em>
+    </h1>
+    <p class="hero-subhead">
+      Atlas automates the heavy lifting of legal and corporate drafting while simultaneously building the data foundation for your future AI models.
+    </p>
+    <div class="hero-cta">
+      <a href="#features" class="btn-primary">Explore Features</a>
+      <a href="#comparison" class="btn-ghost">See How It Works</a>
     </div>
+  </div>
 
-    <footer>
-        <div class="container">
-            <h2>Financials</h2>
-            <p>As estimated above, the value of software of the type currently packaged into Redliner is approximately $21.18 + $3 + $1.8 billion, for a total of $25.98 billion.</p>
-            <p>The magnitude of this figure is consistent with the current administration's stated interest in supporting investment into the development of artificial intelligence-related technology in the United States. The existence of software for redlining, versioning and document management indicates that lawyers at top law firms will use competing software if suitably incentivized to do so. The suitability of the incentive to use Redliner is based on the size of the tax offset available to users. The absence of software that provides a similar bundling of tax benefits with enterprise software suggests that, if a first-mover advantage exists, Redliner will be the product that captures it.</p>
-        </div>
-    </footer>
+  <div class="hero-right">
+    <div class="doc-mockup">
+      <div class="doc-topbar">
+        <div class="doc-dot r"></div>
+        <div class="doc-dot y"></div>
+        <div class="doc-dot g"></div>
+        <span class="doc-title">service_agreement_v3.atlas</span>
+      </div>
+      <div class="doc-body">
+        <span class="doc-heading">§ 4.2 — Limitation of Liability</span>
+        <span class="doc-line">
+          <span class="tag-chip tag-risk">Risk Factor</span>
+        </span>
+        <span class="doc-line" style="margin-top:8px">
+          In no event shall the Company be liable for
+        </span>
+        <span class="doc-line">
+          <span class="redline-del">any indirect or consequential damages</span>
+          <span class="redline-ins">damages exceeding the contract value</span>
+        </span>
+        <span class="doc-line" style="margin-top:12px">arising from use of the Services.</span>
+        <br>
+        <span class="doc-heading" style="margin-top:16px">§ 5.1 — Effective Date</span>
+        <span class="doc-line">
+          This Agreement shall commence on
+          <span class="redline-del">January 1, 2025</span>
+          <span class="redline-ins">the date of execution</span>
+          <span class="tag-chip tag-date">Eff. Date</span>
+        </span>
+        <br>
+        <span class="doc-line" style="margin-top:16px; color: #999">
+          ↳ ML Training entry logged
+          <span class="tag-chip tag-clause">Clause</span>
+        </span>
+        <span class="doc-line" style="margin-top:8px">
+          <span style="color:#999">Training corpus: </span>247 entries<span class="cursor-blink"></span>
+        </span>
+      </div>
+    </div>
+  </div>
+</section>
 
+<!-- SECTION RULE -->
+<div class="section-rule">
+  <div class="section-rule-line"></div>
+  <span class="section-rule-label">Core Capabilities</span>
+  <div class="section-rule-line"></div>
+</div>
+
+<!-- FEATURES -->
+<section class="features reveal" id="features">
+  <div class="feature-card">
+    <div class="feature-number">01</div>
+    <h3 class="feature-title">Precision Redlining</h3>
+    <p class="feature-desc">
+      Powered by a singleton <code style="font-family:'DM Mono',monospace;font-size:0.82em;background:var(--cream);padding:1px 5px">RedlineEngine</code>, Atlas runs high-performance document comparisons on background threads — deletions in vivid red, insertions in striking blue — without interrupting your flow.
+    </p>
+    <span class="feature-tag">Diff Engine</span>
+  </div>
+
+  <div class="feature-card">
+    <div class="feature-number">02</div>
+    <h3 class="feature-title">Semantic Tagging</h3>
+    <p class="feature-desc">
+      Label clauses like "Risk Factors" or "Effective Date" with precise range metadata stored as <code style="font-family:'DM Mono',monospace;font-size:0.82em;background:var(--cream);padding:1px 5px">SemanticTag</code> objects. Your invisible instruction layer is protected by AES-GCM encryption via the Secure Enclave.
+    </p>
+    <span class="feature-tag">Invisible Ink</span>
+  </div>
+
+  <div class="feature-card">
+    <div class="feature-number">03</div>
+    <h3 class="feature-title">Automated ML Datasets</h3>
+    <p class="feature-desc">
+      As you draft, <code style="font-family:'DM Mono',monospace;font-size:0.82em;background:var(--cream);padding:1px 5px">AtlasMLManager</code> silently records every edit, tag, and refinement as a <code style="font-family:'DM Mono',monospace;font-size:0.82em;background:var(--cream);padding:1px 5px">TrainingEntry</code>. Build a proprietary NL Gazetteer from your own expert work.
+    </p>
+    <span class="feature-tag">ML Foundation</span>
+  </div>
+</section>
+
+<!-- SECTION RULE -->
+<div class="section-rule">
+  <div class="section-rule-line"></div>
+  <span class="section-rule-label">The Atlas Way</span>
+  <div class="section-rule-line"></div>
+</div>
+
+<!-- COMPARISON TABLE -->
+<section class="comparison-section reveal" id="comparison">
+  <div class="section-header">
+    <p class="section-eyebrow">Before & After</p>
+    <h2 class="section-title">Traditional tools force you<br>to choose. Atlas doesn't.</h2>
+  </div>
+  <table class="comparison-table">
+    <thead>
+      <tr>
+        <th>The Old Way</th>
+        <th class="atlas-col">The Atlas Way</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="old-way">Edit in a disconnected word processor</td>
+        <td class="new-way"><strong>Redline</strong> with integrated diff engines in real time</td>
+      </tr>
+      <tr>
+        <td class="old-way">Manually track changes for a database</td>
+        <td class="new-way"><strong>Observe</strong> every edit via transactional logging automatically</td>
+      </tr>
+      <tr>
+        <td class="old-way">Hire a consultant to build an ML dataset</td>
+        <td class="new-way"><strong>Build</strong> proprietary datasets as you draft — zero overhead</td>
+      </tr>
+      <tr>
+        <td class="old-way">Hope for format consistency across exports</td>
+        <td class="new-way"><strong>Standardize</strong> everything via Pandoc Docker runners with custom CSS</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- SECTION RULE -->
+<div class="section-rule">
+  <div class="section-rule-line"></div>
+  <span class="section-rule-label">Technical Specs</span>
+  <div class="section-rule-line"></div>
+</div>
+
+<!-- SPECS -->
+<section class="specs-section reveal">
+  <div class="specs-label">
+    One Platform.<br><em style="font-style:italic;color:var(--blue)">Infinite</em><br>Formats.
+  </div>
+  <div class="specs-grid">
+    <div class="spec-item">
+      <div class="spec-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1M8 12l4 4m0 0l4-4m-4 4V4"/></svg>
+      </div>
+      <div class="spec-name">Universal Ingestion</div>
+      <div class="spec-detail">Import from the web, HTML, Markdown, or RTF. Your content arrives ready to work.</div>
+    </div>
+    <div class="spec-item">
+      <div class="spec-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+      </div>
+      <div class="spec-name">Enterprise Export</div>
+      <div class="spec-detail">Generate pristine PDF, DOCX, LaTeX, or HTML with one click via Pandoc.</div>
+    </div>
+    <div class="spec-item">
+      <div class="spec-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      </div>
+      <div class="spec-name">Docker Isolation</div>
+      <div class="spec-detail">Every conversion runs in a pristine, isolated container. Zero data collision.</div>
+    </div>
+    <div class="spec-item">
+      <div class="spec-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      </div>
+      <div class="spec-name">Version History</div>
+      <div class="spec-detail">Every document state is a snapshot. Load and compare historical drafts instantly via the Version Sidebar.</div>
+    </div>
+    <div class="spec-item">
+      <div class="spec-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 7h18M3 12h18M3 17h18"/></svg>
+      </div>
+      <div class="spec-name">Structure Navigation</div>
+      <div class="spec-detail">Auto-generated heading trees let you navigate deep legal documents in a single click.</div>
+    </div>
+    <div class="spec-item">
+      <div class="spec-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-1.447-.894L15 4m0 13V4m0 0L9 7"/></svg>
+      </div>
+      <div class="spec-name">Evidence Dump</div>
+      <div class="spec-detail">Drag & drop files to extract iCloud metadata, GPS locations, and device IDs automatically.</div>
+    </div>
+  </div>
+</section>
+
+<!-- SECURITY CALLOUT -->
+<div class="security-section reveal">
+  <div class="security-icon-wrap">
+    <svg viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.955 11.955 0 003 10c0 5.592 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.249-8.25-3.286z"/></svg>
+  </div>
+  <div class="security-content">
+    <p class="security-label">Invisible Ink — Security Protocol</p>
+    <h3 class="security-title">Your instructions are sealed by the Enclave.</h3>
+    <p class="security-desc">
+      The instruction set and transaction log that powers Atlas's ML pipeline never travels unprotected. AES-GCM encryption via a "Lawyer's Key" stored in the device Secure Enclave ensures your proprietary editing patterns remain exclusively yours.
+    </p>
+    <div class="security-badges">
+      <span class="security-badge">AES-GCM Encryption</span>
+      <span class="security-badge">Secure Enclave</span>
+      <span class="security-badge">Transactional Logging</span>
+      <span class="security-badge">Staging Isolation</span>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">Atlas<span style="display:inline-block;width:6px;height:6px;background:#c8302a;border-radius:50%;margin-left:2px;vertical-align:middle;position:relative;top:-1px"></span></div>
+  <div class="footer-note">
+    The Document OS for the Machine Learning Age<br>
+    <span style="opacity:0.5">Professional · Secure · Intelligent</span>
+  </div>
+</footer>
+
+<script>
+  // Scroll reveal
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.1 });
+  reveals.forEach(el => observer.observe(el));
+
+  // Animated redline cursor typing effect
+  const lines = document.querySelectorAll('.doc-line');
+  // subtle shimmer on hover for mockup
+  const mockup = document.querySelector('.doc-mockup');
+  if (mockup) {
+    mockup.addEventListener('mousemove', (e) => {
+      const rect = mockup.getBoundingClientRect();
+      const x = ((e.clientX - rect.left) / rect.width - 0.5) * 6;
+      const y = ((e.clientY - rect.top) / rect.height - 0.5) * 6;
+      mockup.style.transform = `perspective(800px) rotateY(${x}deg) rotateX(${-y}deg)`;
+    });
+    mockup.addEventListener('mouseleave', () => {
+      mockup.style.transform = '';
+      mockup.style.transition = 'transform 0.5s ease';
+    });
+    mockup.addEventListener('mouseenter', () => {
+      mockup.style.transition = 'transform 0.1s ease';
+    });
+  }
+</script>
 </body>
 </html>
