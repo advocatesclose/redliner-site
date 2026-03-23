@@ -20,13 +20,16 @@
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-  html { scroll-behavior: smooth; }
+  html {
+    scroll-behavior: smooth;
+    scroll-snap-type: y mandatory;
+  }
 
   body {
     background-color: var(--paper);
     color: var(--ink);
     font-family: 'Instrument Sans', sans-serif;
-    font-size: 16px;
+    font-size: 18px;
     line-height: 1.65;
     overflow-x: hidden;
   }
@@ -42,6 +45,19 @@
     opacity: 0.5;
   }
 
+  /* ── SCROLL SNAP ── */
+  .snap-section {
+    scroll-snap-align: start;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .snap-section-auto {
+    scroll-snap-align: start;
+  }
+
   /* ── MASTHEAD ── */
   .masthead {
     border-bottom: 2px solid var(--ink);
@@ -49,8 +65,10 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    position: sticky;
+    position: fixed;
     top: 0;
+    left: 0;
+    right: 0;
     background: var(--paper);
     z-index: 100;
     animation: slideDown 0.6s ease both;
@@ -91,15 +109,17 @@
   /* ── HERO ── */
   .hero {
     padding: 0 60px;
+    padding-top: 60px; /* masthead clearance */
     display: grid;
     grid-template-columns: 1fr 1fr;
-    min-height: 88vh;
+    min-height: 100vh;
     border-bottom: 1px solid var(--rule);
     overflow: hidden;
+    scroll-snap-align: start;
   }
 
   .hero-left {
-    padding: 80px 60px 80px 0;
+    padding: 120px 80px 120px 0;
     border-right: 1px solid var(--rule);
     display: flex;
     flex-direction: column;
@@ -114,11 +134,11 @@
 
   .kicker {
     font-family: 'DM Mono', monospace;
-    font-size: 0.72rem;
+    font-size: 0.78rem;
     letter-spacing: 0.18em;
     text-transform: uppercase;
     color: var(--red);
-    margin-bottom: 24px;
+    margin-bottom: 32px;
     display: flex;
     align-items: center;
     gap: 10px;
@@ -127,18 +147,18 @@
   .kicker::before {
     content: '';
     display: block;
-    width: 32px;
+    width: 40px;
     height: 1px;
     background: var(--red);
   }
 
   .hero-headline {
     font-family: 'Playfair Display', serif;
-    font-size: clamp(3rem, 5vw, 5.5rem);
+    font-size: clamp(3.5rem, 6.5vw, 7rem);
     font-weight: 900;
-    line-height: 1.0;
-    letter-spacing: -0.03em;
-    margin-bottom: 32px;
+    line-height: 0.95;
+    letter-spacing: -0.035em;
+    margin-bottom: 48px;
   }
 
   .hero-headline em {
@@ -147,13 +167,13 @@
   }
 
   .hero-subhead {
-    font-size: 1.05rem;
+    font-size: 1.2rem;
     color: var(--muted);
-    max-width: 480px;
-    line-height: 1.7;
+    max-width: 520px;
+    line-height: 1.75;
     border-left: 3px solid var(--gold);
-    padding-left: 20px;
-    margin-bottom: 48px;
+    padding-left: 24px;
+    margin-bottom: 56px;
   }
 
   .hero-cta {
@@ -166,10 +186,10 @@
     background: var(--ink);
     color: var(--paper);
     font-family: 'DM Mono', monospace;
-    font-size: 0.75rem;
+    font-size: 0.78rem;
     letter-spacing: 0.14em;
     text-transform: uppercase;
-    padding: 14px 28px;
+    padding: 16px 32px;
     border: none;
     cursor: pointer;
     text-decoration: none;
@@ -183,10 +203,10 @@
     background: transparent;
     color: var(--ink);
     font-family: 'DM Mono', monospace;
-    font-size: 0.75rem;
+    font-size: 0.78rem;
     letter-spacing: 0.14em;
     text-transform: uppercase;
-    padding: 13px 28px;
+    padding: 15px 32px;
     border: 1px solid var(--ink);
     cursor: pointer;
     text-decoration: none;
@@ -198,7 +218,7 @@
 
   /* ── HERO RIGHT ── */
   .hero-right {
-    padding: 80px 0 80px 60px;
+    padding: 120px 0 120px 80px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -207,7 +227,7 @@
 
   .doc-mockup {
     width: 100%;
-    max-width: 420px;
+    max-width: 440px;
     background: white;
     border: 1px solid var(--rule);
     box-shadow: 12px 16px 0 var(--rule), 24px 32px 0 rgba(0,0,0,0.05);
@@ -237,15 +257,15 @@
   }
 
   .doc-body {
-    padding: 28px 24px;
+    padding: 32px 28px;
     font-family: 'DM Mono', monospace;
-    font-size: 0.72rem;
+    font-size: 0.74rem;
     line-height: 1.9;
     color: #333;
   }
 
   .doc-line { display: block; margin-bottom: 4px; }
-  .doc-heading { font-weight: 500; font-size: 0.8rem; color: var(--ink); margin-bottom: 8px; display: block; }
+  .doc-heading { font-weight: 500; font-size: 0.82rem; color: var(--ink); margin-bottom: 8px; display: block; }
 
   .redline-del {
     color: var(--red);
@@ -292,6 +312,77 @@
     50% { opacity: 0; }
   }
 
+  /* ── STATEMENT SECTION ── */
+  .statement {
+    padding: 0 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .statement-inner {
+    max-width: 900px;
+    padding: 0 40px;
+  }
+
+  .statement-text {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.2rem, 4vw, 3.8rem);
+    font-weight: 900;
+    line-height: 1.15;
+    letter-spacing: -0.025em;
+  }
+
+  .statement-text em {
+    font-style: italic;
+    color: var(--blue);
+  }
+
+  .statement-sub {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.78rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-top: 40px;
+  }
+
+  /* ── ESSAY SECTION ── */
+  .essay-section {
+    padding: 120px 60px;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .essay-section .section-header {
+    margin-bottom: 80px;
+  }
+
+  .essay-columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    max-width: 1100px;
+  }
+
+  .essay-columns p {
+    font-size: 1.1rem;
+    color: var(--muted);
+    line-height: 1.85;
+    margin-bottom: 1.6em;
+  }
+
+  .essay-columns p:last-child {
+    margin-bottom: 0;
+  }
+
+  .essay-lead {
+    font-size: 1.3rem !important;
+    color: var(--ink) !important;
+    font-weight: 500;
+  }
+
   /* ── SECTION DIVIDER ── */
   .section-rule {
     display: flex;
@@ -313,21 +404,38 @@
     border-right: 1px solid var(--rule);
   }
 
+  .section-eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--red);
+    margin-bottom: 20px;
+  }
+
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.4rem, 4vw, 3.6rem);
+    font-weight: 900;
+    line-height: 1.1;
+    letter-spacing: -0.025em;
+  }
+
+  .section-header {
+    margin-bottom: 56px;
+  }
+
   /* ── FEATURE GRID ── */
   .features {
-    padding: 80px 60px;
+    padding: 120px 60px;
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 0;
     border-bottom: 1px solid var(--rule);
-    animation: fadeUp 0.8s 0.1s ease both;
-    animation-play-state: paused;
   }
 
-  .features.visible { animation-play-state: running; }
-
   .feature-card {
-    padding: 48px 40px;
+    padding: 60px 48px;
     border-right: 1px solid var(--rule);
     position: relative;
     transition: background 0.3s;
@@ -338,11 +446,11 @@
 
   .feature-number {
     font-family: 'Playfair Display', serif;
-    font-size: 5rem;
+    font-size: 6rem;
     font-weight: 900;
     color: var(--rule);
     line-height: 1;
-    margin-bottom: 20px;
+    margin-bottom: 28px;
     transition: color 0.3s;
   }
 
@@ -350,23 +458,23 @@
 
   .feature-title {
     font-family: 'Playfair Display', serif;
-    font-size: 1.5rem;
+    font-size: 1.7rem;
     font-weight: 700;
-    margin-bottom: 14px;
+    margin-bottom: 18px;
     line-height: 1.2;
   }
 
   .feature-desc {
-    font-size: 0.9rem;
+    font-size: 1rem;
     color: var(--muted);
-    line-height: 1.7;
+    line-height: 1.75;
   }
 
   .feature-tag {
     display: inline-block;
-    margin-top: 20px;
+    margin-top: 28px;
     font-family: 'DM Mono', monospace;
-    font-size: 0.65rem;
+    font-size: 0.68rem;
     letter-spacing: 0.15em;
     text-transform: uppercase;
     color: var(--red);
@@ -374,59 +482,10 @@
     padding-bottom: 2px;
   }
 
-  /* ── ESSAY SECTION ── */
-  .essay-section {
-    padding: 80px 60px;
-    border-bottom: 1px solid var(--rule);
-    max-width: 100%;
-  }
-
-  .essay-section .section-header {
-    margin-bottom: 56px;
-  }
-
-  .essay-columns {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 60px;
-  }
-
-  .essay-columns p {
-    font-size: 0.95rem;
-    color: var(--muted);
-    line-height: 1.8;
-    margin-bottom: 1.4em;
-  }
-
-  .essay-columns p:last-child {
-    margin-bottom: 0;
-  }
-
   /* ── COMPARISON TABLE ── */
   .comparison-section {
-    padding: 80px 60px;
+    padding: 120px 60px;
     border-bottom: 1px solid var(--rule);
-  }
-
-  .section-header {
-    margin-bottom: 56px;
-  }
-
-  .section-eyebrow {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.7rem;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: var(--red);
-    margin-bottom: 14px;
-  }
-
-  .section-title {
-    font-family: 'Playfair Display', serif;
-    font-size: clamp(2rem, 3.5vw, 3.2rem);
-    font-weight: 900;
-    line-height: 1.1;
-    letter-spacing: -0.025em;
   }
 
   .comparison-table {
@@ -440,10 +499,10 @@
 
   .comparison-table th {
     font-family: 'DM Mono', monospace;
-    font-size: 0.7rem;
+    font-size: 0.75rem;
     letter-spacing: 0.15em;
     text-transform: uppercase;
-    padding: 12px 24px 16px;
+    padding: 14px 28px 18px;
     text-align: left;
     color: var(--muted);
   }
@@ -451,10 +510,11 @@
   .comparison-table th.atlas-col { color: var(--blue); }
 
   .comparison-table td {
-    padding: 20px 24px;
+    padding: 24px 28px;
     border-bottom: 1px solid var(--rule);
-    font-size: 0.92rem;
+    font-size: 1.05rem;
     vertical-align: top;
+    line-height: 1.6;
   }
 
   .comparison-table tr:hover td { background: var(--cream); }
@@ -477,22 +537,22 @@
 
   /* ── SPECS ── */
   .specs-section {
-    padding: 80px 60px;
+    padding: 120px 60px;
     display: grid;
     grid-template-columns: 1fr 2fr;
-    gap: 80px;
+    gap: 100px;
     border-bottom: 1px solid var(--rule);
     align-items: start;
   }
 
   .specs-label {
     font-family: 'Playfair Display', serif;
-    font-size: clamp(2rem, 3.5vw, 3.2rem);
+    font-size: clamp(2.4rem, 4vw, 3.6rem);
     font-weight: 900;
     line-height: 1.1;
     letter-spacing: -0.025em;
     position: sticky;
-    top: 80px;
+    top: 100px;
   }
 
   .specs-grid {
@@ -502,42 +562,42 @@
   }
 
   .spec-item {
-    padding: 28px 0;
+    padding: 32px 0;
     border-bottom: 1px solid var(--rule);
   }
 
-  .spec-item:nth-child(odd) { padding-right: 40px; border-right: 1px solid var(--rule); }
-  .spec-item:nth-child(even) { padding-left: 40px; }
+  .spec-item:nth-child(odd) { padding-right: 48px; border-right: 1px solid var(--rule); }
+  .spec-item:nth-child(even) { padding-left: 48px; }
 
   .spec-icon {
-    width: 36px; height: 36px;
-    margin-bottom: 14px;
+    width: 40px; height: 40px;
+    margin-bottom: 16px;
     display: flex; align-items: center; justify-content: center;
   }
 
-  .spec-icon svg { width: 22px; height: 22px; }
+  .spec-icon svg { width: 24px; height: 24px; }
 
   .spec-name {
     font-family: 'Instrument Sans', sans-serif;
     font-weight: 600;
-    font-size: 0.9rem;
-    margin-bottom: 6px;
+    font-size: 1rem;
+    margin-bottom: 8px;
   }
 
   .spec-detail {
-    font-size: 0.83rem;
+    font-size: 0.92rem;
     color: var(--muted);
-    line-height: 1.6;
+    line-height: 1.65;
   }
 
   /* ── SECURITY CALLOUT ── */
   .security-section {
     margin: 0 60px;
     border: 1px solid var(--ink);
-    padding: 56px 60px;
+    padding: 72px 80px;
     display: grid;
     grid-template-columns: auto 1fr;
-    gap: 48px;
+    gap: 56px;
     align-items: center;
     background: var(--ink);
     color: var(--paper);
@@ -545,60 +605,58 @@
   }
 
   .security-icon-wrap {
-    width: 80px; height: 80px;
+    width: 96px; height: 96px;
     border: 1px solid rgba(245,242,235,0.2);
     display: flex; align-items: center; justify-content: center;
     flex-shrink: 0;
   }
 
-  .security-icon-wrap svg { width: 36px; height: 36px; stroke: var(--gold); fill: none; }
-
-  .security-content {}
+  .security-icon-wrap svg { width: 40px; height: 40px; stroke: var(--gold); fill: none; }
 
   .security-label {
     font-family: 'DM Mono', monospace;
-    font-size: 0.66rem;
+    font-size: 0.72rem;
     letter-spacing: 0.2em;
     text-transform: uppercase;
     color: var(--gold);
-    margin-bottom: 12px;
+    margin-bottom: 16px;
   }
 
   .security-title {
     font-family: 'Playfair Display', serif;
-    font-size: 1.8rem;
+    font-size: 2.2rem;
     font-weight: 700;
-    margin-bottom: 14px;
+    margin-bottom: 18px;
     line-height: 1.2;
   }
 
   .security-desc {
-    font-size: 0.9rem;
+    font-size: 1rem;
     color: rgba(245,242,235,0.65);
-    line-height: 1.7;
-    max-width: 640px;
+    line-height: 1.75;
+    max-width: 680px;
   }
 
   .security-badges {
     display: flex;
-    gap: 12px;
-    margin-top: 24px;
+    gap: 14px;
+    margin-top: 32px;
     flex-wrap: wrap;
   }
 
   .security-badge {
     font-family: 'DM Mono', monospace;
-    font-size: 0.63rem;
+    font-size: 0.66rem;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    padding: 7px 14px;
+    padding: 9px 16px;
     border: 1px solid rgba(245,242,235,0.2);
     color: rgba(245,242,235,0.6);
   }
 
   /* ── FOOTER ── */
   footer {
-    padding: 40px 60px;
+    padding: 48px 60px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -609,12 +667,12 @@
   .footer-logo {
     font-family: 'Playfair Display', serif;
     font-weight: 900;
-    font-size: 1.1rem;
+    font-size: 1.2rem;
   }
 
   .footer-note {
     font-family: 'DM Mono', monospace;
-    font-size: 0.65rem;
+    font-size: 0.68rem;
     color: var(--muted);
     letter-spacing: 0.1em;
     text-align: right;
@@ -634,21 +692,24 @@
 
   /* ── RESPONSIVE ── */
   @media (max-width: 900px) {
+    html { scroll-snap-type: y proximity; }
     .masthead { padding: 14px 24px; }
-    .hero { grid-template-columns: 1fr; padding: 0 24px; min-height: auto; }
+    .hero { grid-template-columns: 1fr; padding: 0 24px; padding-top: 60px; min-height: auto; }
     .hero-left { padding: 60px 0 40px; border-right: none; border-bottom: 1px solid var(--rule); }
     .hero-right { padding: 40px 0 60px; }
-    .features { grid-template-columns: 1fr; padding: 40px 24px; }
-    .feature-card { border-right: none; border-bottom: 1px solid var(--rule); padding: 36px 0; }
-    .comparison-section, .specs-section, .essay-section { padding: 60px 24px; }
-    .specs-section { grid-template-columns: 1fr; gap: 40px; }
+    .features { grid-template-columns: 1fr; padding: 60px 24px; }
+    .feature-card { border-right: none; border-bottom: 1px solid var(--rule); padding: 40px 0; }
+    .comparison-section, .specs-section, .essay-section { padding: 80px 24px; }
+    .specs-section { grid-template-columns: 1fr; gap: 48px; }
     .specs-label { position: static; }
     .specs-grid { grid-template-columns: 1fr; }
     .spec-item:nth-child(odd) { padding-right: 0; border-right: none; }
     .spec-item:nth-child(even) { padding-left: 0; }
-    .security-section { margin: 0 24px; padding: 36px 28px; grid-template-columns: 1fr; gap: 24px; }
-    .essay-columns { grid-template-columns: 1fr; gap: 32px; }
-    footer { padding: 28px 24px; flex-direction: column; gap: 12px; text-align: center; }
+    .security-section { margin: 0 24px; padding: 48px 32px; grid-template-columns: 1fr; gap: 28px; }
+    .essay-columns { grid-template-columns: 1fr; gap: 40px; }
+    .statement { padding: 80px 24px; }
+    .snap-section { min-height: auto; }
+    footer { padding: 32px 24px; flex-direction: column; gap: 12px; text-align: center; }
     .footer-note { text-align: center; }
     .section-rule { padding: 0 24px; }
   }
@@ -664,7 +725,7 @@
   </div>
 </header>
 
-<!-- HERO -->
+<!-- ─── PAGE 1: HERO ─── -->
 <section class="hero">
   <div class="hero-left">
     <p class="kicker">Native macOS Application</p>
@@ -718,53 +779,66 @@
   </div>
 </section>
 
-<!-- SECTION RULE -->
-<div class="section-rule">
-  <div class="section-rule-line"></div>
-  <span class="section-rule-label">Thesis</span>
-  <div class="section-rule-line"></div>
-</div>
+<!-- ─── PAGE 2: OPENING STATEMENT ─── -->
+<section class="statement snap-section reveal">
+  <div class="statement-inner">
+    <p class="statement-text">
+      Programmers have developed an astonishing array of tools for managing complexity. We are interested in bringing these tools to bear on <em>the practice of law.</em>
+    </p>
+    <p class="statement-sub">Advocates Close — New York</p>
+  </div>
+</section>
 
-<!-- ESSAY -->
-<section class="essay-section reveal" id="thesis">
+<!-- ─── PAGE 3: ESSAY ─── -->
+<section class="essay-section snap-section-auto reveal" id="thesis">
   <div class="section-header">
     <p class="section-eyebrow">On Complexity</p>
-    <h2 class="section-title">Programmers have solved<br>problems that other fields<br>have not.</h2>
+    <h2 class="section-title">Tools that do not degrade<br>with scale.</h2>
   </div>
   <div class="essay-columns">
     <div>
-      <p>
-        Computer programmers as we know them today have existed for less than a century. They are not credentialed or licensed. They do not sit an exam. And yet the things entrusted to computer programs are not somehow less important than the things entrusted to professionals who do. A Boeing 747 does not stay aloft because it is required by law to do so. It stays aloft because it is governed by computer programs that make it able to do so.
+      <p class="essay-lead">
+        Computer programmers as we know them today have existed for less than a century. They are not credentialed or licensed. They do not sit an exam.
       </p>
       <p>
-        How this is possible is worth understanding. Over a remarkably short period, programmers have developed an astonishing array of tools, practices, protocols, and processes for managing complexity and building large-scale systems that interoperate with one another. iPhones are not less useful when three billion people have one. The tools do not degrade with scale.
+        And yet the things entrusted to computer programs are not somehow less important than the things entrusted to professionals who do. A Boeing 747 does not stay aloft because it is required by law to do so. It stays aloft because it is governed by computer programs that make it able to do so. How this is possible is worth understanding.
       </p>
     </div>
     <div>
       <p>
-        Laws, by contrast, become harder to use when the number of people who must apply them increases. It is not obvious that this limitation reflects some fundamental constraint. It may simply reflect a gap in tooling.
+        Over a remarkably short period, programmers have developed tools, practices, and protocols for building large-scale systems that interoperate with one another. iPhones are not less useful when three billion people have one. The tools do not degrade with scale.
       </p>
       <p>
-        Redliner is an attempt to close that gap. If you print a document to Word and then print it to PDF, you have not done one thing twice. You have done two things once each. Printing is printing. Redlining is redlining. The conventional approach asks you to repeat yourself — to manually produce each output, each comparison, each format. We think this is unnecessary. A single edit should propagate to every output as a matter of architecture, not effort.
+        Laws, by contrast, become harder to use when the number of people who must apply them increases. It is not obvious that this limitation reflects some fundamental constraint. It may simply reflect a gap in tooling.
       </p>
     </div>
   </div>
 </section>
 
+<!-- ─── PAGE 4: THE CORE INSIGHT ─── -->
+<section class="statement snap-section reveal">
+  <div class="statement-inner">
+    <p class="statement-text">
+      If you print a document to Word and then print it to PDF, you have not done <em>one thing twice.</em> You have done <em>two things</em> once each.
+    </p>
+    <p class="statement-sub">Printing is printing. Redlining is redlining.</p>
+  </div>
+</section>
+
 <!-- SECTION RULE -->
-<div class="section-rule">
+<div class="section-rule snap-section-auto">
   <div class="section-rule-line"></div>
   <span class="section-rule-label">Architecture</span>
   <div class="section-rule-line"></div>
 </div>
 
-<!-- FEATURES -->
-<section class="features reveal" id="architecture">
+<!-- ─── PAGE 5: ARCHITECTURE ─── -->
+<section class="features reveal snap-section-auto" id="architecture">
   <div class="feature-card">
     <div class="feature-number">01</div>
     <h3 class="feature-title">XPC Services</h3>
     <p class="feature-desc">
-      Document conversion and redline generation run in dedicated XPC services — separate processes with independent memory spaces, managed by <code style="font-family:'DM Mono',monospace;font-size:0.82em;background:var(--cream);padding:1px 5px">launchd</code>, created and destroyed on demand. Each service does one thing. The app coordinates.
+      Document conversion and redline generation run in dedicated XPC services — separate processes with independent memory spaces, managed by <code style="font-family:'DM Mono',monospace;font-size:0.85em;background:var(--cream);padding:2px 6px">launchd</code>, created and destroyed on demand. Each service does one thing. The app coordinates.
     </p>
     <span class="feature-tag">Multi-Process</span>
   </div>
@@ -773,7 +847,7 @@
     <div class="feature-number">02</div>
     <h3 class="feature-title">Parallel Redlining</h3>
     <p class="feature-desc">
-      The redline engine implements a word-level Myers diff. Multiple redlines execute in parallel — each with its own <code style="font-family:'DM Mono',monospace;font-size:0.82em;background:var(--cream);padding:1px 5px">NSXPCConnection</code>, its own handler, its own coordinated file access via <code style="font-family:'DM Mono',monospace;font-size:0.82em;background:var(--cream);padding:1px 5px">NSFileCoordinator</code>.
+      The redline engine implements a word-level Myers diff. Multiple redlines execute in parallel — each with its own <code style="font-family:'DM Mono',monospace;font-size:0.85em;background:var(--cream);padding:2px 6px">NSXPCConnection</code>, its own handler, its own coordinated file access via <code style="font-family:'DM Mono',monospace;font-size:0.85em;background:var(--cream);padding:2px 6px">NSFileCoordinator</code>.
     </p>
     <span class="feature-tag">Structured Concurrency</span>
   </div>
@@ -788,15 +862,25 @@
   </div>
 </section>
 
+<!-- ─── PAGE 6: PRIVACY STATEMENT ─── -->
+<section class="statement snap-section reveal" style="border-bottom: 1px solid var(--rule);">
+  <div class="statement-inner">
+    <p class="statement-text">
+      Privacy is not a trade-off.<br>It is a <em>design constraint.</em>
+    </p>
+    <p class="statement-sub">Separate processes. Separate memory. No content on the wire.</p>
+  </div>
+</section>
+
 <!-- SECTION RULE -->
-<div class="section-rule">
+<div class="section-rule snap-section-auto">
   <div class="section-rule-line"></div>
   <span class="section-rule-label">The Difference</span>
   <div class="section-rule-line"></div>
 </div>
 
-<!-- COMPARISON TABLE -->
-<section class="comparison-section reveal" id="comparison">
+<!-- ─── PAGE 7: COMPARISON TABLE ─── -->
+<section class="comparison-section reveal snap-section-auto" id="comparison">
   <div class="section-header">
     <p class="section-eyebrow">Do It Once</p>
     <h2 class="section-title">One edit. Every output.<br>Every format. Every time.</h2>
@@ -830,14 +914,14 @@
 </section>
 
 <!-- SECTION RULE -->
-<div class="section-rule">
+<div class="section-rule snap-section-auto">
   <div class="section-rule-line"></div>
   <span class="section-rule-label">Technical Specs</span>
   <div class="section-rule-line"></div>
 </div>
 
-<!-- SPECS -->
-<section class="specs-section reveal">
+<!-- ─── PAGE 8: SPECS ─── -->
+<section class="specs-section reveal snap-section-auto">
   <div class="specs-label">
     Apple<br>Frameworks.<br><em style="font-style:italic;color:var(--blue)">Nothing</em><br>Else.
   </div>
@@ -887,16 +971,16 @@
   </div>
 </section>
 
-<!-- SECURITY CALLOUT -->
-<div class="security-section reveal">
+<!-- ─── PAGE 9: SECURITY ─── -->
+<div class="security-section reveal snap-section-auto">
   <div class="security-icon-wrap">
     <svg viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.955 11.955 0 003 10c0 5.592 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.249-8.25-3.286z"/></svg>
   </div>
   <div class="security-content">
     <p class="security-label">Privacy by Architecture</p>
-    <h3 class="security-title">Privacy is not a trade-off. It is a design constraint.</h3>
+    <h3 class="security-title">The architecture makes the wrong thing hard to do.</h3>
     <p class="security-desc">
-      XPC services run in separate processes with separate memory. No document content crosses the process boundary — only file paths. Edit transactions are encrypted with AES-GCM before they touch disk. The architecture makes the wrong thing hard to do, not merely prohibited.
+      XPC services run in separate processes with separate memory. No document content crosses the process boundary — only file paths. Edit transactions are encrypted with AES-GCM before they touch disk. Privacy is enforced by the structure of the system, not by a policy that someone might override.
     </p>
     <div class="security-badges">
       <span class="security-badge">XPC Process Isolation</span>
@@ -907,8 +991,18 @@
   </div>
 </div>
 
+<!-- ─── PAGE 10: CLOSING ─── -->
+<section class="statement snap-section reveal" style="min-height: 80vh;">
+  <div class="statement-inner">
+    <p class="statement-text">
+      A single edit should propagate to every output as a matter of <em>architecture,</em> not effort.
+    </p>
+    <p class="statement-sub">This is what we build.</p>
+  </div>
+</section>
+
 <!-- FOOTER -->
-<footer>
+<footer class="snap-section-auto">
   <div class="footer-logo">Redliner<span style="display:inline-block;width:6px;height:6px;background:#c8302a;border-radius:50%;margin-left:2px;vertical-align:middle;position:relative;top:-1px"></span></div>
   <div class="footer-note">
     Advocates Close · New York<br>
