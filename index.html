@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Atlas — The Document OS for the Machine Learning Age</title>
+<title>Redliner — Do It Once</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=DM+Mono:wght@300;400;500&family=Instrument+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -275,9 +275,9 @@
     top: -1px;
   }
 
-  .tag-risk { background: rgba(200,48,42,0.1); color: var(--red); }
-  .tag-date { background: rgba(30,79,156,0.1); color: var(--blue); }
-  .tag-clause { background: rgba(184,144,42,0.1); color: var(--gold); }
+  .tag-html { background: rgba(200,48,42,0.1); color: var(--red); }
+  .tag-pdf { background: rgba(30,79,156,0.1); color: var(--blue); }
+  .tag-docx { background: rgba(184,144,42,0.1); color: var(--gold); }
 
   .cursor-blink {
     display: inline-block;
@@ -372,6 +372,34 @@
     color: var(--red);
     border-bottom: 1px solid var(--red);
     padding-bottom: 2px;
+  }
+
+  /* ── ESSAY SECTION ── */
+  .essay-section {
+    padding: 80px 60px;
+    border-bottom: 1px solid var(--rule);
+    max-width: 100%;
+  }
+
+  .essay-section .section-header {
+    margin-bottom: 56px;
+  }
+
+  .essay-columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 60px;
+  }
+
+  .essay-columns p {
+    font-size: 0.95rem;
+    color: var(--muted);
+    line-height: 1.8;
+    margin-bottom: 1.4em;
+  }
+
+  .essay-columns p:last-child {
+    margin-bottom: 0;
   }
 
   /* ── COMPARISON TABLE ── */
@@ -612,13 +640,14 @@
     .hero-right { padding: 40px 0 60px; }
     .features { grid-template-columns: 1fr; padding: 40px 24px; }
     .feature-card { border-right: none; border-bottom: 1px solid var(--rule); padding: 36px 0; }
-    .comparison-section, .specs-section { padding: 60px 24px; }
+    .comparison-section, .specs-section, .essay-section { padding: 60px 24px; }
     .specs-section { grid-template-columns: 1fr; gap: 40px; }
     .specs-label { position: static; }
     .specs-grid { grid-template-columns: 1fr; }
     .spec-item:nth-child(odd) { padding-right: 0; border-right: none; }
     .spec-item:nth-child(even) { padding-left: 0; }
     .security-section { margin: 0 24px; padding: 36px 28px; grid-template-columns: 1fr; gap: 24px; }
+    .essay-columns { grid-template-columns: 1fr; gap: 32px; }
     footer { padding: 28px 24px; flex-direction: column; gap: 12px; text-align: center; }
     .footer-note { text-align: center; }
     .section-rule { padding: 0 24px; }
@@ -629,27 +658,27 @@
 
 <!-- MASTHEAD -->
 <header class="masthead">
-  <div class="masthead-logo">Atlas<span></span></div>
+  <div class="masthead-logo">Redliner<span></span></div>
   <div class="masthead-meta">
-    Document OS<br>Machine Learning Age
+    Advocates Close<br>New York
   </div>
 </header>
 
 <!-- HERO -->
 <section class="hero">
   <div class="hero-left">
-    <p class="kicker">Professional Document Engine</p>
+    <p class="kicker">Native macOS Application</p>
     <h1 class="hero-headline">
-      Draft.<br>
-      Redline.<br>
-      <em>Learn.</em>
+      Change<br>
+      once.<br>
+      <em>Publish everywhere.</em>
     </h1>
     <p class="hero-subhead">
-      Atlas automates the heavy lifting of legal and corporate drafting while simultaneously building the data foundation for your future AI models.
+      Edit a document. The redline, the PDF, the Word file, and the HTML update simultaneously — not because you asked, but because that's how the system works.
     </p>
     <div class="hero-cta">
-      <a href="#features" class="btn-primary">Explore Features</a>
-      <a href="#comparison" class="btn-ghost">See How It Works</a>
+      <a href="#thesis" class="btn-primary">Read More</a>
+      <a href="#architecture" class="btn-ghost">Architecture</a>
     </div>
   </div>
 
@@ -659,14 +688,11 @@
         <div class="doc-dot r"></div>
         <div class="doc-dot y"></div>
         <div class="doc-dot g"></div>
-        <span class="doc-title">service_agreement_v3.atlas</span>
+        <span class="doc-title">registration_statement.atlas</span>
       </div>
       <div class="doc-body">
         <span class="doc-heading">§ 4.2 — Limitation of Liability</span>
         <span class="doc-line">
-          <span class="tag-chip tag-risk">Risk Factor</span>
-        </span>
-        <span class="doc-line" style="margin-top:8px">
           In no event shall the Company be liable for
         </span>
         <span class="doc-line">
@@ -675,20 +701,17 @@
         </span>
         <span class="doc-line" style="margin-top:12px">arising from use of the Services.</span>
         <br>
-        <span class="doc-heading" style="margin-top:16px">§ 5.1 — Effective Date</span>
-        <span class="doc-line">
-          This Agreement shall commence on
-          <span class="redline-del">January 1, 2025</span>
-          <span class="redline-ins">the date of execution</span>
-          <span class="tag-chip tag-date">Eff. Date</span>
-        </span>
-        <br>
         <span class="doc-line" style="margin-top:16px; color: #999">
-          ↳ ML Training entry logged
-          <span class="tag-chip tag-clause">Clause</span>
+          ↳ output/
         </span>
-        <span class="doc-line" style="margin-top:8px">
-          <span style="color:#999">Training corpus: </span>247 entries<span class="cursor-blink"></span>
+        <span class="doc-line" style="margin-top:4px">
+          &nbsp;&nbsp;redline.html <span class="tag-chip tag-html">html</span>
+        </span>
+        <span class="doc-line" style="margin-top:4px">
+          &nbsp;&nbsp;registration_statement.pdf <span class="tag-chip tag-pdf">pdf</span>
+        </span>
+        <span class="doc-line" style="margin-top:4px">
+          &nbsp;&nbsp;registration_statement.docx <span class="tag-chip tag-docx">docx</span><span class="cursor-blink"></span>
         </span>
       </div>
     </div>
@@ -698,76 +721,109 @@
 <!-- SECTION RULE -->
 <div class="section-rule">
   <div class="section-rule-line"></div>
-  <span class="section-rule-label">Core Capabilities</span>
+  <span class="section-rule-label">Thesis</span>
   <div class="section-rule-line"></div>
 </div>
 
-<!-- FEATURES -->
-<section class="features reveal" id="features">
-  <div class="feature-card">
-    <div class="feature-number">01</div>
-    <h3 class="feature-title">Precision Redlining</h3>
-    <p class="feature-desc">
-      Powered by a singleton <code style="font-family:'DM Mono',monospace;font-size:0.82em;background:var(--cream);padding:1px 5px">RedlineEngine</code>, Atlas runs high-performance document comparisons on background threads — deletions in vivid red, insertions in striking blue — without interrupting your flow.
-    </p>
-    <span class="feature-tag">Diff Engine</span>
+<!-- ESSAY -->
+<section class="essay-section reveal" id="thesis">
+  <div class="section-header">
+    <p class="section-eyebrow">On Complexity</p>
+    <h2 class="section-title">Programmers have solved<br>problems that other fields<br>have not.</h2>
   </div>
-
-  <div class="feature-card">
-    <div class="feature-number">02</div>
-    <h3 class="feature-title">Semantic Tagging</h3>
-    <p class="feature-desc">
-      Label clauses like "Risk Factors" or "Effective Date" with precise range metadata stored as <code style="font-family:'DM Mono',monospace;font-size:0.82em;background:var(--cream);padding:1px 5px">SemanticTag</code> objects. Your invisible instruction layer is protected by AES-GCM encryption via the Secure Enclave.
-    </p>
-    <span class="feature-tag">Invisible Ink</span>
-  </div>
-
-  <div class="feature-card">
-    <div class="feature-number">03</div>
-    <h3 class="feature-title">Automated ML Datasets</h3>
-    <p class="feature-desc">
-      As you draft, <code style="font-family:'DM Mono',monospace;font-size:0.82em;background:var(--cream);padding:1px 5px">AtlasMLManager</code> silently records every edit, tag, and refinement as a <code style="font-family:'DM Mono',monospace;font-size:0.82em;background:var(--cream);padding:1px 5px">TrainingEntry</code>. Build a proprietary NL Gazetteer from your own expert work.
-    </p>
-    <span class="feature-tag">ML Foundation</span>
+  <div class="essay-columns">
+    <div>
+      <p>
+        Computer programmers as we know them today have existed for less than a century. They are not credentialed or licensed. They do not sit an exam. And yet the things entrusted to computer programs are not somehow less important than the things entrusted to professionals who do. A Boeing 747 does not stay aloft because it is required by law to do so. It stays aloft because it is governed by computer programs that make it able to do so.
+      </p>
+      <p>
+        How this is possible is worth understanding. Over a remarkably short period, programmers have developed an astonishing array of tools, practices, protocols, and processes for managing complexity and building large-scale systems that interoperate with one another. iPhones are not less useful when three billion people have one. The tools do not degrade with scale.
+      </p>
+    </div>
+    <div>
+      <p>
+        Laws, by contrast, become harder to use when the number of people who must apply them increases. It is not obvious that this limitation reflects some fundamental constraint. It may simply reflect a gap in tooling.
+      </p>
+      <p>
+        Redliner is an attempt to close that gap. If you print a document to Word and then print it to PDF, you have not done one thing twice. You have done two things once each. Printing is printing. Redlining is redlining. The conventional approach asks you to repeat yourself — to manually produce each output, each comparison, each format. We think this is unnecessary. A single edit should propagate to every output as a matter of architecture, not effort.
+      </p>
+    </div>
   </div>
 </section>
 
 <!-- SECTION RULE -->
 <div class="section-rule">
   <div class="section-rule-line"></div>
-  <span class="section-rule-label">The Atlas Way</span>
+  <span class="section-rule-label">Architecture</span>
+  <div class="section-rule-line"></div>
+</div>
+
+<!-- FEATURES -->
+<section class="features reveal" id="architecture">
+  <div class="feature-card">
+    <div class="feature-number">01</div>
+    <h3 class="feature-title">XPC Services</h3>
+    <p class="feature-desc">
+      Document conversion and redline generation run in dedicated XPC services — separate processes with independent memory spaces, managed by <code style="font-family:'DM Mono',monospace;font-size:0.82em;background:var(--cream);padding:1px 5px">launchd</code>, created and destroyed on demand. Each service does one thing. The app coordinates.
+    </p>
+    <span class="feature-tag">Multi-Process</span>
+  </div>
+
+  <div class="feature-card">
+    <div class="feature-number">02</div>
+    <h3 class="feature-title">Parallel Redlining</h3>
+    <p class="feature-desc">
+      The redline engine implements a word-level Myers diff. Multiple redlines execute in parallel — each with its own <code style="font-family:'DM Mono',monospace;font-size:0.82em;background:var(--cream);padding:1px 5px">NSXPCConnection</code>, its own handler, its own coordinated file access via <code style="font-family:'DM Mono',monospace;font-size:0.82em;background:var(--cream);padding:1px 5px">NSFileCoordinator</code>.
+    </p>
+    <span class="feature-tag">Structured Concurrency</span>
+  </div>
+
+  <div class="feature-card">
+    <div class="feature-number">03</div>
+    <h3 class="feature-title">Zero-Copy IPC</h3>
+    <p class="feature-desc">
+      No document content crosses the XPC boundary. The app passes file paths; the services read, process, and write directly to the filesystem. The main process never holds conversion artifacts in memory.
+    </p>
+    <span class="feature-tag">File Paths Only</span>
+  </div>
+</section>
+
+<!-- SECTION RULE -->
+<div class="section-rule">
+  <div class="section-rule-line"></div>
+  <span class="section-rule-label">The Difference</span>
   <div class="section-rule-line"></div>
 </div>
 
 <!-- COMPARISON TABLE -->
 <section class="comparison-section reveal" id="comparison">
   <div class="section-header">
-    <p class="section-eyebrow">Before & After</p>
-    <h2 class="section-title">Traditional tools force you<br>to choose. Atlas doesn't.</h2>
+    <p class="section-eyebrow">Do It Once</p>
+    <h2 class="section-title">One edit. Every output.<br>Every format. Every time.</h2>
   </div>
   <table class="comparison-table">
     <thead>
       <tr>
-        <th>The Old Way</th>
-        <th class="atlas-col">The Atlas Way</th>
+        <th>Conventional</th>
+        <th class="atlas-col">Redliner</th>
       </tr>
     </thead>
     <tbody>
       <tr>
-        <td class="old-way">Edit in a disconnected word processor</td>
-        <td class="new-way"><strong>Redline</strong> with integrated diff engines in real time</td>
+        <td class="old-way">Print to Word, then print to PDF — two jobs</td>
+        <td class="new-way"><strong>One edit</strong> propagates to HTML, PDF, and DOCX simultaneously via XPC</td>
       </tr>
       <tr>
-        <td class="old-way">Manually track changes for a database</td>
-        <td class="new-way"><strong>Observe</strong> every edit via transactional logging automatically</td>
+        <td class="old-way">Run a redline manually after each revision</td>
+        <td class="new-way"><strong>Redlines exist</strong> as a matter of process — they are produced, not requested</td>
       </tr>
       <tr>
-        <td class="old-way">Hire a consultant to build an ML dataset</td>
-        <td class="new-way"><strong>Build</strong> proprietary datasets as you draft — zero overhead</td>
+        <td class="old-way">Choose between privacy and performance</td>
+        <td class="new-way"><strong>XPC isolation</strong> — separate process memory, no content on the wire, no trade-off</td>
       </tr>
       <tr>
-        <td class="old-way">Hope for format consistency across exports</td>
-        <td class="new-way"><strong>Standardize</strong> everything via Pandoc Docker runners with custom CSS</td>
+        <td class="old-way">Wait for one conversion to finish before starting the next</td>
+        <td class="new-way"><strong>Parallel execution</strong> — ten redlines at once, each in its own process</td>
       </tr>
     </tbody>
   </table>
@@ -783,50 +839,50 @@
 <!-- SPECS -->
 <section class="specs-section reveal">
   <div class="specs-label">
-    One Platform.<br><em style="font-style:italic;color:var(--blue)">Infinite</em><br>Formats.
+    Apple<br>Frameworks.<br><em style="font-style:italic;color:var(--blue)">Nothing</em><br>Else.
   </div>
   <div class="specs-grid">
     <div class="spec-item">
       <div class="spec-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1M8 12l4 4m0 0l4-4m-4 4V4"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
       </div>
-      <div class="spec-name">Universal Ingestion</div>
-      <div class="spec-detail">Import from the web, HTML, Markdown, or RTF. Your content arrives ready to work.</div>
+      <div class="spec-name">XPC Services</div>
+      <div class="spec-detail">NSXPCConnection, NSXPCListener. Each service runs in its own process with its own memory space. Created by launchd, destroyed on invalidation.</div>
     </div>
     <div class="spec-item">
       <div class="spec-icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
       </div>
-      <div class="spec-name">Enterprise Export</div>
-      <div class="spec-detail">Generate pristine PDF, DOCX, LaTeX, or HTML with one click via Pandoc.</div>
+      <div class="spec-name">File Coordination</div>
+      <div class="spec-detail">NSFileCoordinator with the batch prepare API. Coordinated reads and writes across processes without deadlock.</div>
     </div>
     <div class="spec-item">
       <div class="spec-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1M8 12l4 4m0 0l4-4m-4 4V4"/></svg>
       </div>
-      <div class="spec-name">Docker Isolation</div>
-      <div class="spec-detail">Every conversion runs in a pristine, isolated container. Zero data collision.</div>
+      <div class="spec-name">Multi-Format Export</div>
+      <div class="spec-detail">Pandoc runs over XPC. Markdown in, HTML and PDF and DOCX out. One source, every format.</div>
     </div>
     <div class="spec-item">
       <div class="spec-icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
       </div>
-      <div class="spec-name">Version History</div>
-      <div class="spec-detail">Every document state is a snapshot. Load and compare historical drafts instantly via the Version Sidebar.</div>
+      <div class="spec-name">Structured Concurrency</div>
+      <div class="spec-detail">Swift task groups orchestrate parallel XPC connections. Each redline job gets its own connection, its own handler, its own lifecycle.</div>
     </div>
     <div class="spec-item">
       <div class="spec-icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 7h18M3 12h18M3 17h18"/></svg>
       </div>
-      <div class="spec-name">Structure Navigation</div>
-      <div class="spec-detail">Auto-generated heading trees let you navigate deep legal documents in a single click.</div>
+      <div class="spec-name">SwiftData</div>
+      <div class="spec-detail">Structured filing data persisted with @Model. Template fields resolve at render time against live model state.</div>
     </div>
     <div class="spec-item">
       <div class="spec-icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-1.447-.894L15 4m0 13V4m0 0L9 7"/></svg>
       </div>
-      <div class="spec-name">Evidence Dump</div>
-      <div class="spec-detail">Drag & drop files to extract iCloud metadata, GPS locations, and device IDs automatically.</div>
+      <div class="spec-name">TextKit 2</div>
+      <div class="spec-detail">NSTextView backed by NSTextStorage. Every keystroke produces a timestamped EditTransaction, encrypted with AES-GCM on save.</div>
     </div>
   </div>
 </section>
@@ -837,26 +893,26 @@
     <svg viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.955 11.955 0 003 10c0 5.592 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.249-8.25-3.286z"/></svg>
   </div>
   <div class="security-content">
-    <p class="security-label">Invisible Ink — Security Protocol</p>
-    <h3 class="security-title">Your instructions are sealed by the Enclave.</h3>
+    <p class="security-label">Privacy by Architecture</p>
+    <h3 class="security-title">Privacy is not a trade-off. It is a design constraint.</h3>
     <p class="security-desc">
-      The instruction set and transaction log that powers Atlas's ML pipeline never travels unprotected. AES-GCM encryption via a "Lawyer's Key" stored in the device Secure Enclave ensures your proprietary editing patterns remain exclusively yours.
+      XPC services run in separate processes with separate memory. No document content crosses the process boundary — only file paths. Edit transactions are encrypted with AES-GCM before they touch disk. The architecture makes the wrong thing hard to do, not merely prohibited.
     </p>
     <div class="security-badges">
+      <span class="security-badge">XPC Process Isolation</span>
+      <span class="security-badge">Zero-Copy IPC</span>
       <span class="security-badge">AES-GCM Encryption</span>
-      <span class="security-badge">Secure Enclave</span>
-      <span class="security-badge">Transactional Logging</span>
-      <span class="security-badge">Staging Isolation</span>
+      <span class="security-badge">NSFileCoordinator</span>
     </div>
   </div>
 </div>
 
 <!-- FOOTER -->
 <footer>
-  <div class="footer-logo">Atlas<span style="display:inline-block;width:6px;height:6px;background:#c8302a;border-radius:50%;margin-left:2px;vertical-align:middle;position:relative;top:-1px"></span></div>
+  <div class="footer-logo">Redliner<span style="display:inline-block;width:6px;height:6px;background:#c8302a;border-radius:50%;margin-left:2px;vertical-align:middle;position:relative;top:-1px"></span></div>
   <div class="footer-note">
-    The Document OS for the Machine Learning Age<br>
-    <span style="opacity:0.5">Professional · Secure · Intelligent</span>
+    Advocates Close · New York<br>
+    <span style="opacity:0.5">macOS 15+ · Swift 6 · Apple Frameworks</span>
   </div>
 </footer>
 
@@ -873,8 +929,6 @@
   }, { threshold: 0.1 });
   reveals.forEach(el => observer.observe(el));
 
-  // Animated redline cursor typing effect
-  const lines = document.querySelectorAll('.doc-line');
   // subtle shimmer on hover for mockup
   const mockup = document.querySelector('.doc-mockup');
   if (mockup) {
