@@ -474,6 +474,13 @@
     line-height: 1.75;
   }
 
+  .feature-desc code {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.85em;
+    background: var(--cream);
+    padding: 2px 6px;
+  }
+
   .feature-tag {
     display: inline-block;
     margin-top: 28px;
@@ -741,7 +748,7 @@
       <em>Publish everywhere.</em>
     </h1>
     <p class="hero-subhead">
-      Edit a document. The redline, the PDF, the Word file, and the HTML update simultaneously — not because you asked, but because that's how the system works.
+      Edit a document. The redline, the PDF, the Word file, and the HTML update simultaneously — not because you asked, but because that’s how the system works.
     </p>
     <div class="hero-cta">
       <a href="#thesis" class="btn-primary">Read More</a>
@@ -844,7 +851,7 @@
     <div class="feature-number">01</div>
     <h3 class="feature-title">XPC Services</h3>
     <p class="feature-desc">
-      Document conversion and redline generation run in dedicated XPC services — separate processes with independent memory spaces, managed by <code style="font-family:'DM Mono',monospace;font-size:0.85em;background:var(--cream);padding:2px 6px">launchd</code>, created and destroyed on demand. Each service does one thing. The app coordinates.
+      Document conversion and redline generation run in dedicated XPC services — separate processes with independent memory spaces, managed by <code>launchd</code>, created and destroyed on demand. Each service does one thing. The app coordinates.
     </p>
     <span class="feature-tag">Multi-Process</span>
   </div>
@@ -853,7 +860,7 @@
     <div class="feature-number">02</div>
     <h3 class="feature-title">Parallel Redlining</h3>
     <p class="feature-desc">
-      The redline engine implements a word-level Myers diff. Multiple redlines execute in parallel — each with its own <code style="font-family:'DM Mono',monospace;font-size:0.85em;background:var(--cream);padding:2px 6px">NSXPCConnection</code>, its own handler, its own coordinated file access via <code style="font-family:'DM Mono',monospace;font-size:0.85em;background:var(--cream);padding:2px 6px">NSFileCoordinator</code>.
+      The redline engine implements a word-level Myers diff. Multiple redlines execute in parallel — each with its own <code>NSXPCConnection</code>, its own handler, its own coordinated file access via <code>NSFileCoordinator</code>.
     </p>
     <span class="feature-tag">Structured Concurrency</span>
   </div>
