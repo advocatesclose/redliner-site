@@ -1,0 +1,1154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Redliner — Capital Markets</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=DM+Mono:wght@300;400;500&family=Instrument+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0d0d0e;
+    --paper: #f5f2eb;
+    --cream: #ede9df;
+    --red: #c8302a;
+    --blue: #1e4f9c;
+    --gold: #b8902a;
+    --muted: #7a7570;
+    --rule: #d4cfc4;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html {
+    scroll-behavior: smooth;
+    scroll-snap-type: y mandatory;
+  }
+
+  body {
+    background-color: var(--paper);
+    color: var(--ink);
+    font-family: 'Instrument Sans', sans-serif;
+    font-size: 18px;
+    line-height: 1.65;
+    overflow-x: hidden;
+  }
+
+  /* ── NOISE TEXTURE OVERLAY ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 999;
+    opacity: 0.5;
+  }
+
+  /* ── SCROLL SNAP ── */
+  .snap-section {
+    scroll-snap-align: start;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .snap-section-auto {
+    scroll-snap-align: start;
+  }
+
+  /* ── MASTHEAD ── */
+  .masthead {
+    border-bottom: 2px solid var(--ink);
+    padding: 18px 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: var(--paper);
+    z-index: 100;
+    animation: slideDown 0.6s ease both;
+  }
+
+  @keyframes slideDown {
+    from { transform: translateY(-100%); opacity: 0; }
+    to   { transform: translateY(0);     opacity: 1; }
+  }
+
+  .masthead-logo {
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    font-size: 1.4rem;
+    letter-spacing: -0.03em;
+  }
+
+  .masthead-logo a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .masthead-logo span {
+    display: inline-block;
+    width: 8px; height: 8px;
+    background: var(--red);
+    border-radius: 50%;
+    margin-left: 3px;
+    vertical-align: middle;
+    position: relative;
+    top: -2px;
+  }
+
+  .masthead-meta {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    text-align: right;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    padding: 0 60px;
+    padding-top: 60px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    min-height: 100vh;
+    border-bottom: 1px solid var(--rule);
+    overflow: hidden;
+    scroll-snap-align: start;
+  }
+
+  .hero-left {
+    padding: 120px 80px 120px 0;
+    border-right: 1px solid var(--rule);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    animation: fadeUp 0.9s 0.2s ease both;
+  }
+
+  @keyframes fadeUp {
+    from { transform: translateY(40px); opacity: 0; }
+    to   { transform: translateY(0);    opacity: 1; }
+  }
+
+  .kicker {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.78rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--red);
+    margin-bottom: 32px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .kicker::before {
+    content: '';
+    display: block;
+    width: 40px;
+    height: 1px;
+    background: var(--red);
+  }
+
+  .hero-headline {
+    font-family: 'Inter', sans-serif;
+    font-size: clamp(3rem, 5.5vw, 6rem);
+    font-weight: 800;
+    line-height: 0.95;
+    letter-spacing: -0.045em;
+    margin-bottom: 48px;
+  }
+
+  .hero-headline em {
+    font-style: normal;
+    font-weight: 400;
+    color: var(--blue);
+  }
+
+  .hero-subhead {
+    font-size: 1.2rem;
+    color: var(--muted);
+    max-width: 520px;
+    line-height: 1.75;
+    border-left: 3px solid var(--gold);
+    padding-left: 24px;
+    margin-bottom: 56px;
+  }
+
+  .hero-cta {
+    display: inline-flex;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .btn-primary {
+    background: var(--ink);
+    color: var(--paper);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.78rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    padding: 16px 32px;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.2s, transform 0.15s;
+    display: inline-block;
+  }
+
+  .btn-primary:hover { background: var(--blue); transform: translateY(-2px); }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--ink);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.78rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    padding: 15px 32px;
+    border: 1px solid var(--ink);
+    cursor: pointer;
+    text-decoration: none;
+    transition: border-color 0.2s, color 0.2s, transform 0.15s;
+    display: inline-block;
+  }
+
+  .btn-ghost:hover { border-color: var(--blue); color: var(--blue); transform: translateY(-2px); }
+
+  /* ── HERO RIGHT: EDGAR MOCKUP ── */
+  .hero-right {
+    padding: 120px 0 120px 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: fadeUp 0.9s 0.45s ease both;
+  }
+
+  .doc-mockup {
+    width: 100%;
+    max-width: 460px;
+    background: white;
+    border: 1px solid var(--rule);
+    box-shadow: 12px 16px 0 var(--rule), 24px 32px 0 rgba(0,0,0,0.05);
+    overflow: hidden;
+    position: relative;
+  }
+
+  .doc-topbar {
+    background: var(--ink);
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .doc-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .doc-dot.r { background: #c8302a; }
+  .doc-dot.y { background: #b8902a; }
+  .doc-dot.g { background: #2a8c4e; }
+
+  .doc-title {
+    margin-left: auto;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    color: rgba(255,255,255,0.45);
+    letter-spacing: 0.1em;
+  }
+
+  .doc-body {
+    padding: 28px 24px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    line-height: 1.85;
+    color: #333;
+  }
+
+  .doc-line { display: block; margin-bottom: 4px; }
+  .doc-heading { font-weight: 500; font-size: 0.82rem; color: var(--ink); margin-bottom: 8px; display: block; }
+  .doc-url { color: var(--blue); word-break: break-all; }
+  .doc-comment { color: var(--muted); font-style: italic; }
+  .doc-type { color: var(--red); }
+  .doc-field { color: #2a8c4e; }
+
+  .cursor-blink {
+    display: inline-block;
+    width: 2px; height: 12px;
+    background: var(--ink);
+    margin-left: 2px;
+    vertical-align: middle;
+    animation: blink 1.1s step-end infinite;
+  }
+
+  @keyframes blink {
+    50% { opacity: 0; }
+  }
+
+  /* ── SECTION STYLES ── */
+  .section-rule {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    padding: 0 60px;
+    margin: 0;
+  }
+
+  .section-rule-line { flex: 1; height: 1px; background: var(--rule); }
+  .section-rule-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.66rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 14px 24px;
+    border-left: 1px solid var(--rule);
+    border-right: 1px solid var(--rule);
+  }
+
+  .section-eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--red);
+    margin-bottom: 20px;
+  }
+
+  .section-title {
+    font-family: 'Inter', sans-serif;
+    font-size: clamp(2.4rem, 4vw, 3.6rem);
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.035em;
+  }
+
+  .section-header {
+    margin-bottom: 56px;
+  }
+
+  /* ── PIPELINE ── */
+  .pipeline-section {
+    padding: 120px 60px;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .pipeline {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    margin-top: 20px;
+  }
+
+  .pipeline-stage {
+    flex: 1;
+    padding: 36px 28px;
+    border: 1px solid var(--rule);
+    border-right: none;
+    position: relative;
+    transition: background 0.3s;
+  }
+
+  .pipeline-stage:last-child { border-right: 1px solid var(--rule); }
+  .pipeline-stage:hover { background: var(--cream); }
+
+  .pipeline-stage-number {
+    font-family: 'Inter', sans-serif;
+    font-size: 3.5rem;
+    font-weight: 800;
+    color: var(--rule);
+    line-height: 1;
+    margin-bottom: 16px;
+    letter-spacing: -0.04em;
+    transition: color 0.3s;
+  }
+
+  .pipeline-stage:hover .pipeline-stage-number { color: var(--blue); opacity: 0.25; }
+
+  .pipeline-stage-name {
+    font-family: 'Inter', sans-serif;
+    font-size: 1.15rem;
+    font-weight: 650;
+    margin-bottom: 10px;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+  }
+
+  .pipeline-stage-detail {
+    font-size: 0.92rem;
+    color: var(--muted);
+    line-height: 1.65;
+    margin-bottom: 14px;
+  }
+
+  .pipeline-stage-code {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--blue);
+    background: rgba(30,79,156,0.06);
+    padding: 4px 8px;
+    display: inline-block;
+    letter-spacing: 0.02em;
+  }
+
+  .pipeline-arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    flex-shrink: 0;
+    color: var(--rule);
+  }
+
+  .pipeline-arrow svg { width: 24px; height: 24px; }
+
+  /* ── FEATURE GRID ── */
+  .features {
+    padding: 120px 60px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .feature-card {
+    padding: 60px 48px;
+    border-right: 1px solid var(--rule);
+    position: relative;
+    transition: background 0.3s;
+  }
+
+  .feature-card:last-child { border-right: none; }
+  .feature-card:hover { background: var(--cream); }
+
+  .feature-number {
+    font-family: 'Inter', sans-serif;
+    font-size: 6rem;
+    font-weight: 800;
+    color: var(--rule);
+    line-height: 1;
+    margin-bottom: 28px;
+    letter-spacing: -0.04em;
+    transition: color 0.3s;
+  }
+
+  .feature-card:hover .feature-number { color: var(--blue); opacity: 0.25; }
+
+  .feature-title {
+    font-family: 'Inter', sans-serif;
+    font-size: 1.7rem;
+    font-weight: 650;
+    margin-bottom: 18px;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+  }
+
+  .feature-desc {
+    font-size: 1rem;
+    color: var(--muted);
+    line-height: 1.75;
+  }
+
+  .feature-desc code {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.85em;
+    background: var(--cream);
+    padding: 2px 6px;
+  }
+
+  .feature-tag {
+    display: inline-block;
+    margin-top: 28px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--red);
+    border-bottom: 1px solid var(--red);
+    padding-bottom: 2px;
+  }
+
+  /* ── ESSAY SECTION ── */
+  .essay-section {
+    padding: 120px 60px;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .essay-section .section-header {
+    margin-bottom: 80px;
+  }
+
+  .essay-columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    max-width: 1100px;
+  }
+
+  .essay-columns p {
+    font-size: 1.1rem;
+    color: var(--muted);
+    line-height: 1.85;
+    margin-bottom: 1.6em;
+  }
+
+  .essay-columns p:last-child {
+    margin-bottom: 0;
+  }
+
+  .essay-lead {
+    font-size: 1.3rem !important;
+    color: var(--ink) !important;
+    font-weight: 500;
+  }
+
+  .essay-columns code {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.85em;
+    background: var(--cream);
+    padding: 2px 6px;
+  }
+
+  /* ── STATEMENT SECTION ── */
+  .statement {
+    padding: 0 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .statement-inner {
+    max-width: 900px;
+    padding: 0 40px;
+  }
+
+  .statement-text {
+    font-family: 'Inter', sans-serif;
+    font-size: clamp(2.2rem, 4vw, 3.8rem);
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -0.035em;
+  }
+
+  .statement-text em {
+    font-style: normal;
+    font-weight: 400;
+    color: var(--blue);
+  }
+
+  .statement-sub {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.78rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-top: 40px;
+  }
+
+  /* ── SPECS ── */
+  .specs-section {
+    padding: 120px 60px;
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 100px;
+    border-bottom: 1px solid var(--rule);
+    align-items: start;
+  }
+
+  .specs-label {
+    font-family: 'Inter', sans-serif;
+    font-size: clamp(2.4rem, 4vw, 3.6rem);
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.035em;
+    position: sticky;
+    top: 100px;
+  }
+
+  .specs-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+  }
+
+  .spec-item {
+    padding: 32px 0;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .spec-item:nth-child(odd) { padding-right: 48px; border-right: 1px solid var(--rule); }
+  .spec-item:nth-child(even) { padding-left: 48px; }
+
+  .spec-icon {
+    width: 40px; height: 40px;
+    margin-bottom: 16px;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .spec-icon svg { width: 24px; height: 24px; }
+
+  .spec-name {
+    font-family: 'Instrument Sans', sans-serif;
+    font-weight: 600;
+    font-size: 1rem;
+    margin-bottom: 8px;
+  }
+
+  .spec-detail {
+    font-size: 0.92rem;
+    color: var(--muted);
+    line-height: 1.65;
+  }
+
+  /* ── SECURITY CALLOUT ── */
+  .security-section {
+    margin: 0 60px;
+    border: 1px solid var(--ink);
+    padding: 72px 80px;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 56px;
+    align-items: center;
+    background: var(--ink);
+    color: var(--paper);
+    margin-bottom: 0;
+  }
+
+  .security-icon-wrap {
+    width: 96px; height: 96px;
+    border: 1px solid rgba(245,242,235,0.2);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .security-icon-wrap svg { width: 40px; height: 40px; stroke: var(--gold); fill: none; }
+
+  .security-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 16px;
+  }
+
+  .security-title {
+    font-family: 'Inter', sans-serif;
+    font-size: 2.2rem;
+    font-weight: 650;
+    margin-bottom: 18px;
+    line-height: 1.2;
+    letter-spacing: -0.025em;
+  }
+
+  .security-desc {
+    font-size: 1rem;
+    color: rgba(245,242,235,0.65);
+    line-height: 1.75;
+    max-width: 680px;
+  }
+
+  .security-badges {
+    display: flex;
+    gap: 14px;
+    margin-top: 32px;
+    flex-wrap: wrap;
+  }
+
+  .security-badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.66rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 9px 16px;
+    border: 1px solid rgba(245,242,235,0.2);
+    color: rgba(245,242,235,0.6);
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    padding: 48px 60px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid var(--rule);
+    margin-top: 60px;
+  }
+
+  .footer-logo {
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    font-size: 1.15rem;
+    letter-spacing: -0.03em;
+  }
+
+  .footer-note {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-align: right;
+  }
+
+  /* ── SCROLL REVEAL ── */
+  .reveal {
+    opacity: 0;
+    transform: translateY(32px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 900px) {
+    html { scroll-snap-type: y proximity; }
+    .masthead { padding: 14px 24px; }
+    .hero { grid-template-columns: 1fr; padding: 0 24px; padding-top: 60px; min-height: auto; }
+    .hero-left { padding: 60px 0 40px; border-right: none; border-bottom: 1px solid var(--rule); }
+    .hero-right { padding: 40px 0 60px; }
+    .pipeline-section { padding: 80px 24px; }
+    .pipeline { flex-direction: column; }
+    .pipeline-arrow { width: auto; height: 32px; transform: rotate(90deg); }
+    .pipeline-stage { border-right: 1px solid var(--rule); border-bottom: none; }
+    .pipeline-stage:last-child { border-bottom: 1px solid var(--rule); }
+    .features { grid-template-columns: 1fr; padding: 60px 24px; }
+    .feature-card { border-right: none; border-bottom: 1px solid var(--rule); padding: 40px 0; }
+    .essay-section { padding: 80px 24px; }
+    .specs-section { padding: 80px 24px; grid-template-columns: 1fr; gap: 48px; }
+    .specs-label { position: static; }
+    .specs-grid { grid-template-columns: 1fr; }
+    .spec-item:nth-child(odd) { padding-right: 0; border-right: none; }
+    .spec-item:nth-child(even) { padding-left: 0; }
+    .security-section { margin: 0 24px; padding: 48px 32px; grid-template-columns: 1fr; gap: 28px; }
+    .essay-columns { grid-template-columns: 1fr; gap: 40px; }
+    .statement { padding: 80px 24px; }
+    .snap-section { min-height: auto; }
+    footer { padding: 32px 24px; flex-direction: column; gap: 12px; text-align: center; }
+    .footer-note { text-align: center; }
+    .section-rule { padding: 0 24px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- MASTHEAD -->
+<header class="masthead">
+  <div class="masthead-logo"><a href="../index.html">Redliner<span></span></a></div>
+  <div class="masthead-meta">
+    Capital Markets<br>EDGAR Import Pipeline
+  </div>
+</header>
+
+<!-- ─── PAGE 1: HERO ─── -->
+<section class="hero">
+  <div class="hero-left">
+    <p class="kicker">106,109 Pages Per Year</p>
+    <h1 class="hero-headline">
+      The largest<br>
+      public dataset<br>
+      <em>nobody parses.</em>
+    </h1>
+    <p class="hero-subhead">
+      The Federal Register published 106,109 pages in 2024 alone -- over 400 pages per business day. EDGAR holds millions of filings going back decades. This is one of the largest freely available, necessarily public datasets in existence. Redliner builds the parsing infrastructure to turn it into structured, editable documents.
+    </p>
+    <div class="hero-cta">
+      <a href="#pipeline" class="btn-primary">See the Pipeline</a>
+      <a href="#deep-dive" class="btn-ghost">Technical Deep Dive</a>
+    </div>
+  </div>
+
+  <div class="hero-right">
+    <div class="doc-mockup">
+      <div class="doc-topbar">
+        <div class="doc-dot r"></div>
+        <div class="doc-dot y"></div>
+        <div class="doc-dot g"></div>
+        <span class="doc-title">Import from EDGAR</span>
+      </div>
+      <div class="doc-body">
+        <span class="doc-heading">EDGAR Filing URL</span>
+        <span class="doc-line">
+          <span class="doc-url">https://www.sec.gov/Archives/edgar/data/</span>
+        </span>
+        <span class="doc-line">
+          <span class="doc-url">1846416/000149315224044245/</span>
+        </span>
+        <span class="doc-line" style="margin-top:14px">
+          <span class="doc-comment">// Progress</span>
+        </span>
+        <span class="doc-line"><span class="doc-field">Downloading registration statement...</span></span>
+        <span class="doc-line"><span class="doc-field">Found: Acme Holdings Inc.</span></span>
+        <span class="doc-line"><span class="doc-field">Fetching filing index...</span></span>
+        <span class="doc-line"><span class="doc-field">Found 14 exhibits</span></span>
+        <span class="doc-line"><span class="doc-type">  EX-3.1 Certificate of Incorporation</span></span>
+        <span class="doc-line"><span class="doc-type">  EX-3.2 Articles of Association</span></span>
+        <span class="doc-line"><span class="doc-type">  EX-5   Opinion of Counsel</span></span>
+        <span class="doc-line"><span class="doc-type">  EX-10  Material Contract</span></span>
+        <span class="doc-line"><span class="doc-type">  EX-23  Consent</span></span>
+        <span class="doc-line" style="margin-top:10px"><span class="doc-field">Converting to markdown via pandoc...</span></span>
+        <span class="doc-line"><span class="doc-field">Done -- 15 documents imported</span><span class="cursor-blink"></span></span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION RULE -->
+<div class="section-rule snap-section-auto">
+  <div class="section-rule-line"></div>
+  <span class="section-rule-label">The Pipeline</span>
+  <div class="section-rule-line"></div>
+</div>
+
+<!-- ─── PAGE 2: PIPELINE ─── -->
+<section class="pipeline-section reveal snap-section-auto" id="pipeline">
+  <div class="section-header">
+    <p class="section-eyebrow">Data Flow</p>
+    <h2 class="section-title">Five stages. One paste.</h2>
+  </div>
+
+  <div class="pipeline">
+    <div class="pipeline-stage">
+      <div class="pipeline-stage-number">01</div>
+      <div class="pipeline-stage-name">EDGAR URL</div>
+      <div class="pipeline-stage-detail">
+        User pastes any URL from an SEC filing. The importer resolves relative paths, strips inline XBRL viewer prefixes (<code>/ix?doc=</code>), and normalizes to the filing's base directory.
+      </div>
+      <div class="pipeline-stage-code">ImportFilingSheet.swift</div>
+    </div>
+
+    <div class="pipeline-arrow">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14m-7-7l7 7-7 7"/></svg>
+    </div>
+
+    <div class="pipeline-stage">
+      <div class="pipeline-stage-number">02</div>
+      <div class="pipeline-stage-name">DownloadService</div>
+      <div class="pipeline-stage-detail">
+        An XPC service running outside the app sandbox. Sets SEC-compliant User-Agent headers. Downloads to the local filesystem. Strips EDGAR navigation chrome and SEC header blocks from the raw HTML.
+      </div>
+      <div class="pipeline-stage-code">DownloadServiceProtocol</div>
+    </div>
+
+    <div class="pipeline-arrow">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14m-7-7l7 7-7 7"/></svg>
+    </div>
+
+    <div class="pipeline-stage">
+      <div class="pipeline-stage-number">03</div>
+      <div class="pipeline-stage-name">SECHTMLParser</div>
+      <div class="pipeline-stage-detail">
+        A compiled regex engine that extracts every <code>&lt;p&gt;</code> block from SEC HTML. Reads the "attribute soup" to classify headings, sections, list items, and body paragraphs. Strips internal tags. Handles <code>&amp;nbsp;</code>, <code>&amp;#8226;</code>, and entity artifacts.
+      </div>
+      <div class="pipeline-stage-code">SECHTMLParser.parse(html:)</div>
+    </div>
+
+    <div class="pipeline-arrow">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14m-7-7l7 7-7 7"/></svg>
+    </div>
+
+    <div class="pipeline-stage">
+      <div class="pipeline-stage-number">04</div>
+      <div class="pipeline-stage-name">SECDocument</div>
+      <div class="pipeline-stage-detail">
+        A Codable, Sendable model. Each filing becomes an array of <code>SECBlock</code> values, each with a <code>UUID</code>, a <code>SECBlockType</code>, content text, and optional XBRL metadata. Converts to and from JSON instantly.
+      </div>
+      <div class="pipeline-stage-code">SECDocument / SECBlock</div>
+    </div>
+
+    <div class="pipeline-arrow">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14m-7-7l7 7-7 7"/></svg>
+    </div>
+
+    <div class="pipeline-stage">
+      <div class="pipeline-stage-number">05</div>
+      <div class="pipeline-stage-name">FilingBlueprint</div>
+      <div class="pipeline-stage-detail">
+        Registration statements are split into sections by markdown heading. Each section and exhibit becomes a <code>BlueprintExhibit</code>. The result is an editable, structured document ready for the three-column editor.
+      </div>
+      <div class="pipeline-stage-code">FilingBlueprint</div>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION RULE -->
+<div class="section-rule snap-section-auto">
+  <div class="section-rule-line"></div>
+  <span class="section-rule-label">Capabilities</span>
+  <div class="section-rule-line"></div>
+</div>
+
+<!-- ─── PAGE 3: FEATURE CARDS ─── -->
+<section class="features reveal snap-section-auto" id="features">
+  <div class="feature-card">
+    <div class="feature-number">01</div>
+    <h3 class="feature-title">EDGAR Import</h3>
+    <p class="feature-desc">
+      Paste a URL from any filing on EDGAR. Redliner derives the accession number from the directory structure (the 18-digit format like <code>000149315224044245</code>), reformats it with dashes (10-2-6), and fetches the filing index page to discover every exhibit. The importer classifies exhibits by filename convention: <code>ex3-1</code> is a Certificate of Incorporation, <code>ex10-</code> is a Material Contract, <code>ex5-</code> is an Opinion of Counsel. It handles S-1, S-1/A, 10-K, 10-Q, and every other filing type on EDGAR.
+    </p>
+    <span class="feature-tag">EDGARImporter</span>
+  </div>
+
+  <div class="feature-card">
+    <div class="feature-number">02</div>
+    <h3 class="feature-title">HTML Parsing</h3>
+    <p class="feature-desc">
+      <code>SECHTMLParser</code> uses a compiled <code>NSRegularExpression</code> with <code>.dotMatchesLineSeparators</code> to extract every paragraph from SEC HTML. It reads the attribute string of each <code>&lt;p&gt;</code> tag -- checking for class names like <code>H1</code>, <code>H2</code>, <code>Article</code>, and <code>Section</code> -- to classify block type. Bullet points are detected via <code>&amp;#8226;</code> entities and literal bullet characters. Internal tags are stripped. Entity artifacts are cleaned.
+    </p>
+    <span class="feature-tag">Regex Engine</span>
+  </div>
+
+  <div class="feature-card">
+    <div class="feature-number">03</div>
+    <h3 class="feature-title">Document Model</h3>
+    <p class="feature-desc">
+      The parsed result is an <code>SECDocument</code> -- a <code>Codable</code>, <code>Sendable</code> struct containing an array of <code>SECBlock</code> values. Each block has a <code>UUID</code> identifier, a typed <code>SECBlockType</code> (heading1, heading2, heading3, paragraph, definition, listMarker, listItem), content text, and an optional <code>[String: String]</code> metadata dictionary for inline XBRL tags like <code>ix:name</code>.
+    </p>
+    <span class="feature-tag">SECDocumentModel</span>
+  </div>
+</section>
+
+<!-- ─── PAGE 4: STATEMENT ─── -->
+<section class="statement snap-section reveal">
+  <div class="statement-inner">
+    <p class="statement-text">
+      Semi-structured, inconsistent, massive, and <em>entirely public.</em> This is one of the most interesting parsing problems on earth.
+    </p>
+    <p class="statement-sub">Not a database. Not a blob. Something in between.</p>
+  </div>
+</section>
+
+<!-- SECTION RULE -->
+<div class="section-rule snap-section-auto">
+  <div class="section-rule-line"></div>
+  <span class="section-rule-label">Deep Dive</span>
+  <div class="section-rule-line"></div>
+</div>
+
+<!-- ─── PAGE 5: ESSAY ─── -->
+<section class="essay-section snap-section-auto reveal" id="deep-dive">
+  <div class="section-header">
+    <p class="section-eyebrow">Technical Essay</p>
+    <h2 class="section-title">Why this data is<br>hard -- and interesting.</h2>
+  </div>
+  <div class="essay-columns">
+    <div>
+      <p class="essay-lead">
+        EDGAR filings are not web pages and they are not database rows. They are legal documents serialized as HTML -- semi-structured data with internal organization expressed through headings, exhibits, cross-references, numbered sections, and inline XBRL tags, all rendered via inconsistent markup that varies by filing agent, era, and document type.
+      </p>
+      <p>
+        A typical SEC filing uses deeply nested tables for layout, not CSS. Headings are not <code>&lt;h1&gt;</code> through <code>&lt;h6&gt;</code> tags -- they are <code>&lt;p&gt;</code> tags with class names like <code>"H1"</code>, <code>"H2"</code>, <code>"Article"</code>, or <code>"Section"</code> embedded in an "attribute soup" alongside inline styles for margins, fonts, and spacing. A paragraph might carry <code>class="H1" style="margin:0; font-family:Times"</code> and the only way to know it is a heading is to scan the attribute string for the class name.
+      </p>
+      <p>
+        Bullet points do not use <code>&lt;ul&gt;</code> or <code>&lt;li&gt;</code>. They use <code>&lt;p&gt;</code> tags containing the HTML entity <code>&amp;#8226;</code> or a literal Unicode bullet character. The parser must detect both forms and strip the bullet from the content after reclassifying the block type.
+      </p>
+    </div>
+    <div>
+      <p>
+        Then there is inline XBRL. Modern SEC filings wrap financial data in <code>&lt;ix:nonFraction&gt;</code>, <code>&lt;ix:nonNumeric&gt;</code>, and similar tags that interleave with the HTML content. These tags carry metadata like <code>ix:name</code> that identifies the XBRL concept. The parser must preserve this metadata while stripping the tags to extract clean text. The <code>SECBlock</code> model stores this in an optional <code>[String: String]</code> metadata dictionary.
+      </p>
+      <p>
+        Redliner's approach is deliberate: a single compiled <code>NSRegularExpression</code> with the pattern <code>&lt;p\b([^&gt;]*)&gt;(.*?)&lt;/p&gt;</code>, using <code>.dotMatchesLineSeparators</code> so content spanning multiple lines is captured correctly. Group 1 captures the attribute soup. Group 2 captures the raw content. The <code>\b</code> word boundary prevents false matches on <code>&lt;pre&gt;</code> or <code>&lt;param&gt;</code> tags. The regex is compiled once at load time and reused for every parse call.
+      </p>
+      <p>
+        After extraction, a tag-stripping pass removes internal HTML (<code>&lt;span&gt;</code>, <code>&lt;b&gt;</code>, <code>&lt;i&gt;</code>) and a cleanup pass normalizes non-breaking spaces (<code>&amp;nbsp;</code>, <code>&amp;#160;</code>). The result is a clean <code>SECDocument</code> with typed, structured blocks that can be rendered, diffed, or edited.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION RULE -->
+<div class="section-rule snap-section-auto">
+  <div class="section-rule-line"></div>
+  <span class="section-rule-label">Mathematical Depth</span>
+  <div class="section-rule-line"></div>
+</div>
+
+<!-- ─── PAGE 5.5: MATHEMATICAL DEPTH ─── -->
+<section class="essay-section snap-section-auto reveal" id="math">
+  <div class="section-header">
+    <p class="section-eyebrow">Computational Methods</p>
+    <h2 class="section-title">Why semi-structured data<br>requires serious math.</h2>
+  </div>
+  <div class="essay-columns">
+    <div>
+      <p class="essay-lead">
+        Parsing EDGAR is not a string-matching problem. The corpus is too large, too inconsistent, and too structurally varied for pattern-matching alone. Training on and generalizing across this material touches real computational depth.
+      </p>
+      <p>
+        The structural variation across filings is topological in nature -- document sections nest, cross-reference, and recombine in ways that resist tree representations and require reasoning about manifolds and connectedness. Spectral methods apply when decomposing the recurring structural patterns across thousands of filings: eigenvector analysis of section co-occurrence, Chebyshev polynomial approximations for smoothing noisy classification signals, and Fisher information matrices for quantifying how much each structural feature tells you about document type.
+      </p>
+    </div>
+    <div>
+      <p>
+        Time series methods matter because the EDGAR corpus is not stationary -- filing conventions drift. The HTML output of Donnelley, Toppan Merrill, and other filing agents has changed across decades. A parser that works on 2024 S-1 filings may fail on 2008 10-Ks. Modeling this requires non-stationary time series analysis, drift terms, and innovation matrices that capture how formatting conventions evolve. Convergence guarantees for parsing heuristics require analysis of overdetermined systems where multiple classification signals (class names, nesting depth, font attributes, position) must be reconciled.
+      </p>
+      <p>
+        Generating functions formalize the combinatorics of exhibit discovery -- how many distinct structural patterns exist in the filing index, and what is the probability that a new filing introduces a pattern outside the known set. Hessians of the loss surface characterize the stability of learned parsers under distribution shift. This is not NLP applied to legal text. It is infrastructure for one of the most interesting semi-structured datasets available to anyone with a network connection.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION RULE -->
+<div class="section-rule snap-section-auto">
+  <div class="section-rule-line"></div>
+  <span class="section-rule-label">Technical Specs</span>
+  <div class="section-rule-line"></div>
+</div>
+
+<!-- ─── PAGE 6: SPECS ─── -->
+<section class="specs-section reveal snap-section-auto">
+  <div class="specs-label">
+    The types<br>behind the<br><em style="color:var(--blue)">pipeline.</em>
+  </div>
+  <div class="specs-grid">
+    <div class="spec-item">
+      <div class="spec-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+      </div>
+      <div class="spec-name">SECDocument</div>
+      <div class="spec-detail">Codable, Sendable struct. Contains an array of SECBlock values. Converts to/from JSON. The canonical representation of a parsed filing.</div>
+    </div>
+    <div class="spec-item">
+      <div class="spec-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      </div>
+      <div class="spec-name">SECBlock</div>
+      <div class="spec-detail">UUID-identified block with SECBlockType enum (heading1, heading2, heading3, paragraph, definition, listMarker, listItem, unknown), content string, and optional XBRL metadata dictionary.</div>
+    </div>
+    <div class="spec-item">
+      <div class="spec-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      </div>
+      <div class="spec-name">EDGARImporter</div>
+      <div class="spec-detail">Async static API. importFiling(from:progress:) takes a URL and a progress callback. Returns a FilingBlueprint with sections split by markdown heading.</div>
+    </div>
+    <div class="spec-item">
+      <div class="spec-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1M8 12l4 4m0 0l4-4m-4 4V4"/></svg>
+      </div>
+      <div class="spec-name">DownloadServiceProtocol</div>
+      <div class="spec-detail">@objc XPC protocol. Two methods: download(from:to:reply:) for single documents, downloadFiling(from:to:reply:) for full filing index downloads.</div>
+    </div>
+    <div class="spec-item">
+      <div class="spec-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 7h18M3 12h18M3 17h18"/></svg>
+      </div>
+      <div class="spec-name">NSRegularExpression</div>
+      <div class="spec-detail">Compiled once at load time with .dotMatchesLineSeparators and .caseInsensitive. Pattern: &lt;p\b([^&gt;]*)&gt;(.*?)&lt;/p&gt;. Used for every parse call.</div>
+    </div>
+    <div class="spec-item">
+      <div class="spec-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-1.447-.894L15 4m0 13V4m0 0L9 7"/></svg>
+      </div>
+      <div class="spec-name">PandocClient</div>
+      <div class="spec-detail">Converts downloaded HTML to markdown for section splitting and diffing. SEC headings become clean # and ## markers, making structural extraction trivial.</div>
+    </div>
+    <div class="spec-item">
+      <div class="spec-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h14a2 2 0 012 2v14a2 2 0 01-2 2z"/><path d="M9 7h6m-6 4h6m-6 4h4"/></svg>
+      </div>
+      <div class="spec-name">FilingBlueprint</div>
+      <div class="spec-detail">The import result. Contains BlueprintSection arrays for Registration Statement, Exhibits, and Financial Statements. Each section holds BlueprintExhibit values with imported markdown or HTML.</div>
+    </div>
+    <div class="spec-item">
+      <div class="spec-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
+      </div>
+      <div class="spec-name">NSDataDetector</div>
+      <div class="spec-detail">Used for broad URL discovery in filing HTML. Combined with regex href extraction to catch both absolute and relative links. Deduplicates by filename.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── PAGE 7: ON-DEVICE CALLOUT ─── -->
+<div class="security-section reveal snap-section-auto">
+  <div class="security-icon-wrap">
+    <svg viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.955 11.955 0 003 10c0 5.592 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.249-8.25-3.286z"/></svg>
+  </div>
+  <div class="security-content">
+    <p class="security-label">Direct to Your Machine</p>
+    <h3 class="security-title">Filings download directly to your machine via XPC. No intermediary server.</h3>
+    <p class="security-desc">
+      The DownloadService is a dedicated XPC process that fetches filings straight from SEC EDGAR to your local filesystem. It sets a SEC-compliant User-Agent header (<code style="color:var(--gold);background:rgba(245,242,235,0.08);padding:2px 6px;">Redliner/1.0 (Advocates Close Corp.)</code>), strips EDGAR navigation chrome, and writes clean HTML to disk. The main application never touches the network. No proxy. No intermediary. No cloud. The filing goes from EDGAR to your <code style="color:var(--gold);background:rgba(245,242,235,0.08);padding:2px 6px;">~/Library/Application Support/Redliner/Filings/</code> directory and nowhere else. The XPC service auto-terminates after five minutes of inactivity. macOS relaunches it on the next call.
+    </p>
+    <div class="security-badges">
+      <span class="security-badge">XPC Process Isolation</span>
+      <span class="security-badge">SEC-Compliant User-Agent</span>
+      <span class="security-badge">Local Filesystem Only</span>
+      <span class="security-badge">Auto-Shutdown (300s)</span>
+    </div>
+  </div>
+</div>
+
+<!-- ─── PAGE 8: CLOSING ─── -->
+<section class="statement snap-section reveal" style="min-height: 80vh;">
+  <div class="statement-inner">
+    <p class="statement-text">
+      Millions of filings. Decades of history. <em>Freely available.</em> The only hard part is parsing it.
+    </p>
+    <p class="statement-sub">Paste the URL. The pipeline handles the rest.</p>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="snap-section-auto">
+  <div class="footer-logo">Redliner<span style="display:inline-block;width:6px;height:6px;background:#c8302a;border-radius:50%;margin-left:2px;vertical-align:middle;position:relative;top:-1px"></span></div>
+  <div style="text-align:center;">
+    <div style="font-family:'DM Mono',monospace;font-size:0.65rem;color:var(--muted);letter-spacing:0.1em;margin-bottom:6px;">Capital Markets &middot; EDGAR Import Pipeline</div>
+    <div style="font-family:'DM Mono',monospace;font-size:0.65rem;letter-spacing:0.1em;">
+      <a href="../index.html" style="color:var(--muted);text-decoration:none;border-bottom:1px solid var(--rule);">home</a>
+      <span style="color:var(--rule);margin:0 8px;">&middot;</span>
+      <span style="color:var(--ink);">capital markets</span>
+      <span style="color:var(--rule);margin:0 8px;">&middot;</span>
+      <a href="https://github.com/advocatesclose" style="color:var(--muted);text-decoration:none;border-bottom:1px solid var(--rule);">github</a>
+    </div>
+  </div>
+  <div class="footer-note">
+    macOS 15+ &middot; Swift 6 &middot; XPC Services
+  </div>
+</footer>
+
+<script>
+  // Scroll reveal
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.1 });
+  reveals.forEach(el => observer.observe(el));
+
+  // subtle shimmer on hover for mockup
+  const mockup = document.querySelector('.doc-mockup');
+  if (mockup) {
+    mockup.addEventListener('mousemove', (e) => {
+      const rect = mockup.getBoundingClientRect();
+      const x = ((e.clientX - rect.left) / rect.width - 0.5) * 6;
+      const y = ((e.clientY - rect.top) / rect.height - 0.5) * 6;
+      mockup.style.transform = `perspective(800px) rotateY(${x}deg) rotateX(${-y}deg)`;
+    });
+    mockup.addEventListener('mouseleave', () => {
+      mockup.style.transform = '';
+      mockup.style.transition = 'transform 0.5s ease';
+    });
+    mockup.addEventListener('mouseenter', () => {
+      mockup.style.transition = 'transform 0.1s ease';
+    });
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Redliner — Metal GPU Text Layout</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=DM+Mono:wght@300;400;500&family=Instrument+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0d0d0e;
+    --paper: #f5f2eb;
+    --cream: #ede9df;
+    --red: #c8302a;
+    --blue: #1e4f9c;
+    --gold: #b8902a;
+    --muted: #7a7570;
+    --rule: #d4cfc4;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html {
+    scroll-behavior: smooth;
+    scroll-snap-type: y mandatory;
+  }
+
+  body {
+    background-color: var(--paper);
+    color: var(--ink);
+    font-family: 'Instrument Sans', sans-serif;
+    font-size: 18px;
+    line-height: 1.65;
+    overflow-x: hidden;
+  }
+
+  /* ── NOISE TEXTURE OVERLAY ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 999;
+    opacity: 0.5;
+  }
+
+  /* ── SCROLL SNAP ── */
+  .snap-section {
+    scroll-snap-align: start;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .snap-section-auto {
+    scroll-snap-align: start;
+  }
+
+  /* ── MASTHEAD ── */
+  .masthead {
+    border-bottom: 2px solid var(--ink);
+    padding: 18px 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: var(--paper);
+    z-index: 100;
+    animation: slideDown 0.6s ease both;
+  }
+
+  @keyframes slideDown {
+    from { transform: translateY(-100%); opacity: 0; }
+    to   { transform: translateY(0);     opacity: 1; }
+  }
+
+  .masthead-logo {
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    font-size: 1.4rem;
+    letter-spacing: -0.03em;
+  }
+
+  .masthead-logo a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .masthead-logo span {
+    display: inline-block;
+    width: 8px; height: 8px;
+    background: var(--red);
+    border-radius: 50%;
+    margin-left: 3px;
+    vertical-align: middle;
+    position: relative;
+    top: -2px;
+  }
+
+  .masthead-meta {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    text-align: right;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    padding: 0 60px;
+    padding-top: 60px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    min-height: 100vh;
+    border-bottom: 1px solid var(--rule);
+    overflow: hidden;
+    scroll-snap-align: start;
+  }
+
+  .hero-left {
+    padding: 120px 80px 120px 0;
+    border-right: 1px solid var(--rule);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    animation: fadeUp 0.9s 0.2s ease both;
+  }
+
+  @keyframes fadeUp {
+    from { transform: translateY(40px); opacity: 0; }
+    to   { transform: translateY(0);    opacity: 1; }
+  }
+
+  .kicker {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.78rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--red);
+    margin-bottom: 32px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .kicker::before {
+    content: '';
+    display: block;
+    width: 40px;
+    height: 1px;
+    background: var(--red);
+  }
+
+  .hero-headline {
+    font-family: 'Inter', sans-serif;
+    font-size: clamp(3.5rem, 6.5vw, 7rem);
+    font-weight: 800;
+    line-height: 0.95;
+    letter-spacing: -0.045em;
+    margin-bottom: 48px;
+  }
+
+  .hero-headline em {
+    font-style: normal;
+    font-weight: 400;
+    color: var(--blue);
+  }
+
+  .hero-subhead {
+    font-size: 1.2rem;
+    color: var(--muted);
+    max-width: 520px;
+    line-height: 1.75;
+    border-left: 3px solid var(--gold);
+    padding-left: 24px;
+    margin-bottom: 56px;
+  }
+
+  .hero-cta {
+    display: inline-flex;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .btn-primary {
+    background: var(--ink);
+    color: var(--paper);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.78rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    padding: 16px 32px;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.2s, transform 0.15s;
+    display: inline-block;
+  }
+
+  .btn-primary:hover { background: var(--blue); transform: translateY(-2px); }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--ink);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.78rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    padding: 15px 32px;
+    border: 1px solid var(--ink);
+    cursor: pointer;
+    text-decoration: none;
+    transition: border-color 0.2s, color 0.2s, transform 0.15s;
+    display: inline-block;
+  }
+
+  .btn-ghost:hover { border-color: var(--blue); color: var(--blue); transform: translateY(-2px); }
+
+  /* ── HERO RIGHT ── */
+  .hero-right {
+    padding: 120px 0 120px 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: fadeUp 0.9s 0.45s ease both;
+  }
+
+  .benchmark-display {
+    width: 100%;
+    max-width: 440px;
+    background: var(--ink);
+    border: 1px solid var(--rule);
+    box-shadow: 12px 16px 0 var(--rule), 24px 32px 0 rgba(0,0,0,0.05);
+    overflow: hidden;
+    position: relative;
+    padding: 56px 48px;
+    text-align: center;
+  }
+
+  .benchmark-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 32px;
+  }
+
+  .benchmark-number {
+    font-family: 'Inter', sans-serif;
+    font-size: 5.5rem;
+    font-weight: 800;
+    color: var(--paper);
+    line-height: 1;
+    letter-spacing: -0.04em;
+    margin-bottom: 8px;
+  }
+
+  .benchmark-unit {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.82rem;
+    color: rgba(245,242,235,0.5);
+    letter-spacing: 0.1em;
+    margin-bottom: 40px;
+  }
+
+  .benchmark-divider {
+    width: 48px;
+    height: 1px;
+    background: rgba(245,242,235,0.15);
+    margin: 0 auto 40px;
+  }
+
+  .benchmark-stat {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    color: rgba(245,242,235,0.45);
+    letter-spacing: 0.08em;
+    line-height: 2;
+  }
+
+  .benchmark-stat strong {
+    color: var(--paper);
+    font-weight: 500;
+  }
+
+  /* ── STATEMENT SECTION ── */
+  .statement {
+    padding: 0 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .statement-inner {
+    max-width: 900px;
+    padding: 0 40px;
+  }
+
+  .statement-text {
+    font-family: 'Inter', sans-serif;
+    font-size: clamp(2.2rem, 4vw, 3.8rem);
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -0.035em;
+  }
+
+  .statement-text em {
+    font-style: normal;
+    font-weight: 400;
+    color: var(--blue);
+  }
+
+  .statement-sub {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.78rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-top: 40px;
+  }
+
+  /* ── ESSAY SECTION ── */
+  .essay-section {
+    padding: 120px 60px;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .essay-section .section-header {
+    margin-bottom: 80px;
+  }
+
+  .essay-columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    max-width: 1100px;
+  }
+
+  .essay-columns p {
+    font-size: 1.1rem;
+    color: var(--muted);
+    line-height: 1.85;
+    margin-bottom: 1.6em;
+  }
+
+  .essay-columns p:last-child {
+    margin-bottom: 0;
+  }
+
+  .essay-lead {
+    font-size: 1.3rem !important;
+    color: var(--ink) !important;
+    font-weight: 500;
+  }
+
+  /* ── SECTION DIVIDER ── */
+  .section-rule {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    padding: 0 60px;
+    margin: 0;
+  }
+
+  .section-rule-line { flex: 1; height: 1px; background: var(--rule); }
+  .section-rule-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.66rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 14px 24px;
+    border-left: 1px solid var(--rule);
+    border-right: 1px solid var(--rule);
+  }
+
+  .section-eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--red);
+    margin-bottom: 20px;
+  }
+
+  .section-title {
+    font-family: 'Inter', sans-serif;
+    font-size: clamp(2.4rem, 4vw, 3.6rem);
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.035em;
+  }
+
+  .section-header {
+    margin-bottom: 56px;
+  }
+
+  /* ── FEATURE GRID ── */
+  .features {
+    padding: 120px 60px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .feature-card {
+    padding: 60px 48px;
+    border-right: 1px solid var(--rule);
+    position: relative;
+    transition: background 0.3s;
+  }
+
+  .feature-card:last-child { border-right: none; }
+  .feature-card:hover { background: var(--cream); }
+
+  .feature-number {
+    font-family: 'Inter', sans-serif;
+    font-size: 6rem;
+    font-weight: 800;
+    color: var(--rule);
+    line-height: 1;
+    margin-bottom: 28px;
+    letter-spacing: -0.04em;
+    transition: color 0.3s;
+  }
+
+  .feature-card:hover .feature-number { color: var(--blue); opacity: 0.25; }
+
+  .feature-title {
+    font-family: 'Inter', sans-serif;
+    font-size: 1.7rem;
+    font-weight: 650;
+    margin-bottom: 18px;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+  }
+
+  .feature-desc {
+    font-size: 1rem;
+    color: var(--muted);
+    line-height: 1.75;
+  }
+
+  .feature-desc code {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.85em;
+    background: var(--cream);
+    padding: 2px 6px;
+  }
+
+  .feature-tag {
+    display: inline-block;
+    margin-top: 28px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--red);
+    border-bottom: 1px solid var(--red);
+    padding-bottom: 2px;
+  }
+
+  /* ── SPECS ── */
+  .specs-section {
+    padding: 120px 60px;
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 100px;
+    border-bottom: 1px solid var(--rule);
+    align-items: start;
+  }
+
+  .specs-label {
+    font-family: 'Inter', sans-serif;
+    font-size: clamp(2.4rem, 4vw, 3.6rem);
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.035em;
+    position: sticky;
+    top: 100px;
+  }
+
+  .specs-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+  }
+
+  .spec-item {
+    padding: 32px 0;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .spec-item:nth-child(odd) { padding-right: 48px; border-right: 1px solid var(--rule); }
+  .spec-item:nth-child(even) { padding-left: 48px; }
+
+  .spec-icon {
+    width: 40px; height: 40px;
+    margin-bottom: 16px;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .spec-icon svg { width: 24px; height: 24px; }
+
+  .spec-name {
+    font-family: 'Instrument Sans', sans-serif;
+    font-weight: 600;
+    font-size: 1rem;
+    margin-bottom: 8px;
+  }
+
+  .spec-detail {
+    font-size: 0.92rem;
+    color: var(--muted);
+    line-height: 1.65;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    padding: 48px 60px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid var(--rule);
+    margin-top: 60px;
+  }
+
+  .footer-logo {
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    font-size: 1.15rem;
+    letter-spacing: -0.03em;
+  }
+
+  .footer-note {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-align: right;
+  }
+
+  /* ── SCROLL REVEAL ── */
+  .reveal {
+    opacity: 0;
+    transform: translateY(32px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 900px) {
+    html { scroll-snap-type: y proximity; }
+    .masthead { padding: 14px 24px; }
+    .hero { grid-template-columns: 1fr; padding: 0 24px; padding-top: 60px; min-height: auto; }
+    .hero-left { padding: 60px 0 40px; border-right: none; border-bottom: 1px solid var(--rule); }
+    .hero-right { padding: 40px 0 60px; }
+    .features { grid-template-columns: 1fr; padding: 60px 24px; }
+    .feature-card { border-right: none; border-bottom: 1px solid var(--rule); padding: 40px 0; }
+    .specs-section, .essay-section { padding: 80px 24px; }
+    .specs-section { grid-template-columns: 1fr; gap: 48px; }
+    .specs-label { position: static; }
+    .specs-grid { grid-template-columns: 1fr; }
+    .spec-item:nth-child(odd) { padding-right: 0; border-right: none; }
+    .spec-item:nth-child(even) { padding-left: 0; }
+    .essay-columns { grid-template-columns: 1fr; gap: 40px; }
+    .statement { padding: 80px 24px; }
+    .snap-section { min-height: auto; }
+    footer { padding: 32px 24px; flex-direction: column; gap: 12px; text-align: center; }
+    .footer-note { text-align: center; }
+    .section-rule { padding: 0 24px; }
+    .benchmark-display { padding: 40px 28px; }
+    .benchmark-number { font-size: 3.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- MASTHEAD -->
+<header class="masthead">
+  <div class="masthead-logo"><a href="../">Redliner<span></span></a></div>
+  <div class="masthead-meta">
+    Metal GPU<br>Text Layout Engine
+  </div>
+</header>
+
+<!-- ─── PAGE 1: HERO ─── -->
+<section class="hero">
+  <div class="hero-left">
+    <p class="kicker">Metal GPU Rendering</p>
+    <h1 class="hero-headline">
+      Text layout<br>
+      at GPU<br>
+      <em>speed.</em>
+    </h1>
+    <p class="hero-subhead">
+      100,000 paragraphs laid out in 0.321 seconds. No TextKit. No NSLayoutManager. Every glyph is a textured quad rendered directly by the GPU on your machine.
+    </p>
+    <div class="hero-cta">
+      <a href="#architecture" class="btn-primary">How It Works</a>
+      <a href="../" class="btn-ghost">Back to Redliner</a>
+    </div>
+  </div>
+
+  <div class="hero-right">
+    <div class="benchmark-display">
+      <p class="benchmark-label">Layout Benchmark</p>
+      <div class="benchmark-number">0.321s</div>
+      <div class="benchmark-unit">100,000 paragraphs</div>
+      <div class="benchmark-divider"></div>
+      <div class="benchmark-stat">
+        <strong>311,526</strong> paragraphs per second<br>
+        <strong>1</strong> draw call per frame<br>
+        <strong>0</strong> main-thread layout passes<br>
+        <strong>0</strong> server dependencies
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── PAGE 2: OPENING STATEMENT ─── -->
+<section class="statement snap-section reveal">
+  <div class="statement-inner">
+    <p class="statement-text">
+      Text layout has been CPU-bound for forty years. <em>It does not have to be.</em>
+    </p>
+    <p class="statement-sub">Metal. Apple Silicon. Your GPU. On-device.</p>
+  </div>
+</section>
+
+<!-- ─── PAGE 3: ARCHITECTURE ESSAY ─── -->
+<section class="essay-section snap-section-auto reveal" id="architecture">
+  <div class="section-header">
+    <p class="section-eyebrow">The Pipeline</p>
+    <h2 class="section-title">How Metal replaces<br>CPU-bound text layout.</h2>
+  </div>
+  <div class="essay-columns">
+    <div>
+      <p class="essay-lead">
+        Traditional text engines measure glyphs on the CPU, one paragraph at a time. NSLayoutManager walks the glyph stream sequentially, computing line breaks, measuring advances, positioning each character. For a ten-page brief, this is fine. For a hundred-thousand-paragraph corpus, it is a wall.
+      </p>
+      <p>
+        Redliner's <code>MetalTextLayout</code> framework eliminates the sequential bottleneck. Instead of asking the CPU to measure and position glyphs, the engine pre-rasterizes the glyph set into a GPU-resident texture atlas. Each character becomes a texture coordinate. Layout becomes arithmetic: advance widths are summed, line breaks are computed, and the entire paragraph set is measured in a single pass.
+      </p>
+    </div>
+    <div>
+      <p>
+        The renderer packs glyph positions into vertex buffers and submits them to the Metal render pipeline. One draw call per frame. The GPU samples each glyph from the atlas texture and composites the final image. No NSTextView. No NSTextStorage for rendering. No TextKit in the hot path.
+      </p>
+      <p>
+        The text buffer itself is backed by a piece table data structure. Edits are splice operations on buffer ranges -- insertions append to an add buffer, deletions split existing pieces. The piece table feeds the layout engine, which feeds vertex buffers, which feed the GPU. The entire pipeline runs without blocking the main thread.
+      </p>
+      <p>
+        The <code>MetalEditorView</code> is an <code>NSView</code> subclass that owns the Metal device, command queue, and render pipeline state. <code>MetalEditorRepresentable</code> bridges it into SwiftUI via <code>NSViewRepresentable</code>, with bidirectional text binding and a coordinator guard against feedback loops. The result is a GPU text editor that drops into any SwiftUI view hierarchy with a single line of code.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ─── PAGE 4: STATEMENT ─── -->
+<section class="statement snap-section reveal">
+  <div class="statement-inner">
+    <p class="statement-text">
+      Every glyph is a textured quad. Layout is <em>arithmetic.</em> One draw call per frame.
+    </p>
+    <p class="statement-sub">No TextKit. No NSLayoutManager. No compromise.</p>
+  </div>
+</section>
+
+<!-- SECTION RULE -->
+<div class="section-rule snap-section-auto">
+  <div class="section-rule-line"></div>
+  <span class="section-rule-label">Capabilities</span>
+  <div class="section-rule-line"></div>
+</div>
+
+<!-- ─── PAGE 5: FEATURE CARDS ─── -->
+<section class="features reveal snap-section-auto">
+  <div class="feature-card">
+    <div class="feature-number">01</div>
+    <h3 class="feature-title">Parallel Paragraph Layout</h3>
+    <p class="feature-desc">
+      Paragraph measurement is not sequential. The layout engine processes the full paragraph set in a single pass, computing line breaks and glyph positions as arithmetic over advance-width tables. 100,000 paragraphs in 0.321 seconds -- over 300,000 paragraphs per second on Apple Silicon.
+    </p>
+    <span class="feature-tag">Batch Layout</span>
+  </div>
+
+  <div class="feature-card">
+    <div class="feature-number">02</div>
+    <h3 class="feature-title">GPU Glyph Atlas</h3>
+    <p class="feature-desc">
+      The glyph set is pre-rasterized into a GPU-resident <code>MTLTexture</code>. Each character maps to a texture coordinate. The renderer packs positions into <code>MTLBuffer</code> vertex buffers and submits one draw call per frame. The GPU samples and composites. No CPU glyph rendering in the hot path.
+    </p>
+    <span class="feature-tag">Metal Texture Atlas</span>
+  </div>
+
+  <div class="feature-card">
+    <div class="feature-number">03</div>
+    <h3 class="feature-title">Zero Main-Thread Blocking</h3>
+    <p class="feature-desc">
+      The text buffer uses a piece table: insertions append to an add buffer, deletions split pieces by <code>BufferRange</code>. Edits feed the layout engine, which feeds vertex buffers, which feed the GPU. The main thread handles events. The GPU handles rendering. They never wait on each other.
+    </p>
+    <span class="feature-tag">Piece Table + Metal</span>
+  </div>
+</section>
+
+<!-- SECTION RULE -->
+<div class="section-rule snap-section-auto">
+  <div class="section-rule-line"></div>
+  <span class="section-rule-label">Technical Specs</span>
+  <div class="section-rule-line"></div>
+</div>
+
+<!-- ─── PAGE 6: SPECS GRID ─── -->
+<section class="specs-section reveal snap-section-auto">
+  <div class="specs-label">
+    Built on<br>
+    <em style="color:var(--blue)">Metal.</em>
+  </div>
+  <div class="specs-grid">
+    <div class="spec-item">
+      <div class="spec-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5"/></svg>
+      </div>
+      <div class="spec-name">MetalTextLayout</div>
+      <div class="spec-detail">Custom Swift package providing the GPU text layout pipeline. Glyph atlas generation, vertex buffer packing, and render pipeline state -- all Metal-native.</div>
+    </div>
+    <div class="spec-item">
+      <div class="spec-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8m-4-4v4"/></svg>
+      </div>
+      <div class="spec-name">MetalEditorView</div>
+      <div class="spec-detail">NSView subclass that owns the MTLDevice, MTLCommandQueue, and MTLRenderPipelineState. Handles keyboard input, cursor positioning, and frame rendering.</div>
+    </div>
+    <div class="spec-item">
+      <div class="spec-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 7h16M4 12h16M4 17h10"/></svg>
+      </div>
+      <div class="spec-name">Piece Table Buffer</div>
+      <div class="spec-detail">Text storage backed by a piece table with BufferRange-based splice operations. Append-only add buffer. O(log n) edits. Feeds the layout engine directly.</div>
+    </div>
+    <div class="spec-item">
+      <div class="spec-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 4v16m8-8H4"/></svg>
+      </div>
+      <div class="spec-name">MetalEditorRepresentable</div>
+      <div class="spec-detail">NSViewRepresentable bridge into SwiftUI. Bidirectional text binding with coordinator guard against feedback loops. One line to embed a GPU editor.</div>
+    </div>
+    <div class="spec-item">
+      <div class="spec-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 3v18m6-18v18M3 9h18M3 15h18"/></svg>
+      </div>
+      <div class="spec-name">Glyph Atlas</div>
+      <div class="spec-detail">Pre-rasterized MTLTexture containing the full glyph set. Each character is a texture coordinate lookup. No Core Text in the render loop.</div>
+    </div>
+    <div class="spec-item">
+      <div class="spec-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+      </div>
+      <div class="spec-name">Apple Silicon</div>
+      <div class="spec-detail">Unified memory architecture means zero copies between CPU and GPU. Vertex buffers and texture atlases share the same physical memory. Built for M-series chips.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── PAGE 7: CLOSING STATEMENT ─── -->
+<section class="statement snap-section reveal" style="min-height: 80vh;">
+  <div class="statement-inner">
+    <p class="statement-text">
+      Your GPU renders the text. Your machine owns the data. <em>No server required.</em>
+    </p>
+    <p class="statement-sub">This is how text should be rendered.</p>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="snap-section-auto">
+  <div class="footer-logo">Redliner<span style="display:inline-block;width:6px;height:6px;background:#c8302a;border-radius:50%;margin-left:2px;vertical-align:middle;position:relative;top:-1px"></span></div>
+  <div style="text-align:center;">
+    <div style="font-family:'DM Mono',monospace;font-size:0.65rem;color:var(--muted);letter-spacing:0.1em;margin-bottom:6px;">Metal GPU Text Layout Engine</div>
+    <div style="font-family:'DM Mono',monospace;font-size:0.65rem;letter-spacing:0.1em;">
+      <a href="../" style="color:var(--muted);text-decoration:none;border-bottom:1px solid var(--rule);">technical</a>
+      <span style="color:var(--rule);margin:0 8px;">·</span>
+      <span style="color:var(--ink);">metal</span>
+      <span style="color:var(--rule);margin:0 8px;">·</span>
+      <a href="https://github.com/advocatesclose" style="color:var(--muted);text-decoration:none;border-bottom:1px solid var(--rule);">github</a>
+    </div>
+  </div>
+  <div class="footer-note">
+    macOS 15+ · Swift 6 · Metal 3 · Apple Silicon
+  </div>
+</footer>
+
+<script>
+  // Scroll reveal
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.1 });
+  reveals.forEach(el => observer.observe(el));
+</script>
+</body>
+</html>

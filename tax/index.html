@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Redliner — Section 174A</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=DM+Mono:wght@300;400;500&family=Instrument+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0d0d0e;
+    --paper: #f5f2eb;
+    --cream: #ede9df;
+    --red: #c8302a;
+    --blue: #1e4f9c;
+    --gold: #b8902a;
+    --muted: #7a7570;
+    --rule: #d4cfc4;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html {
+    scroll-behavior: smooth;
+    scroll-snap-type: y mandatory;
+  }
+
+  body {
+    background-color: var(--paper);
+    color: var(--ink);
+    font-family: 'Instrument Sans', sans-serif;
+    font-size: 18px;
+    line-height: 1.65;
+    overflow-x: hidden;
+  }
+
+  /* ── NOISE TEXTURE OVERLAY ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 999;
+    opacity: 0.5;
+  }
+
+  /* ── SCROLL SNAP ── */
+  .snap-section {
+    scroll-snap-align: start;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .snap-section-auto {
+    scroll-snap-align: start;
+  }
+
+  /* ── MASTHEAD ── */
+  .masthead {
+    border-bottom: 2px solid var(--ink);
+    padding: 18px 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: var(--paper);
+    z-index: 100;
+    animation: slideDown 0.6s ease both;
+  }
+
+  @keyframes slideDown {
+    from { transform: translateY(-100%); opacity: 0; }
+    to   { transform: translateY(0);     opacity: 1; }
+  }
+
+  .masthead-logo {
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    font-size: 1.4rem;
+    letter-spacing: -0.03em;
+  }
+
+  .masthead-logo a {
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .masthead-logo span {
+    display: inline-block;
+    width: 8px; height: 8px;
+    background: var(--red);
+    border-radius: 50%;
+    margin-left: 3px;
+    vertical-align: middle;
+    position: relative;
+    top: -2px;
+  }
+
+  .masthead-meta {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    text-align: right;
+  }
+
+  /* ── HERO ── */
+  .hero-174 {
+    padding: 0 60px;
+    padding-top: 60px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    border-bottom: 1px solid var(--rule);
+    text-align: center;
+    scroll-snap-align: start;
+    animation: fadeUp 0.9s 0.2s ease both;
+  }
+
+  @keyframes fadeUp {
+    from { transform: translateY(40px); opacity: 0; }
+    to   { transform: translateY(0);    opacity: 1; }
+  }
+
+  .hero-174 .kicker {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.78rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--red);
+    margin-bottom: 40px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    justify-content: center;
+  }
+
+  .hero-174 .kicker::before {
+    content: '';
+    display: block;
+    width: 40px;
+    height: 1px;
+    background: var(--red);
+  }
+
+  .hero-174 .kicker::after {
+    content: '';
+    display: block;
+    width: 40px;
+    height: 1px;
+    background: var(--red);
+  }
+
+  .hero-174 .hero-headline {
+    font-family: 'Inter', sans-serif;
+    font-size: clamp(2.2rem, 4.5vw, 4.2rem);
+    font-weight: 800;
+    line-height: 1.15;
+    letter-spacing: -0.04em;
+    max-width: 900px;
+    margin-bottom: 40px;
+  }
+
+  .hero-174 .hero-headline em {
+    font-style: italic;
+    font-weight: 400;
+    color: var(--blue);
+  }
+
+  .hero-174 .hero-cite {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.78rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  /* ── STATEMENT SECTION ── */
+  .statement {
+    padding: 0 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .statement-inner {
+    max-width: 900px;
+    padding: 0 40px;
+  }
+
+  .statement-text {
+    font-family: 'Inter', sans-serif;
+    font-size: clamp(2.2rem, 4vw, 3.8rem);
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -0.035em;
+  }
+
+  .statement-text em {
+    font-style: normal;
+    font-weight: 400;
+    color: var(--blue);
+  }
+
+  .statement-sub {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.78rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-top: 40px;
+  }
+
+  /* ── SECTION HELPERS ── */
+  .section-rule {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    padding: 0 60px;
+    margin: 0;
+  }
+
+  .section-rule-line { flex: 1; height: 1px; background: var(--rule); }
+  .section-rule-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.66rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 14px 24px;
+    border-left: 1px solid var(--rule);
+    border-right: 1px solid var(--rule);
+  }
+
+  .section-eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--red);
+    margin-bottom: 20px;
+  }
+
+  .section-title {
+    font-family: 'Inter', sans-serif;
+    font-size: clamp(2.4rem, 4vw, 3.6rem);
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.035em;
+  }
+
+  .section-header {
+    margin-bottom: 56px;
+  }
+
+  /* ── ESSAY SECTION ── */
+  .essay-section {
+    padding: 120px 60px;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .essay-section .section-header {
+    margin-bottom: 80px;
+  }
+
+  .essay-columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    max-width: 1100px;
+  }
+
+  .essay-columns p {
+    font-size: 1.1rem;
+    color: var(--muted);
+    line-height: 1.85;
+    margin-bottom: 1.6em;
+  }
+
+  .essay-columns p:last-child {
+    margin-bottom: 0;
+  }
+
+  .essay-lead {
+    font-size: 1.3rem !important;
+    color: var(--ink) !important;
+    font-weight: 500;
+  }
+
+  /* ── FEATURE GRID ── */
+  .features {
+    padding: 120px 60px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .feature-card {
+    padding: 60px 40px;
+    border-right: 1px solid var(--rule);
+    position: relative;
+    transition: background 0.3s;
+  }
+
+  .feature-card:last-child { border-right: none; }
+  .feature-card:hover { background: var(--cream); }
+
+  .feature-number {
+    font-family: 'Inter', sans-serif;
+    font-size: 6rem;
+    font-weight: 800;
+    color: var(--rule);
+    line-height: 1;
+    margin-bottom: 28px;
+    letter-spacing: -0.04em;
+    transition: color 0.3s;
+  }
+
+  .feature-card:hover .feature-number { color: var(--blue); opacity: 0.25; }
+
+  .feature-title {
+    font-family: 'Inter', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 650;
+    margin-bottom: 18px;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+  }
+
+  .feature-desc {
+    font-size: 0.95rem;
+    color: var(--muted);
+    line-height: 1.75;
+  }
+
+  .feature-desc code {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.85em;
+    background: var(--cream);
+    padding: 2px 6px;
+  }
+
+  .feature-tag {
+    display: inline-block;
+    margin-top: 28px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--red);
+    border-bottom: 1px solid var(--red);
+    padding-bottom: 2px;
+  }
+
+  /* ── SECURITY CALLOUT ── */
+  .security-section {
+    margin: 0 60px;
+    border: 1px solid var(--ink);
+    padding: 72px 80px;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 56px;
+    align-items: center;
+    background: var(--ink);
+    color: var(--paper);
+    margin-bottom: 0;
+  }
+
+  .security-icon-wrap {
+    width: 96px; height: 96px;
+    border: 1px solid rgba(245,242,235,0.2);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .security-icon-wrap svg { width: 40px; height: 40px; stroke: var(--gold); fill: none; }
+
+  .security-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 16px;
+  }
+
+  .security-title {
+    font-family: 'Inter', sans-serif;
+    font-size: 2.2rem;
+    font-weight: 650;
+    margin-bottom: 18px;
+    line-height: 1.2;
+    letter-spacing: -0.025em;
+  }
+
+  .security-desc {
+    font-size: 1rem;
+    color: rgba(245,242,235,0.65);
+    line-height: 1.75;
+    max-width: 680px;
+  }
+
+  .security-badges {
+    display: flex;
+    gap: 14px;
+    margin-top: 32px;
+    flex-wrap: wrap;
+  }
+
+  .security-badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.66rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 9px 16px;
+    border: 1px solid rgba(245,242,235,0.2);
+    color: rgba(245,242,235,0.6);
+  }
+
+  /* ── DISCLAIMER ── */
+  .disclaimer-section {
+    padding: 80px 60px;
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+    text-align: center;
+  }
+
+  .disclaimer-text {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.82rem;
+    color: var(--muted);
+    line-height: 1.85;
+    max-width: 700px;
+    margin: 0 auto;
+    letter-spacing: 0.02em;
+  }
+
+  .disclaimer-text strong {
+    color: var(--ink);
+    font-weight: 500;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    padding: 48px 60px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid var(--rule);
+    margin-top: 60px;
+  }
+
+  .footer-logo {
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    font-size: 1.15rem;
+    letter-spacing: -0.03em;
+  }
+
+  .footer-logo a {
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .footer-note {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-align: right;
+  }
+
+  /* ── SCROLL REVEAL ── */
+  .reveal {
+    opacity: 0;
+    transform: translateY(32px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 900px) {
+    html { scroll-snap-type: y proximity; }
+    .masthead { padding: 14px 24px; }
+    .hero-174 { padding: 80px 24px; padding-top: 100px; min-height: auto; }
+    .hero-174 .hero-headline { font-size: clamp(1.8rem, 5vw, 2.8rem); }
+    .features { grid-template-columns: 1fr; padding: 60px 24px; }
+    .feature-card { border-right: none; border-bottom: 1px solid var(--rule); padding: 40px 0; }
+    .essay-section { padding: 80px 24px; }
+    .essay-columns { grid-template-columns: 1fr; gap: 40px; }
+    .statement { padding: 80px 24px; }
+    .snap-section { min-height: auto; }
+    .security-section { margin: 0 24px; padding: 48px 32px; grid-template-columns: 1fr; gap: 28px; }
+    .disclaimer-section { padding: 60px 24px; }
+    footer { padding: 32px 24px; flex-direction: column; gap: 12px; text-align: center; }
+    .footer-note { text-align: center; }
+    .section-rule { padding: 0 24px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- MASTHEAD -->
+<header class="masthead">
+  <div class="masthead-logo"><a href="../">Redliner<span></span></a></div>
+  <div class="masthead-meta">
+    Section 174A<br>Documentation Engineering
+  </div>
+</header>
+
+<!-- ─── HERO ─── -->
+<section class="hero-174">
+  <p class="kicker">Documentation Engineering</p>
+  <h1 class="hero-headline">
+    A new tax deduction created<br>an <em>engineering problem.</em>
+  </h1>
+  <p class="hero-cite">IRC Section 174A &middot; One Big Beautiful Bill Act, July 2025</p>
+</section>
+
+<!-- ─── WHAT 174A IS ─── -->
+<section class="essay-section snap-section-auto reveal" id="what-174a-is">
+  <div class="section-header">
+    <p class="section-eyebrow">The Law</p>
+    <h2 class="section-title">What Section 174A is.</h2>
+  </div>
+  <div class="essay-columns">
+    <div>
+      <p class="essay-lead">
+        In July 2025, Congress enacted Section 174A of the Internal Revenue Code as part of the One Big Beautiful Bill Act. The statute provides a deduction for domestic software research and development expenditure.
+      </p>
+      <p>
+        The language is broad: "any amounts paid or incurred in connection with the development of software." Not reasonable amounts. Not amounts approved by a CPA. Any amounts. The deduction applies to domestic R&amp;D — software developed in the United States.
+      </p>
+    </div>
+    <div>
+      <p>
+        Congress writes tax law to incentivize specific economic activity. Section 174A is designed to encourage software development by making the cost of that development deductible. The deduction is available to anyone who develops software domestically — sole developers, small teams, large organizations.
+      </p>
+      <p>
+        The statute is new. There is limited case law, limited regulatory guidance, and limited infrastructure for claiming the deduction. The law exists. The machinery for proving compliance is still being built.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ─── THE PROBLEM ─── -->
+<section class="statement snap-section reveal">
+  <div class="statement-inner">
+    <p class="statement-text">
+      The deduction is straightforward.<br>The <em>documentation</em> is not.
+    </p>
+    <p class="statement-sub">174A created an engineering problem</p>
+  </div>
+</section>
+
+<!-- SECTION RULE -->
+<div class="section-rule snap-section-auto">
+  <div class="section-rule-line"></div>
+  <span class="section-rule-label">The Engineering Problem</span>
+  <div class="section-rule-line"></div>
+</div>
+
+<!-- ─── DOCUMENTATION AS ENGINEERING ─── -->
+<section class="essay-section snap-section-auto reveal" id="documentation">
+  <div class="section-header">
+    <p class="section-eyebrow">The Challenge</p>
+    <h2 class="section-title">Proving what you built,<br>when you built it, and why.</h2>
+  </div>
+  <div class="essay-columns">
+    <div>
+      <p class="essay-lead">
+        To claim a deduction under 174A, you need contemporaneous records — documentation created at the time of the work, not reconstructed at tax time. What was developed, when, by whom, and for how long. That is not a legal problem. It is an engineering problem.
+      </p>
+      <p>
+        The requirements map directly to infrastructure: timestamped records, encrypted storage, version history, structured logs. These are the same primitives that underlie any serious document system. The question is whether they exist in a form that is organized, verifiable, and exportable.
+      </p>
+    </div>
+    <div>
+      <p>
+        For most developers, they do not. Chat logs are scattered. Git commits are unstructured for documentation purposes. Development decisions live in memory, not in records. Hours are untracked. By the time tax season arrives, the evidence either does not exist or cannot be assembled into anything useful.
+      </p>
+      <p>
+        This is the same class of problem that appears across regulatory and legal text: the tax code itself is a semi-structured dataset — 106,109 pages published in the Federal Register in 2024 alone. Regulatory text is non-stationary, shifting across administrations. It is not a blob, not a database. Navigating it at scale requires computational methods. So does generating the documentation it demands.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ─── TRANSITION STATEMENT ─── -->
+<section class="statement snap-section reveal">
+  <div class="statement-inner">
+    <p class="statement-text">
+      The record has to exist <em>from the beginning.</em><br>Not after the fact.
+    </p>
+    <p class="statement-sub">Contemporaneous documentation, by design.</p>
+  </div>
+</section>
+
+<!-- SECTION RULE -->
+<div class="section-rule snap-section-auto">
+  <div class="section-rule-line"></div>
+  <span class="section-rule-label">Documentation Infrastructure</span>
+  <div class="section-rule-line"></div>
+</div>
+
+<!-- ─── FEATURE CARDS ─── -->
+<section class="features reveal snap-section-auto" id="features">
+  <div class="feature-card">
+    <div class="feature-number">01</div>
+    <h3 class="feature-title">Timestamped Transcripts</h3>
+    <p class="feature-desc">
+      Every development session is recorded in <code>.claude/Transcripts/</code> with full timestamps. Who said what, when, and why. Design decisions, technical direction, rejected approaches — all captured as they happen. Not reconstructed. Contemporaneous.
+    </p>
+    <span class="feature-tag">Decision Log</span>
+  </div>
+
+  <div class="feature-card">
+    <div class="feature-number">02</div>
+    <h3 class="feature-title">Encrypted Records</h3>
+    <p class="feature-desc">
+      Development records are stored as structured <code>TimeEntry</code> objects — each with a timestamp, duration, author, source file reference, and raw metadata. Records are sealed in an encrypted container. AES-GCM encryption on every <code>EditTransaction</code> before it touches disk.
+    </p>
+    <span class="feature-tag">AtlasRecordView</span>
+  </div>
+
+  <div class="feature-card">
+    <div class="feature-number">03</div>
+    <h3 class="feature-title">Version Snapshots</h3>
+    <p class="feature-desc">
+      Every keystroke produces a timestamped <code>EditTransaction</code> — a structured record of what changed, when, and in what context. Git integration provides version history. Auto-save commits create an unbroken chain of snapshots that document the entire development timeline.
+    </p>
+    <span class="feature-tag">EditTransaction</span>
+  </div>
+
+  <div class="feature-card">
+    <div class="feature-number">04</div>
+    <h3 class="feature-title">Time Tracking</h3>
+    <p class="feature-desc">
+      The <code>TimeEntryView</code> extracts and organizes metadata from every artifact in your development record — file creation dates, modification timestamps, device identifiers, GPS data. Duration is calculated from log spans. Each entry maps to structured fields for qualified research expenditure.
+    </p>
+    <span class="feature-tag">TimeEntryView</span>
+  </div>
+</section>
+
+<!-- ─── ARCHITECTURE CALLOUT ─── -->
+<div class="security-section reveal snap-section-auto">
+  <div class="security-icon-wrap">
+    <svg viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.955 11.955 0 003 10c0 5.592 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.249-8.25-3.286z"/></svg>
+  </div>
+  <div class="security-content">
+    <p class="security-label">Privacy by Architecture</p>
+    <h3 class="security-title">Your records stay on your machine.</h3>
+    <p class="security-desc">
+      Redliner processes everything on-device. No server. No API calls. No data leaves your machine. Edit transactions are encrypted with AES-GCM before they touch disk. The application runs in Apple's sandbox with process-level isolation via XPC services. The Secure Enclave provides hardware-backed key storage. Your development records — transcripts, timesheets, logs, version history — live in your repository, under your control.
+    </p>
+    <div class="security-badges">
+      <span class="security-badge">AES-GCM Encryption</span>
+      <span class="security-badge">On-Device Only</span>
+      <span class="security-badge">App Sandbox</span>
+      <span class="security-badge">Secure Enclave</span>
+      <span class="security-badge">No Server</span>
+      <span class="security-badge">Zero Telemetry</span>
+    </div>
+  </div>
+</div>
+
+<!-- ─── DISCLAIMER ─── -->
+<section class="disclaimer-section reveal snap-section-auto">
+  <p class="disclaimer-text">
+    <strong>This page is not tax advice.</strong> It describes a provision of the Internal Revenue Code and explains how Redliner's documentation infrastructure addresses the engineering challenge of contemporaneous record-keeping for software development. It is not a substitute for professional tax guidance. Consult a qualified tax professional before claiming any deduction.
+  </p>
+</section>
+
+<!-- ─── FOOTER ─── -->
+<footer>
+  <div class="footer-logo"><a href="../">Redliner<span style="display:inline-block;width:7px;height:7px;background:#c8302a;border-radius:50%;margin-left:3px;vertical-align:middle;position:relative;top:-2px;"></span></a></div>
+  <div class="footer-note">
+    Advocates Close Corp. &middot; New York<br>
+    claude@advocatesclose.nyc
+  </div>
+</footer>
+
+<!-- SCROLL REVEAL -->
+<script>
+(function(){
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.15 });
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+})();
+</script>
+
+</body>
+</html>

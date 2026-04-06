@@ -1,0 +1,1090 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Redliner — XPC Services Architecture</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=DM+Mono:wght@300;400;500&family=Instrument+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0d0d0e;
+    --paper: #f5f2eb;
+    --cream: #ede9df;
+    --red: #c8302a;
+    --blue: #1e4f9c;
+    --gold: #b8902a;
+    --muted: #7a7570;
+    --rule: #d4cfc4;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html {
+    scroll-behavior: smooth;
+    scroll-snap-type: y mandatory;
+  }
+
+  body {
+    background-color: var(--paper);
+    color: var(--ink);
+    font-family: 'Instrument Sans', sans-serif;
+    font-size: 18px;
+    line-height: 1.65;
+    overflow-x: hidden;
+  }
+
+  /* ── NOISE TEXTURE OVERLAY ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 999;
+    opacity: 0.5;
+  }
+
+  /* ── SCROLL SNAP ── */
+  .snap-section {
+    scroll-snap-align: start;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .snap-section-auto {
+    scroll-snap-align: start;
+  }
+
+  /* ── MASTHEAD ── */
+  .masthead {
+    border-bottom: 2px solid var(--ink);
+    padding: 18px 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: var(--paper);
+    z-index: 100;
+    animation: slideDown 0.6s ease both;
+  }
+
+  @keyframes slideDown {
+    from { transform: translateY(-100%); opacity: 0; }
+    to   { transform: translateY(0);     opacity: 1; }
+  }
+
+  .masthead-logo {
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    font-size: 1.4rem;
+    letter-spacing: -0.03em;
+  }
+
+  .masthead-logo a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .masthead-logo span {
+    display: inline-block;
+    width: 8px; height: 8px;
+    background: var(--red);
+    border-radius: 50%;
+    margin-left: 3px;
+    vertical-align: middle;
+    position: relative;
+    top: -2px;
+  }
+
+  .masthead-meta {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    text-align: right;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    padding: 0 60px;
+    padding-top: 60px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    border-bottom: 1px solid var(--rule);
+    overflow: hidden;
+    scroll-snap-align: start;
+    text-align: center;
+  }
+
+  .hero-inner {
+    max-width: 900px;
+    padding: 120px 40px;
+    animation: fadeUp 0.9s 0.2s ease both;
+  }
+
+  @keyframes fadeUp {
+    from { transform: translateY(40px); opacity: 0; }
+    to   { transform: translateY(0);    opacity: 1; }
+  }
+
+  .kicker {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.78rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--red);
+    margin-bottom: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  .kicker::before {
+    content: '';
+    display: block;
+    width: 40px;
+    height: 1px;
+    background: var(--red);
+  }
+
+  .kicker::after {
+    content: '';
+    display: block;
+    width: 40px;
+    height: 1px;
+    background: var(--red);
+  }
+
+  .hero-headline {
+    font-family: 'Inter', sans-serif;
+    font-size: clamp(3rem, 5.5vw, 6rem);
+    font-weight: 800;
+    line-height: 0.95;
+    letter-spacing: -0.045em;
+    margin-bottom: 48px;
+  }
+
+  .hero-headline em {
+    font-style: normal;
+    font-weight: 400;
+    color: var(--blue);
+  }
+
+  .hero-subhead {
+    font-size: 1.2rem;
+    color: var(--muted);
+    max-width: 640px;
+    line-height: 1.75;
+    margin: 0 auto 56px;
+  }
+
+  /* ── STATEMENT SECTION ── */
+  .statement {
+    padding: 0 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .statement-inner {
+    max-width: 900px;
+    padding: 0 40px;
+  }
+
+  .statement-text {
+    font-family: 'Inter', sans-serif;
+    font-size: clamp(2.2rem, 4vw, 3.8rem);
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -0.035em;
+  }
+
+  .statement-text em {
+    font-style: normal;
+    font-weight: 400;
+    color: var(--blue);
+  }
+
+  .statement-sub {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.78rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-top: 40px;
+  }
+
+  /* ── SECTION DIVIDER ── */
+  .section-rule {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    padding: 0 60px;
+    margin: 0;
+  }
+
+  .section-rule-line { flex: 1; height: 1px; background: var(--rule); }
+  .section-rule-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.66rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 14px 24px;
+    border-left: 1px solid var(--rule);
+    border-right: 1px solid var(--rule);
+  }
+
+  .section-eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--red);
+    margin-bottom: 20px;
+  }
+
+  .section-title {
+    font-family: 'Inter', sans-serif;
+    font-size: clamp(2.4rem, 4vw, 3.6rem);
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.035em;
+  }
+
+  .section-header {
+    margin-bottom: 56px;
+  }
+
+  /* ── ARCHITECTURE DIAGRAM ── */
+  .diagram-section {
+    padding: 120px 60px;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .diagram-wrap {
+    max-width: 960px;
+    margin: 0 auto;
+  }
+
+  .diagram {
+    display: grid;
+    grid-template-columns: 1fr 80px 1fr;
+    grid-template-rows: auto auto auto;
+    gap: 24px 0;
+    align-items: center;
+  }
+
+  .diagram-app {
+    grid-column: 1 / 2;
+    grid-row: 1 / 4;
+    background: var(--ink);
+    color: var(--paper);
+    padding: 48px 40px;
+    position: relative;
+    min-height: 420px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .diagram-app-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 16px;
+  }
+
+  .diagram-app-title {
+    font-family: 'Inter', sans-serif;
+    font-size: 1.8rem;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    margin-bottom: 20px;
+  }
+
+  .diagram-app-clients {
+    list-style: none;
+    padding: 0;
+  }
+
+  .diagram-app-clients li {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.78rem;
+    color: rgba(245,242,235,0.55);
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(245,242,235,0.1);
+  }
+
+  .diagram-app-clients li:last-child {
+    border-bottom: none;
+  }
+
+  .diagram-app-clients code {
+    color: var(--paper);
+    font-family: 'DM Mono', monospace;
+  }
+
+  .diagram-arrow {
+    grid-column: 2 / 3;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+  }
+
+  .diagram-arrow-line {
+    width: 100%;
+    height: 1px;
+    background: var(--rule);
+    position: relative;
+  }
+
+  .diagram-arrow-line::after {
+    content: '';
+    position: absolute;
+    right: -1px;
+    top: -4px;
+    width: 0;
+    height: 0;
+    border-left: 6px solid var(--rule);
+    border-top: 4px solid transparent;
+    border-bottom: 4px solid transparent;
+  }
+
+  .diagram-arrow-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.58rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .diagram-service {
+    grid-column: 3 / 4;
+    border: 1px solid var(--rule);
+    padding: 28px 32px;
+    transition: background 0.3s, border-color 0.3s;
+    position: relative;
+  }
+
+  .diagram-service:hover {
+    background: var(--cream);
+    border-color: var(--blue);
+  }
+
+  .diagram-service-name {
+    font-family: 'Inter', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 650;
+    margin-bottom: 6px;
+    letter-spacing: -0.01em;
+  }
+
+  .diagram-service-bundle {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+    margin-bottom: 10px;
+  }
+
+  .diagram-service-desc {
+    font-size: 0.88rem;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  .diagram-service-pid {
+    position: absolute;
+    top: 12px;
+    right: 16px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.58rem;
+    color: var(--blue);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border: 1px solid rgba(30,79,156,0.2);
+    padding: 2px 8px;
+  }
+
+  /* ── FEATURE GRID ── */
+  .features {
+    padding: 120px 60px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .feature-card {
+    padding: 60px 48px;
+    border-right: 1px solid var(--rule);
+    position: relative;
+    transition: background 0.3s;
+  }
+
+  .feature-card:last-child { border-right: none; }
+  .feature-card:hover { background: var(--cream); }
+
+  .feature-number {
+    font-family: 'Inter', sans-serif;
+    font-size: 6rem;
+    font-weight: 800;
+    color: var(--rule);
+    line-height: 1;
+    margin-bottom: 28px;
+    letter-spacing: -0.04em;
+    transition: color 0.3s;
+  }
+
+  .feature-card:hover .feature-number { color: var(--blue); opacity: 0.25; }
+
+  .feature-title {
+    font-family: 'Inter', sans-serif;
+    font-size: 1.7rem;
+    font-weight: 650;
+    margin-bottom: 18px;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+  }
+
+  .feature-desc {
+    font-size: 1rem;
+    color: var(--muted);
+    line-height: 1.75;
+  }
+
+  .feature-desc code {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.85em;
+    background: var(--cream);
+    padding: 2px 6px;
+  }
+
+  .feature-card:hover .feature-desc code {
+    background: var(--paper);
+  }
+
+  .feature-tag {
+    display: inline-block;
+    margin-top: 28px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--red);
+    border-bottom: 1px solid var(--red);
+    padding-bottom: 2px;
+  }
+
+  .feature-method {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--ink);
+    background: var(--cream);
+    padding: 12px 16px;
+    margin-top: 20px;
+    line-height: 1.7;
+    border-left: 3px solid var(--blue);
+    word-break: break-all;
+  }
+
+  .feature-card:hover .feature-method {
+    background: var(--paper);
+  }
+
+  /* ── ESSAY SECTION ── */
+  .essay-section {
+    padding: 120px 60px;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .essay-section .section-header {
+    margin-bottom: 80px;
+  }
+
+  .essay-columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    max-width: 1100px;
+  }
+
+  .essay-columns p {
+    font-size: 1.1rem;
+    color: var(--muted);
+    line-height: 1.85;
+    margin-bottom: 1.6em;
+  }
+
+  .essay-columns p:last-child {
+    margin-bottom: 0;
+  }
+
+  .essay-lead {
+    font-size: 1.3rem !important;
+    color: var(--ink) !important;
+    font-weight: 500;
+  }
+
+  .essay-columns code {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.88em;
+    background: var(--cream);
+    padding: 1px 5px;
+  }
+
+  /* ── SPECS ── */
+  .specs-section {
+    padding: 120px 60px;
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 100px;
+    border-bottom: 1px solid var(--rule);
+    align-items: start;
+  }
+
+  .specs-label {
+    font-family: 'Inter', sans-serif;
+    font-size: clamp(2.4rem, 4vw, 3.6rem);
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.035em;
+    position: sticky;
+    top: 100px;
+  }
+
+  .specs-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+  }
+
+  .spec-item {
+    padding: 32px 0;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .spec-item:nth-child(odd) { padding-right: 48px; border-right: 1px solid var(--rule); }
+  .spec-item:nth-child(even) { padding-left: 48px; }
+
+  .spec-icon {
+    width: 40px; height: 40px;
+    margin-bottom: 16px;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .spec-icon svg { width: 24px; height: 24px; }
+
+  .spec-name {
+    font-family: 'Instrument Sans', sans-serif;
+    font-weight: 600;
+    font-size: 1rem;
+    margin-bottom: 8px;
+  }
+
+  .spec-detail {
+    font-size: 0.92rem;
+    color: var(--muted);
+    line-height: 1.65;
+  }
+
+  .spec-detail code {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.88em;
+    background: var(--cream);
+    padding: 1px 5px;
+  }
+
+  /* ── SECURITY CALLOUT ── */
+  .security-section {
+    margin: 0 60px;
+    border: 1px solid var(--ink);
+    padding: 72px 80px;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 56px;
+    align-items: center;
+    background: var(--ink);
+    color: var(--paper);
+    margin-bottom: 0;
+  }
+
+  .security-icon-wrap {
+    width: 96px; height: 96px;
+    border: 1px solid rgba(245,242,235,0.2);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .security-icon-wrap svg { width: 40px; height: 40px; stroke: var(--gold); fill: none; }
+
+  .security-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 16px;
+  }
+
+  .security-title {
+    font-family: 'Inter', sans-serif;
+    font-size: 2.2rem;
+    font-weight: 650;
+    margin-bottom: 18px;
+    line-height: 1.2;
+    letter-spacing: -0.025em;
+  }
+
+  .security-desc {
+    font-size: 1rem;
+    color: rgba(245,242,235,0.65);
+    line-height: 1.75;
+    max-width: 680px;
+  }
+
+  .security-badges {
+    display: flex;
+    gap: 14px;
+    margin-top: 32px;
+    flex-wrap: wrap;
+  }
+
+  .security-badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.66rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 9px 16px;
+    border: 1px solid rgba(245,242,235,0.2);
+    color: rgba(245,242,235,0.6);
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    padding: 48px 60px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid var(--rule);
+    margin-top: 60px;
+  }
+
+  .footer-logo {
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    font-size: 1.15rem;
+    letter-spacing: -0.03em;
+  }
+
+  .footer-logo a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .footer-note {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-align: right;
+  }
+
+  /* ── SCROLL REVEAL ── */
+  .reveal {
+    opacity: 0;
+    transform: translateY(32px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 900px) {
+    html { scroll-snap-type: y proximity; }
+    .masthead { padding: 14px 24px; }
+    .hero { padding: 0 24px; padding-top: 60px; min-height: auto; }
+    .hero-inner { padding: 60px 0; }
+    .features { grid-template-columns: 1fr; padding: 60px 24px; }
+    .feature-card { border-right: none; border-bottom: 1px solid var(--rule); padding: 40px 0; }
+    .specs-section, .essay-section { padding: 80px 24px; }
+    .specs-section { grid-template-columns: 1fr; gap: 48px; }
+    .specs-label { position: static; }
+    .specs-grid { grid-template-columns: 1fr; }
+    .spec-item:nth-child(odd) { padding-right: 0; border-right: none; }
+    .spec-item:nth-child(even) { padding-left: 0; }
+    .security-section { margin: 0 24px; padding: 48px 32px; grid-template-columns: 1fr; gap: 28px; }
+    .essay-columns { grid-template-columns: 1fr; gap: 40px; }
+    .statement { padding: 80px 24px; }
+    .snap-section { min-height: auto; }
+    footer { padding: 32px 24px; flex-direction: column; gap: 12px; text-align: center; }
+    .footer-note { text-align: center; }
+    .section-rule { padding: 0 24px; }
+    .diagram-section { padding: 80px 24px; }
+    .diagram { grid-template-columns: 1fr; grid-template-rows: auto; gap: 0; }
+    .diagram-app { grid-column: 1; grid-row: 1; min-height: auto; }
+    .diagram-arrow { grid-column: 1; flex-direction: row; padding: 16px 0; }
+    .diagram-arrow-line { width: 1px; height: 40px; }
+    .diagram-arrow-line::after { display: none; }
+    .diagram-service { grid-column: 1; }
+  }
+</style>
+</head>
+<body>
+
+<!-- MASTHEAD -->
+<header class="masthead">
+  <div class="masthead-logo"><a href="../">Redliner<span></span></a></div>
+  <div class="masthead-meta">
+    XPC Services<br>Architecture
+  </div>
+</header>
+
+<!-- ─── HERO ─── -->
+<section class="hero">
+  <div class="hero-inner">
+    <p class="kicker">Process Isolation</p>
+    <h1 class="hero-headline">
+      Three services.<br>
+      Three processes.<br>
+      <em>Zero shared memory.</em>
+    </h1>
+    <p class="hero-subhead">
+      Every heavyweight operation in Redliner runs outside the main application process. Each XPC service lives in its own sandbox, with its own address space, its own lifecycle, and its own failure domain. A crash in the conversion engine cannot reach your document. That is not a feature. It is the architecture.
+    </p>
+  </div>
+</section>
+
+<!-- ─── ARCHITECTURE STATEMENT ─── -->
+<section class="statement snap-section reveal">
+  <div class="statement-inner">
+    <p class="statement-text">
+      No document content crosses the process boundary. The only thing on the wire is <em>a file path.</em>
+    </p>
+    <p class="statement-sub">Pointers, not payloads. By design.</p>
+  </div>
+</section>
+
+<!-- SECTION RULE -->
+<div class="section-rule snap-section-auto">
+  <div class="section-rule-line"></div>
+  <span class="section-rule-label">Process Map</span>
+  <div class="section-rule-line"></div>
+</div>
+
+<!-- ─── ARCHITECTURE DIAGRAM ─── -->
+<section class="diagram-section snap-section-auto reveal">
+  <div class="section-header">
+    <p class="section-eyebrow">Architecture</p>
+    <h2 class="section-title">Multi-process topology</h2>
+  </div>
+  <div class="diagram-wrap">
+    <div class="diagram">
+
+      <!-- Main App Process -->
+      <div class="diagram-app">
+        <p class="diagram-app-label">Main Process</p>
+        <h3 class="diagram-app-title">Redliner.app</h3>
+        <ul class="diagram-app-clients">
+          <li><code>PandocClient</code> &mdash; conversion proxy</li>
+          <li><code>RedlineClient</code> &mdash; diff proxy</li>
+          <li><code>NSXPCConnection</code> &mdash; one per call</li>
+          <li><code>withCheckedThrowingContinuation</code></li>
+        </ul>
+      </div>
+
+      <!-- Arrow 1 -->
+      <div class="diagram-arrow" style="grid-row:1">
+        <div class="diagram-arrow-line"></div>
+        <span class="diagram-arrow-label">file path</span>
+      </div>
+
+      <!-- DownloadService -->
+      <div class="diagram-service" style="grid-row:1">
+        <span class="diagram-service-pid">PID 2</span>
+        <h4 class="diagram-service-name">DownloadService</h4>
+        <p class="diagram-service-bundle">com.advocatesclose.markup.DownloadService</p>
+        <p class="diagram-service-desc">SEC EDGAR fetching. Downloads filings to a destination directory and returns the local path. SEC-compliant User-Agent header. 5-minute idle shutdown.</p>
+      </div>
+
+      <!-- Arrow 2 -->
+      <div class="diagram-arrow" style="grid-row:2">
+        <div class="diagram-arrow-line"></div>
+        <span class="diagram-arrow-label">file path</span>
+      </div>
+
+      <!-- PandocService -->
+      <div class="diagram-service" style="grid-row:2">
+        <span class="diagram-service-pid">PID 3</span>
+        <h4 class="diagram-service-name">PandocService</h4>
+        <p class="diagram-service-bundle">com.advocatesclose.markup.PandocService</p>
+        <p class="diagram-service-desc">Format conversion via Pandoc. Reads from an input path, writes to an output path with the new extension. Supports HTML, DOCX, PDF, LaTeX. 5-minute idle shutdown.</p>
+      </div>
+
+      <!-- Arrow 3 -->
+      <div class="diagram-arrow" style="grid-row:3">
+        <div class="diagram-arrow-line"></div>
+        <span class="diagram-arrow-label">file path</span>
+      </div>
+
+      <!-- RedlineService -->
+      <div class="diagram-service" style="grid-row:3">
+        <span class="diagram-service-pid">PID 4</span>
+        <h4 class="diagram-service-name">RedlineService</h4>
+        <p class="diagram-service-bundle">com.advocatesclose.markup.RedlineService</p>
+        <p class="diagram-service-desc">Word-level diff engine. Reads base and modified documents via NSFileCoordinator, writes redline HTML to the output path. Batch-parallel via task groups.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- SECTION RULE -->
+<div class="section-rule snap-section-auto">
+  <div class="section-rule-line"></div>
+  <span class="section-rule-label">Services</span>
+  <div class="section-rule-line"></div>
+</div>
+
+<!-- ─── FEATURE CARDS ─── -->
+<section class="features reveal snap-section-auto">
+
+  <div class="feature-card">
+    <div class="feature-number">01</div>
+    <h3 class="feature-title">DownloadService</h3>
+    <p class="feature-desc">
+      Fetches documents from SEC EDGAR and other sources. The app passes a URL locator and a destination directory. The service downloads the file, strips EDGAR navigation chrome from HTML, and replies with the local file path. Sets an SEC-compliant <code>User-Agent</code> header on every request. Shuts itself down after 5 minutes of inactivity; <code>launchd</code> relaunches it on the next XPC call.
+    </p>
+    <div class="feature-method">
+      func download(from locator: String, to destinationDirectory: String, reply: @escaping (String?, NSError?) -> Void)
+    </div>
+    <div class="feature-method">
+      func downloadFiling(from indexLocator: String, to destinationDirectory: String, reply: @escaping (String?, NSError?) -> Void)
+    </div>
+    <span class="feature-tag">DownloadServiceProtocol</span>
+  </div>
+
+  <div class="feature-card">
+    <div class="feature-number">02</div>
+    <h3 class="feature-title">PandocService</h3>
+    <p class="feature-desc">
+      Runs the Pandoc binary out-of-process. Supports three calling conventions: raw markdown conversion, arbitrary format-to-format conversion with content strings, and a file-path-based mode where only paths cross XPC. Output formats include HTML, DOCX, PDF, and LaTeX. Each connection gets its own <code>PandocServiceHandler</code>, released on invalidation.
+    </p>
+    <div class="feature-method">
+      func convertFile(at inputPath: String, to format: String, reply: @escaping (String?, NSError?) -> Void)
+    </div>
+    <div class="feature-method">
+      func convert(_ markdown: String, to format: String, reply: @escaping (Data?, NSError?) -> Void)
+    </div>
+    <span class="feature-tag">PandocServiceProtocol</span>
+  </div>
+
+  <div class="feature-card">
+    <div class="feature-number">03</div>
+    <h3 class="feature-title">RedlineService</h3>
+    <p class="feature-desc">
+      The word-level diff engine. Reads base and modified documents using <code>NSFileCoordinator.prepare(forReadingItemsAt:writingItemsAt:)</code> to coordinate two reads and one write in a single deadlock-free batch. Tokenizes text into words, diffs at word granularity, and writes the resulting redline HTML to the output path. Supports parallel execution via <code>RedlineClient.batchRedline(jobs:)</code>.
+    </p>
+    <div class="feature-method">
+      func redline(base basePath: String, modified modifiedPath: String, output outputPath: String, reply: @escaping (String?, NSError?) -> Void)
+    </div>
+    <span class="feature-tag">RedlineServiceProtocol</span>
+  </div>
+
+</section>
+
+<!-- ─── DEEP-DIVE STATEMENT ─── -->
+<section class="statement snap-section reveal" style="border-bottom: 1px solid var(--rule);">
+  <div class="statement-inner">
+    <p class="statement-text">
+      The proxy calls a method. The method runs in a <em>different process.</em> The caller does not know.
+    </p>
+    <p class="statement-sub">This is the NSXPCConnection pattern.</p>
+  </div>
+</section>
+
+<!-- SECTION RULE -->
+<div class="section-rule snap-section-auto">
+  <div class="section-rule-line"></div>
+  <span class="section-rule-label">How It Works</span>
+  <div class="section-rule-line"></div>
+</div>
+
+<!-- ─── TECHNICAL DEEP-DIVE ESSAY ─── -->
+<section class="essay-section snap-section-auto reveal">
+  <div class="section-header">
+    <p class="section-eyebrow">Technical Deep Dive</p>
+    <h2 class="section-title">The proxy pattern,<br>the lifecycle, the wire.</h2>
+  </div>
+  <div class="essay-columns">
+    <div>
+      <p class="essay-lead">
+        XPC is Apple's inter-process communication framework. Each XPC service is a separate binary, bundled inside the application, launched on demand by <code>launchd</code>. It runs in its own process with its own address space. When the last connection to the service is invalidated, <code>launchd</code> is free to terminate it. When the next connection is opened, <code>launchd</code> launches it again.
+      </p>
+      <p>
+        On the service side, an <code>NSXPCListener</code> waits for incoming connections. When a connection arrives, the listener delegate decides whether to accept it. If accepted, it creates a handler object, sets it as the connection's <code>exportedObject</code>, and declares the protocol the handler conforms to via <code>exportedInterface</code>. In Redliner, each service delegate follows this same pattern: <code>DownloadServiceDelegate</code>, <code>PandocServiceDelegate</code>, and <code>RedlineServiceDelegate</code> each implement <code>NSXPCListenerDelegate</code> with the same structure.
+      </p>
+      <p>
+        On the app side, clients like <code>PandocClient</code> and <code>RedlineClient</code> create an <code>NSXPCConnection</code> with the service's bundle identifier. They set a <code>remoteObjectInterface</code> declaring the expected protocol, resume the connection, and obtain a proxy. The proxy object looks and behaves like a local instance of the protocol. When you call a method on it, the XPC runtime serializes the arguments, sends them across the Mach port to the service process, deserializes them, and calls the real method on the handler. The reply block crosses the boundary in the opposite direction.
+      </p>
+    </div>
+    <div>
+      <p>
+        Redliner wraps every XPC call in Swift's <code>withCheckedThrowingContinuation</code>, bridging the Objective-C reply-block pattern into structured async/await. The connection is created, the call is made, and the connection is invalidated in the reply handler. Each call gets its own connection. This is deliberate: it keeps lifecycle simple, avoids stale connection state, and lets <code>launchd</code> manage process termination cleanly.
+      </p>
+      <p>
+        File coordination is central to the design. The <code>RedlineServiceHandler</code> uses <code>NSFileCoordinator.prepare(forReadingItemsAt:writingItemsAt:error:)</code> to coordinate two reads and one write in a single atomic batch. This is Apple's recommended approach when multiple coordinated accesses are needed. It prevents deadlock and ensures no other process modifies the files mid-operation.
+      </p>
+      <p>
+        The DownloadService and PandocService both implement a 5-minute idle shutdown timer. When the last connection invalidates, a <code>DispatchSourceTimer</code> starts counting. If no new connection arrives within 300 seconds, the service calls <code>exit(0)</code>. macOS will relaunch it transparently on the next XPC call. The result is a system where services exist only when needed, consume no resources when idle, and restart without the app noticing.
+      </p>
+      <p>
+        For batch operations, <code>RedlineClient.batchRedline(jobs:)</code> uses a Swift <code>ThrowingTaskGroup</code> to dispatch multiple redline jobs in parallel. Each job creates its own <code>NSXPCConnection</code>, its own handler in the service process, and its own coordinated file access. The task group collects results as they complete. Ten redlines can run simultaneously, each fully isolated.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION RULE -->
+<div class="section-rule snap-section-auto">
+  <div class="section-rule-line"></div>
+  <span class="section-rule-label">API Surface</span>
+  <div class="section-rule-line"></div>
+</div>
+
+<!-- ─── SPECS GRID ─── -->
+<section class="specs-section reveal snap-section-auto">
+  <div class="specs-label">
+    The real<br>API<br><em style="color:var(--blue)">surface.</em>
+  </div>
+  <div class="specs-grid">
+    <div class="spec-item">
+      <div class="spec-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      </div>
+      <div class="spec-name">NSXPCConnection</div>
+      <div class="spec-detail">Created per call with <code>NSXPCConnection(serviceName:)</code>. Sets <code>remoteObjectInterface</code>, resumes, obtains proxy via <code>remoteObjectProxyWithErrorHandler</code>. Invalidated in the reply block.</div>
+    </div>
+    <div class="spec-item">
+      <div class="spec-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><path d="M12 3v18M3 12h18"/></svg>
+      </div>
+      <div class="spec-name">NSXPCListener</div>
+      <div class="spec-detail">Each service calls <code>NSXPCListener.service()</code> in its <code>main.swift</code>. The listener delegate accepts connections and vends handler objects. Runs the main run loop indefinitely.</div>
+    </div>
+    <div class="spec-item">
+      <div class="spec-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+      </div>
+      <div class="spec-name">NSFileCoordinator</div>
+      <div class="spec-detail">Used by RedlineServiceHandler with <code>prepare(forReadingItemsAt:writingItemsAt:error:)</code>. Coordinates two reads and one write atomically. Prevents cross-process file conflicts.</div>
+    </div>
+    <div class="spec-item">
+      <div class="spec-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      </div>
+      <div class="spec-name">DispatchSourceTimer</div>
+      <div class="spec-detail">5-minute idle shutdown in DownloadService and PandocService. Fires <code>exit(0)</code> after 300 seconds of inactivity. Reset on every new connection and every invalidation.</div>
+    </div>
+    <div class="spec-item">
+      <div class="spec-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+      </div>
+      <div class="spec-name">Protocol Signatures</div>
+      <div class="spec-detail"><code>DownloadServiceProtocol</code>, <code>PandocServiceProtocol</code>, <code>RedlineServiceProtocol</code> &mdash; all <code>@objc public protocol</code> types shared between app and service targets. Reply blocks return file paths or data plus optional NSError.</div>
+    </div>
+    <div class="spec-item">
+      <div class="spec-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1M8 12l4 4m0 0l4-4m-4 4V4"/></svg>
+      </div>
+      <div class="spec-name">ThrowingTaskGroup</div>
+      <div class="spec-detail"><code>RedlineClient.batchRedline(jobs:)</code> dispatches parallel redline jobs using <code>withThrowingTaskGroup</code>. Each job gets its own NSXPCConnection. Results collected in completion order.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── PRIVACY CALLOUT ─── -->
+<div class="security-section reveal snap-section-auto">
+  <div class="security-icon-wrap">
+    <svg viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.955 11.955 0 003 10c0 5.592 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.249-8.25-3.286z"/></svg>
+  </div>
+  <div class="security-content">
+    <p class="security-label">Privacy by Process Isolation</p>
+    <h3 class="security-title">Separate processes. Separate memory. No exceptions.</h3>
+    <p class="security-desc">
+      Each XPC service runs in its own process with its own virtual address space. One service cannot read another service's memory. The main application cannot read the service's memory. No document content is serialized over the XPC connection &mdash; the services receive file paths, read from the filesystem, write to the filesystem, and return file paths. Every byte of your work stays on your machine. There is no server. There are no API calls. There is no telemetry. The architecture makes data exfiltration structurally impossible &mdash; not just prohibited by policy, but prevented by the process model itself.
+    </p>
+    <div class="security-badges">
+      <span class="security-badge">Per-Process Address Space</span>
+      <span class="security-badge">File-Path-Only IPC</span>
+      <span class="security-badge">No Network Dependency</span>
+      <span class="security-badge">On-Device Processing</span>
+    </div>
+  </div>
+</div>
+
+<!-- ─── CLOSING ─── -->
+<section class="statement snap-section reveal" style="min-height: 80vh;">
+  <div class="statement-inner">
+    <p class="statement-text">
+      The best security model is one where the wrong thing is <em>architecturally impossible.</em>
+    </p>
+    <p class="statement-sub">Three processes. Zero shared state. By construction.</p>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="snap-section-auto">
+  <div class="footer-logo"><a href="../">Redliner<span style="display:inline-block;width:6px;height:6px;background:#c8302a;border-radius:50%;margin-left:2px;vertical-align:middle;position:relative;top:-1px"></span></a></div>
+  <div style="text-align:center;">
+    <div style="font-family:'DM Mono',monospace;font-size:0.65rem;color:var(--muted);letter-spacing:0.1em;margin-bottom:6px;">XPC Services Architecture</div>
+    <div style="font-family:'DM Mono',monospace;font-size:0.65rem;letter-spacing:0.1em;">
+      <a href="../" style="color:var(--muted);text-decoration:none;border-bottom:1px solid var(--rule);">home</a>
+      <span style="color:var(--rule);margin:0 8px;">·</span>
+      <span style="color:var(--ink);">xpc</span>
+      <span style="color:var(--rule);margin:0 8px;">·</span>
+      <a href="https://github.com/advocatesclose" style="color:var(--muted);text-decoration:none;border-bottom:1px solid var(--rule);">github</a>
+    </div>
+  </div>
+  <div class="footer-note">
+    macOS 15+ · Swift 6 · Apple Frameworks
+  </div>
+</footer>
+
+<script>
+  // Scroll reveal
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.1 });
+  reveals.forEach(el => observer.observe(el));
+</script>
+</body>
+</html>

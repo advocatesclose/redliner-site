@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Redliner — On-Device Intelligence</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=DM+Mono:wght@300;400;500&family=Instrument+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0d0d0e;
+    --paper: #f5f2eb;
+    --cream: #ede9df;
+    --red: #c8302a;
+    --blue: #1e4f9c;
+    --gold: #b8902a;
+    --muted: #7a7570;
+    --rule: #d4cfc4;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html {
+    scroll-behavior: smooth;
+    scroll-snap-type: y mandatory;
+  }
+
+  body {
+    background-color: var(--paper);
+    color: var(--ink);
+    font-family: 'Instrument Sans', sans-serif;
+    font-size: 18px;
+    line-height: 1.65;
+    overflow-x: hidden;
+  }
+
+  /* ── NOISE TEXTURE OVERLAY ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 999;
+    opacity: 0.5;
+  }
+
+  /* ── SCROLL SNAP ── */
+  .snap-section {
+    scroll-snap-align: start;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .snap-section-auto {
+    scroll-snap-align: start;
+  }
+
+  /* ── MASTHEAD ── */
+  .masthead {
+    border-bottom: 2px solid var(--ink);
+    padding: 18px 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: var(--paper);
+    z-index: 100;
+    animation: slideDown 0.6s ease both;
+  }
+
+  @keyframes slideDown {
+    from { transform: translateY(-100%); opacity: 0; }
+    to   { transform: translateY(0);     opacity: 1; }
+  }
+
+  .masthead-logo {
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    font-size: 1.4rem;
+    letter-spacing: -0.03em;
+  }
+
+  .masthead-logo a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .masthead-logo span {
+    display: inline-block;
+    width: 8px; height: 8px;
+    background: var(--red);
+    border-radius: 50%;
+    margin-left: 3px;
+    vertical-align: middle;
+    position: relative;
+    top: -2px;
+  }
+
+  .masthead-meta {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    text-align: right;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    padding: 0 60px;
+    padding-top: 60px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    min-height: 100vh;
+    border-bottom: 1px solid var(--rule);
+    overflow: hidden;
+    scroll-snap-align: start;
+  }
+
+  .hero-left {
+    padding: 120px 80px 120px 0;
+    border-right: 1px solid var(--rule);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    animation: fadeUp 0.9s 0.2s ease both;
+  }
+
+  @keyframes fadeUp {
+    from { transform: translateY(40px); opacity: 0; }
+    to   { transform: translateY(0);    opacity: 1; }
+  }
+
+  .kicker {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.78rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--red);
+    margin-bottom: 32px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .kicker::before {
+    content: '';
+    display: block;
+    width: 40px;
+    height: 1px;
+    background: var(--red);
+  }
+
+  .hero-headline {
+    font-family: 'Inter', sans-serif;
+    font-size: clamp(3.2rem, 6vw, 6.5rem);
+    font-weight: 800;
+    line-height: 0.95;
+    letter-spacing: -0.045em;
+    margin-bottom: 48px;
+  }
+
+  .hero-headline em {
+    font-style: normal;
+    font-weight: 400;
+    color: var(--blue);
+  }
+
+  .hero-subhead {
+    font-size: 1.2rem;
+    color: var(--muted);
+    max-width: 520px;
+    line-height: 1.75;
+    border-left: 3px solid var(--gold);
+    padding-left: 24px;
+    margin-bottom: 56px;
+  }
+
+  .hero-right {
+    padding: 120px 0 120px 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: fadeUp 0.9s 0.45s ease both;
+  }
+
+  /* ── PIPELINE DIAGRAM ── */
+  .pipeline-diagram {
+    width: 100%;
+    max-width: 400px;
+  }
+
+  .pipeline-step {
+    background: white;
+    border: 1px solid var(--rule);
+    padding: 20px 24px;
+    margin-bottom: 0;
+    position: relative;
+    transition: background 0.3s;
+  }
+
+  .pipeline-step:hover { background: var(--cream); }
+
+  .pipeline-step-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+
+  .pipeline-step-title {
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 1rem;
+    margin-bottom: 4px;
+  }
+
+  .pipeline-step-detail {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--muted);
+  }
+
+  .pipeline-arrow {
+    text-align: center;
+    padding: 6px 0;
+    color: var(--rule);
+    font-size: 1.2rem;
+    line-height: 1;
+  }
+
+  /* ── STATEMENT SECTION ── */
+  .statement {
+    padding: 0 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .statement-inner {
+    max-width: 900px;
+    padding: 0 40px;
+  }
+
+  .statement-text {
+    font-family: 'Inter', sans-serif;
+    font-size: clamp(2.2rem, 4vw, 3.8rem);
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -0.035em;
+  }
+
+  .statement-text em {
+    font-style: normal;
+    font-weight: 400;
+    color: var(--blue);
+  }
+
+  .statement-sub {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.78rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-top: 40px;
+  }
+
+  /* ── ESSAY SECTION ── */
+  .essay-section {
+    padding: 120px 60px;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .essay-section .section-header {
+    margin-bottom: 80px;
+  }
+
+  .essay-columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    max-width: 1100px;
+  }
+
+  .essay-columns p {
+    font-size: 1.1rem;
+    color: var(--muted);
+    line-height: 1.85;
+    margin-bottom: 1.6em;
+  }
+
+  .essay-columns p:last-child {
+    margin-bottom: 0;
+  }
+
+  .essay-lead {
+    font-size: 1.3rem !important;
+    color: var(--ink) !important;
+    font-weight: 500;
+  }
+
+  /* ── SECTION DIVIDER ── */
+  .section-rule {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    padding: 0 60px;
+    margin: 0;
+  }
+
+  .section-rule-line { flex: 1; height: 1px; background: var(--rule); }
+  .section-rule-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.66rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 14px 24px;
+    border-left: 1px solid var(--rule);
+    border-right: 1px solid var(--rule);
+  }
+
+  .section-eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--red);
+    margin-bottom: 20px;
+  }
+
+  .section-title {
+    font-family: 'Inter', sans-serif;
+    font-size: clamp(2.4rem, 4vw, 3.6rem);
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.035em;
+  }
+
+  .section-header {
+    margin-bottom: 56px;
+  }
+
+  /* ── FEATURE GRID ── */
+  .features {
+    padding: 120px 60px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .feature-card {
+    padding: 60px 48px;
+    border-right: 1px solid var(--rule);
+    position: relative;
+    transition: background 0.3s;
+  }
+
+  .feature-card:last-child { border-right: none; }
+  .feature-card:hover { background: var(--cream); }
+
+  .feature-number {
+    font-family: 'Inter', sans-serif;
+    font-size: 6rem;
+    font-weight: 800;
+    color: var(--rule);
+    line-height: 1;
+    margin-bottom: 28px;
+    letter-spacing: -0.04em;
+    transition: color 0.3s;
+  }
+
+  .feature-card:hover .feature-number { color: var(--blue); opacity: 0.25; }
+
+  .feature-title {
+    font-family: 'Inter', sans-serif;
+    font-size: 1.7rem;
+    font-weight: 650;
+    margin-bottom: 18px;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+  }
+
+  .feature-desc {
+    font-size: 1rem;
+    color: var(--muted);
+    line-height: 1.75;
+  }
+
+  .feature-desc code {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.85em;
+    background: var(--cream);
+    padding: 2px 6px;
+  }
+
+  .feature-tag {
+    display: inline-block;
+    margin-top: 28px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--red);
+    border-bottom: 1px solid var(--red);
+    padding-bottom: 2px;
+  }
+
+  /* ── SPECS SECTION (reused for SEC document detail) ── */
+  .specs-section {
+    padding: 120px 60px;
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 100px;
+    border-bottom: 1px solid var(--rule);
+    align-items: start;
+  }
+
+  .specs-label {
+    font-family: 'Inter', sans-serif;
+    font-size: clamp(2.4rem, 4vw, 3.6rem);
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.035em;
+    position: sticky;
+    top: 100px;
+  }
+
+  .specs-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+  }
+
+  .spec-item {
+    padding: 32px 0;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .spec-item:nth-child(odd) { padding-right: 48px; border-right: 1px solid var(--rule); }
+  .spec-item:nth-child(even) { padding-left: 48px; }
+
+  .spec-icon {
+    width: 40px; height: 40px;
+    margin-bottom: 16px;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .spec-icon svg { width: 24px; height: 24px; }
+
+  .spec-name {
+    font-family: 'Instrument Sans', sans-serif;
+    font-weight: 600;
+    font-size: 1rem;
+    margin-bottom: 8px;
+  }
+
+  .spec-detail {
+    font-size: 0.92rem;
+    color: var(--muted);
+    line-height: 1.65;
+  }
+
+  /* ── MATH FOUNDATIONS SECTION ── */
+  .math-section {
+    padding: 120px 60px;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .math-section .section-header {
+    margin-bottom: 80px;
+  }
+
+  .math-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    max-width: 1200px;
+  }
+
+  .math-item {
+    padding: 36px 40px;
+    border-bottom: 1px solid var(--rule);
+    transition: background 0.3s;
+  }
+
+  .math-item:nth-child(odd) { border-right: 1px solid var(--rule); }
+  .math-item:hover { background: var(--cream); }
+
+  .math-item-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--red);
+    margin-bottom: 10px;
+  }
+
+  .math-item-title {
+    font-family: 'Inter', sans-serif;
+    font-weight: 650;
+    font-size: 1.15rem;
+    margin-bottom: 10px;
+    letter-spacing: -0.02em;
+  }
+
+  .math-item-desc {
+    font-size: 0.95rem;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+
+  /* ── SECURITY CALLOUT ── */
+  .security-section {
+    margin: 0 60px;
+    border: 1px solid var(--ink);
+    padding: 72px 80px;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 56px;
+    align-items: center;
+    background: var(--ink);
+    color: var(--paper);
+    margin-bottom: 0;
+  }
+
+  .security-icon-wrap {
+    width: 96px; height: 96px;
+    border: 1px solid rgba(245,242,235,0.2);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .security-icon-wrap svg { width: 40px; height: 40px; stroke: var(--gold); fill: none; }
+
+  .security-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 16px;
+  }
+
+  .security-title {
+    font-family: 'Inter', sans-serif;
+    font-size: 2.2rem;
+    font-weight: 650;
+    margin-bottom: 18px;
+    line-height: 1.2;
+    letter-spacing: -0.025em;
+  }
+
+  .security-desc {
+    font-size: 1rem;
+    color: rgba(245,242,235,0.65);
+    line-height: 1.75;
+    max-width: 680px;
+  }
+
+  .security-badges {
+    display: flex;
+    gap: 14px;
+    margin-top: 32px;
+    flex-wrap: wrap;
+  }
+
+  .security-badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.66rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 9px 16px;
+    border: 1px solid rgba(245,242,235,0.2);
+    color: rgba(245,242,235,0.6);
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    padding: 48px 60px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid var(--rule);
+    margin-top: 60px;
+  }
+
+  .footer-logo {
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    font-size: 1.15rem;
+    letter-spacing: -0.03em;
+  }
+
+  .footer-note {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-align: right;
+  }
+
+  /* ── SCROLL REVEAL ── */
+  .reveal {
+    opacity: 0;
+    transform: translateY(32px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 900px) {
+    html { scroll-snap-type: y proximity; }
+    .masthead { padding: 14px 24px; }
+    .hero { grid-template-columns: 1fr; padding: 0 24px; padding-top: 60px; min-height: auto; }
+    .hero-left { padding: 60px 0 40px; border-right: none; border-bottom: 1px solid var(--rule); }
+    .hero-right { padding: 40px 0 60px; }
+    .features { grid-template-columns: 1fr; padding: 60px 24px; }
+    .feature-card { border-right: none; border-bottom: 1px solid var(--rule); padding: 40px 0; }
+    .comparison-section, .specs-section, .essay-section, .math-section { padding: 80px 24px; }
+    .specs-section { grid-template-columns: 1fr; gap: 48px; }
+    .specs-label { position: static; }
+    .specs-grid { grid-template-columns: 1fr; }
+    .spec-item:nth-child(odd) { padding-right: 0; border-right: none; }
+    .spec-item:nth-child(even) { padding-left: 0; }
+    .security-section { margin: 0 24px; padding: 48px 32px; grid-template-columns: 1fr; gap: 28px; }
+    .essay-columns { grid-template-columns: 1fr; gap: 40px; }
+    .math-grid { grid-template-columns: 1fr; }
+    .math-item:nth-child(odd) { border-right: none; }
+    .statement { padding: 80px 24px; }
+    .snap-section { min-height: auto; }
+    footer { padding: 32px 24px; flex-direction: column; gap: 12px; text-align: center; }
+    .footer-note { text-align: center; }
+    .section-rule { padding: 0 24px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- MASTHEAD -->
+<header class="masthead">
+  <div class="masthead-logo"><a href="../">Redliner<span></span></a></div>
+  <div class="masthead-meta">
+    On-Device<br>Machine Learning
+  </div>
+</header>
+
+<!-- ─── PAGE 1: HERO ─── -->
+<section class="hero">
+  <div class="hero-left">
+    <p class="kicker">NaturalLanguage + Core ML</p>
+    <h1 class="hero-headline">
+      On-device ML.<br>
+      Semi-structured data.<br>
+      <em>Deep mathematics.</em>
+    </h1>
+    <p class="hero-subhead">
+      The Federal Register published 106,109 pages in 2024 — over 400 pages per business day. EDGAR holds millions of filings. All of it is public, freely available, and semi-structured. This is one of the most mathematically interesting datasets on earth, and Redliner processes it entirely on your hardware.
+    </p>
+  </div>
+
+  <div class="hero-right">
+    <div class="pipeline-diagram">
+      <div class="pipeline-step">
+        <div class="pipeline-step-label">Step 1</div>
+        <div class="pipeline-step-title">NLTokenizer</div>
+        <div class="pipeline-step-detail">Raw text in, word tokens out</div>
+      </div>
+      <div class="pipeline-arrow">|</div>
+      <div class="pipeline-step">
+        <div class="pipeline-step-label">Step 2</div>
+        <div class="pipeline-step-title">AtlasMLManager</div>
+        <div class="pipeline-step-detail">Clean, classify, record to JSONL</div>
+      </div>
+      <div class="pipeline-arrow">|</div>
+      <div class="pipeline-step">
+        <div class="pipeline-step-label">Step 3</div>
+        <div class="pipeline-step-title">NLGazetteer</div>
+        <div class="pipeline-step-detail">Build lookup tables from training data</div>
+      </div>
+      <div class="pipeline-arrow">|</div>
+      <div class="pipeline-step">
+        <div class="pipeline-step-label">Step 4</div>
+        <div class="pipeline-step-title">AtlasTagger</div>
+        <div class="pipeline-step-detail">Apply semantic tags to live documents</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── PAGE 2: OPENING STATEMENT ─── -->
+<section class="statement snap-section reveal">
+  <div class="statement-inner">
+    <p class="statement-text">
+      Not a clean database. Not a blob. Structure that must be <em>inferred.</em>
+    </p>
+    <p class="statement-sub">Inconsistent HTML. Varying CSS classes. Nested layout tables. Inline XBRL. Semi-structured at every level.</p>
+  </div>
+</section>
+
+<!-- ─── PAGE 3: ESSAY — THE DATASET ─── -->
+<section class="essay-section snap-section-auto reveal" id="the-dataset">
+  <div class="section-header">
+    <p class="section-eyebrow">The Dataset</p>
+    <h2 class="section-title">Why regulatory filings are<br>a frontier ML problem.</h2>
+  </div>
+  <div class="essay-columns">
+    <div>
+      <p class="essay-lead">
+        Regulatory data is interesting not because it is law, but because of what it demands from a learning system. The SEC's EDGAR database contains millions of filings spanning decades. The Federal Register adds hundreds of pages daily. Every document is necessarily public. And none of it is clean.
+      </p>
+      <p>
+        The internal structure is expressed through inconsistent HTML, CSS classes that vary by filing agent, nested tables used for layout rather than data, and inline XBRL tags embedded at arbitrary depths. The structure is real — headings, sections, definitions, cross-references — but it is never declared in a schema. It must be recovered from surface signals that shift across filers, across years, across administrations.
+      </p>
+    </div>
+    <div>
+      <p>
+        This makes the corpus a genuinely hard problem for machine learning. The data is massive, free, and semi-structured in the specific sense that matters: internal organization exists but must be inferred through statistical regularity rather than parsed from a specification. A model trained on this material must generalize across wildly inconsistent markup to recover the stable semantic structure underneath.
+      </p>
+      <p>
+        Redliner's ML pipeline begins with Apple's NaturalLanguage framework. Every piece of text passes through <code style="font-family:'DM Mono',monospace;font-size:0.85em;background:var(--cream);padding:2px 6px;">NLTokenizer</code> for word-level segmentation, then <code style="font-family:'DM Mono',monospace;font-size:0.85em;background:var(--cream);padding:2px 6px;">AtlasMLManager</code> for cleaning and classification, then <code style="font-family:'DM Mono',monospace;font-size:0.85em;background:var(--cream);padding:2px 6px;">NLGazetteer</code> for dictionary-based entity lookup — all on-device, all within the application process, all growing with your usage.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION RULE -->
+<div class="section-rule snap-section-auto">
+  <div class="section-rule-line"></div>
+  <span class="section-rule-label">Mathematical Foundations</span>
+  <div class="section-rule-line"></div>
+</div>
+
+<!-- ─── MATHEMATICAL FOUNDATIONS ─── -->
+<section class="math-section snap-section-auto reveal" id="mathematics">
+  <div class="section-header">
+    <p class="section-eyebrow">The Mathematics</p>
+    <h2 class="section-title">Why this domain rewards<br>mathematical depth.</h2>
+  </div>
+  <div class="math-grid">
+    <div class="math-item">
+      <div class="math-item-label">Structure</div>
+      <div class="math-item-title">Topology</div>
+      <div class="math-item-desc">Document structure forms directed acyclic graphs: sections contain subsections, definitions reference defined terms, cross-references create edges between nodes. Recovering this graph from flat HTML is a topological inference problem — the model must learn which containment and adjacency relationships are structural versus accidental.</div>
+    </div>
+    <div class="math-item">
+      <div class="math-item-label">Variation</div>
+      <div class="math-item-title">Manifolds</div>
+      <div class="math-item-desc">Filing templates vary smoothly across law firms and filing agents. A 10-K from Wachtell looks different from one prepared by Donnelley, but both inhabit a low-dimensional manifold of "valid 10-K structures." The model must learn this manifold — the space of plausible document shapes — to distinguish meaningful variation from noise in formatting.</div>
+    </div>
+    <div class="math-item">
+      <div class="math-item-label">Clustering</div>
+      <div class="math-item-title">Spectral Methods</div>
+      <div class="math-item-desc">Eigendecomposition of document similarity matrices reveals natural clusters: risk factors group together, compensation tables cluster separately from financial statements. Spectral methods let the system discover these groupings without supervised labels, using the eigenvectors of a Laplacian constructed from pairwise document similarity.</div>
+    </div>
+    <div class="math-item">
+      <div class="math-item-label">Composition</div>
+      <div class="math-item-title">Generating Functions</div>
+      <div class="math-item-desc">SEC filings are compositional: a prospectus is built from a cover page, a summary, risk factors, financial statements, and legal opinions, each of which has its own internal grammar. Generating functions formalize this recursive structure, encoding how smaller templates compose into larger documents and enabling the model to reason about parts and wholes.</div>
+    </div>
+    <div class="math-item">
+      <div class="math-item-label">Training</div>
+      <div class="math-item-title">Convergence</div>
+      <div class="math-item-desc">Training on heterogeneous data — where a risk factor paragraph and a financial table have radically different statistical properties — creates convergence challenges. The loss landscape contains saddle points and narrow valleys. Guaranteeing that gradient descent reaches a useful minimum, rather than oscillating between document types, requires careful analysis of convergence conditions.</div>
+    </div>
+    <div class="math-item">
+      <div class="math-item-label">Approximation</div>
+      <div class="math-item-title">Chebyshev Polynomials</div>
+      <div class="math-item-desc">Field distributions across filings — word counts, section lengths, entity frequencies — are not Gaussian. Chebyshev polynomials provide efficient, near-minimax approximations of these irregular distributions, enabling compact representations of statistical profiles without assuming a parametric form. This matters when the model must quickly estimate whether a document segment is typical or anomalous.</div>
+    </div>
+    <div class="math-item">
+      <div class="math-item-label">Information</div>
+      <div class="math-item-title">Fisher Information Matrices</div>
+      <div class="math-item-desc">Not all parameters in a model are equally constrained by the data. The Fisher information matrix measures, for each parameter, how much the observed data actually tells you about its value. In this domain, some parameters are heavily constrained (the model sees thousands of "risk factor" headings) while others are barely identified (rare filing types). Fisher information reveals which parts of the model are well-grounded and which are guessing.</div>
+    </div>
+    <div class="math-item">
+      <div class="math-item-label">Curvature</div>
+      <div class="math-item-title">Hessians</div>
+      <div class="math-item-desc">The Hessian matrix — the matrix of second derivatives of the loss function — describes the curvature of the loss landscape. Flat directions correspond to parameters the data does not constrain; sharp directions correspond to parameters where small changes cause large errors. For semi-structured data, the Hessian tends to have a few very large eigenvalues (structural features) and many near-zero ones (formatting noise), and understanding this spectrum guides optimizer design.</div>
+    </div>
+    <div class="math-item">
+      <div class="math-item-label">Prediction</div>
+      <div class="math-item-title">Innovation Matrices</div>
+      <div class="math-item-desc">When processing a filing sequentially — paragraph by paragraph — each new block either confirms or surprises the model's expectations. The innovation matrix captures the structure of these prediction errors. In a well-calibrated system, innovations should be white noise; systematic patterns in the innovation sequence indicate that the model is failing to capture some regularity in how document sections follow one another.</div>
+    </div>
+    <div class="math-item">
+      <div class="math-item-label">Dimensionality</div>
+      <div class="math-item-title">Overdetermined Systems</div>
+      <div class="math-item-desc">A single SEC filing contains hundreds of observable surface features — font sizes, CSS classes, tag nesting depth, word frequencies — but the latent structure it expresses may have only a dozen dimensions (filing type, preparer, era, industry). The system is massively overdetermined: far more measurements than unknowns. This is advantageous for inference but requires techniques like pseudoinverse computation and regularization to extract the latent signal cleanly.</div>
+    </div>
+    <div class="math-item">
+      <div class="math-item-label">Temporal</div>
+      <div class="math-item-title">Non-Stationary Time Series</div>
+      <div class="math-item-desc">Regulatory language evolves. The Sarbanes-Oxley Act changed how risk factors are written. Dodd-Frank altered disclosure requirements. Plain English initiatives reshaped sentence structure. A model trained on filings from 2005 will misclassify filings from 2024 unless it accounts for non-stationarity — the fact that the underlying data-generating process is itself changing over time, and that yesterday's patterns are not tomorrow's.</div>
+    </div>
+    <div class="math-item">
+      <div class="math-item-label">Regime</div>
+      <div class="math-item-title">Drift Terms</div>
+      <div class="math-item-desc">Beyond gradual evolution, filing patterns exhibit systematic drift tied to regulatory administrations. An SEC chair who emphasizes disclosure produces measurably different filing behavior than one who emphasizes deregulation. These drift terms are not noise — they are deterministic shifts in the data distribution that a robust model must detect and adapt to, rather than treating them as increased variance.</div>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION RULE -->
+<div class="section-rule snap-section-auto">
+  <div class="section-rule-line"></div>
+  <span class="section-rule-label">Capabilities</span>
+  <div class="section-rule-line"></div>
+</div>
+
+<!-- ─── FEATURE CARDS ─── -->
+<section class="features reveal snap-section-auto" id="capabilities">
+  <div class="feature-card">
+    <div class="feature-number">01</div>
+    <h3 class="feature-title">Semantic Tagging</h3>
+    <p class="feature-desc">
+      <code>AtlasTagger</code> scans <code>NSTextStorage</code> for the custom attribute key <code>.atlasSemanticTag</code> and extracts tagged chunks with their ranges, content, and visual colors. Tags include <code>definition</code>, <code>crossReference</code>, <code>partyName</code>, <code>date</code>, <code>amount</code>, <code>condition</code>, and <code>obligation</code> — the semantic building blocks of a legal document.
+    </p>
+    <span class="feature-tag">NLTagger + TextKit 2</span>
+  </div>
+
+  <div class="feature-card">
+    <div class="feature-number">02</div>
+    <h3 class="feature-title">Document Classification</h3>
+    <p class="feature-desc">
+      <code>AtlasMLManager</code> records every tagging event as a <code>TrainingEntry</code> with fields for <code>label</code>, <code>humanLabel</code>, <code>cleanText</code>, and <code>context</code>. These entries train an <code>NLGazetteer</code> that classifies document segments by SEC filing type — risk factors, definitions, cross-references — without ever leaving the device.
+    </p>
+    <span class="feature-tag">NLGazetteer + JSONL</span>
+  </div>
+
+  <div class="feature-card">
+    <div class="feature-number">03</div>
+    <h3 class="feature-title">Named Entity Recognition</h3>
+    <p class="feature-desc">
+      The <code>Tag</code> model classifies entities into types: <code>partyName</code>, <code>date</code>, <code>amount</code>, <code>condition</code>, <code>obligation</code>. Each tag carries its <code>NSRange</code> so the editor can highlight entities in place. The <code>MLSidebar</code> surfaces all recognized entities in a navigable list alongside the document.
+    </p>
+    <span class="feature-tag">On-Device NER</span>
+  </div>
+</section>
+
+<!-- ─── SEC STATEMENT ─── -->
+<section class="statement snap-section reveal" style="border-bottom: 1px solid var(--rule);">
+  <div class="statement-inner">
+    <p class="statement-text">
+      The parser does not guess at structure. It reads the <em>HTML the SEC actually produces.</em>
+    </p>
+    <p class="statement-sub">EDGAR filings, parsed into typed blocks. On your machine.</p>
+  </div>
+</section>
+
+<!-- SECTION RULE -->
+<div class="section-rule snap-section-auto">
+  <div class="section-rule-line"></div>
+  <span class="section-rule-label">SEC Document Understanding</span>
+  <div class="section-rule-line"></div>
+</div>
+
+<!-- ─── SEC DOCUMENT UNDERSTANDING ─── -->
+<section class="specs-section reveal snap-section-auto" id="sec">
+  <div class="specs-label">
+    Structured<br>data from<br><em style="color:var(--blue)">EDGAR HTML.</em>
+  </div>
+  <div class="specs-grid">
+    <div class="spec-item">
+      <div class="spec-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+      </div>
+      <div class="spec-name">SECHTMLParser</div>
+      <div class="spec-detail">Compiles a paragraph regex at load time. Extracts attribute soup and content from every <code style="font-family:'DM Mono',monospace;font-size:0.85em;">&lt;p&gt;</code> tag in the filing. Classifies by CSS class: H1, H2, H3, Article, Section.</div>
+    </div>
+    <div class="spec-item">
+      <div class="spec-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      </div>
+      <div class="spec-name">SECBlockType</div>
+      <div class="spec-detail">Eight typed block variants: <code style="font-family:'DM Mono',monospace;font-size:0.85em;">heading1</code>, <code style="font-family:'DM Mono',monospace;font-size:0.85em;">heading2</code>, <code style="font-family:'DM Mono',monospace;font-size:0.85em;">heading3</code>, <code style="font-family:'DM Mono',monospace;font-size:0.85em;">paragraph</code>, <code style="font-family:'DM Mono',monospace;font-size:0.85em;">definition</code>, <code style="font-family:'DM Mono',monospace;font-size:0.85em;">listMarker</code>, <code style="font-family:'DM Mono',monospace;font-size:0.85em;">listItem</code>, <code style="font-family:'DM Mono',monospace;font-size:0.85em;">unknown</code>.</div>
+    </div>
+    <div class="spec-item">
+      <div class="spec-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A2 2 0 013 12V7a4 4 0 014-4z"/></svg>
+      </div>
+      <div class="spec-name">SECBlock Metadata</div>
+      <div class="spec-detail">Each block carries an optional <code style="font-family:'DM Mono',monospace;font-size:0.85em;">[String: String]</code> metadata dictionary for inline XBRL tags like <code style="font-family:'DM Mono',monospace;font-size:0.85em;">ix:name</code>. Codable and Sendable for safe cross-boundary use.</div>
+    </div>
+    <div class="spec-item">
+      <div class="spec-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/></svg>
+      </div>
+      <div class="spec-name">SECDocument</div>
+      <div class="spec-detail">The top-level model: a Codable, Sendable array of <code style="font-family:'DM Mono',monospace;font-size:0.85em;">SECBlock</code> values. Converts to and from JSON instantly. The entire document is a value type.</div>
+    </div>
+    <div class="spec-item">
+      <div class="spec-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25H12"/></svg>
+      </div>
+      <div class="spec-name">List Detection</div>
+      <div class="spec-detail">Identifies bullet points by scanning for the HTML entity <code style="font-family:'DM Mono',monospace;font-size:0.85em;">&amp;#8226;</code> and the literal bullet character. Cleans artifacts with regex before classification.</div>
+    </div>
+    <div class="spec-item">
+      <div class="spec-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6.75 7.5l3 2.25-3 2.25m4.5 0h3m-9 8.25h13.5A2.25 2.25 0 0021 18V6a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 6v12a2.25 2.25 0 002.25 2.25z"/></svg>
+      </div>
+      <div class="spec-name">Tag Stripping</div>
+      <div class="spec-detail">Internal HTML tags — <code style="font-family:'DM Mono',monospace;font-size:0.85em;">&lt;span&gt;</code>, <code style="font-family:'DM Mono',monospace;font-size:0.85em;">&lt;b&gt;</code>, <code style="font-family:'DM Mono',monospace;font-size:0.85em;">&lt;i&gt;</code> — are removed by regex. Non-breaking spaces normalized. Content trimmed. Only clean text reaches the model.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── PRIVACY CALLOUT ─── -->
+<div class="security-section reveal snap-section-auto">
+  <div class="security-icon-wrap">
+    <svg viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.955 11.955 0 003 10c0 5.592 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.249-8.25-3.286z"/></svg>
+  </div>
+  <div class="security-content">
+    <p class="security-label">On-Device by Design</p>
+    <h3 class="security-title">Models run on YOUR machine. Data stays on YOUR machine.</h3>
+    <p class="security-desc">
+      There is no server. There is no API key. There is no telemetry endpoint. The NaturalLanguage framework ships with macOS. The training data is written to a local JSONL file in your Documents directory. The gazetteer is built in-process from that local file. The entire ML pipeline — tokenization, classification, entity recognition, tag extraction — executes within the application sandbox. No data is sent anywhere. No data can be sent anywhere. The architecture does not contain a network path.
+    </p>
+    <div class="security-badges">
+      <span class="security-badge">NaturalLanguage.framework</span>
+      <span class="security-badge">Local JSONL Storage</span>
+      <span class="security-badge">Swift Actor Isolation</span>
+      <span class="security-badge">Zero Network Calls</span>
+    </div>
+  </div>
+</div>
+
+<!-- ─── CLOSING ─── -->
+<section class="statement snap-section reveal" style="min-height: 80vh;">
+  <div class="statement-inner">
+    <p class="statement-text">
+      The best intelligence is the kind that <em>never leaves the room.</em>
+    </p>
+    <p class="statement-sub">On-device ML. Built for the work that matters.</p>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="snap-section-auto">
+  <div class="footer-logo">Redliner<span style="display:inline-block;width:6px;height:6px;background:#c8302a;border-radius:50%;margin-left:2px;vertical-align:middle;position:relative;top:-1px"></span></div>
+  <div style="text-align:center;">
+    <div style="font-family:'DM Mono',monospace;font-size:0.65rem;color:var(--muted);letter-spacing:0.1em;margin-bottom:6px;">This content exists in four renderings.</div>
+    <div style="font-family:'DM Mono',monospace;font-size:0.65rem;letter-spacing:0.1em;">
+      <a href="https://advocatesclose.github.io/redliner-editorial/" style="color:var(--muted);text-decoration:none;border-bottom:1px solid var(--rule);">editorial</a>
+      <span style="color:var(--rule);margin:0 8px;">·</span>
+      <a href="../" style="color:var(--muted);text-decoration:none;border-bottom:1px solid var(--rule);">technical</a>
+      <span style="color:var(--rule);margin:0 8px;">·</span>
+      <a href="https://advocatesclose.github.io/redliner-terminal/" style="color:var(--muted);text-decoration:none;border-bottom:1px solid var(--rule);">terminal</a>
+      <span style="color:var(--rule);margin:0 8px;">·</span>
+      <a href="https://github.com/advocatesclose" style="color:var(--muted);text-decoration:none;border-bottom:1px solid var(--rule);">github</a>
+    </div>
+  </div>
+  <div class="footer-note">
+    macOS 15+ · Swift 6 · Apple NaturalLanguage
+  </div>
+</footer>
+
+<script>
+  // Scroll reveal
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.1 });
+  reveals.forEach(el => observer.observe(el));
+</script>
+</body>
+</html>

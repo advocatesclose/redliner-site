@@ -1,0 +1,1345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Redliner — Structured Public Data</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=DM+Mono:wght@300;400;500&family=Instrument+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0d0d0e;
+    --paper: #f5f2eb;
+    --cream: #ede9df;
+    --red: #c8302a;
+    --blue: #1e4f9c;
+    --gold: #b8902a;
+    --muted: #7a7570;
+    --rule: #d4cfc4;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html {
+    scroll-behavior: smooth;
+    scroll-snap-type: y mandatory;
+  }
+
+  body {
+    background-color: var(--paper);
+    color: var(--ink);
+    font-family: 'Instrument Sans', sans-serif;
+    font-size: 18px;
+    line-height: 1.65;
+    overflow-x: hidden;
+  }
+
+  /* ── NOISE TEXTURE OVERLAY ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 999;
+    opacity: 0.5;
+  }
+
+  /* ── SCROLL SNAP ── */
+  .snap-section {
+    scroll-snap-align: start;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .snap-section-auto {
+    scroll-snap-align: start;
+  }
+
+  /* ── MASTHEAD ── */
+  .masthead {
+    border-bottom: 2px solid var(--ink);
+    padding: 18px 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: var(--paper);
+    z-index: 100;
+    animation: slideDown 0.6s ease both;
+  }
+
+  @keyframes slideDown {
+    from { transform: translateY(-100%); opacity: 0; }
+    to   { transform: translateY(0);     opacity: 1; }
+  }
+
+  .masthead-logo {
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    font-size: 1.4rem;
+    letter-spacing: -0.03em;
+  }
+
+  .masthead-logo a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .masthead-logo span {
+    display: inline-block;
+    width: 8px; height: 8px;
+    background: var(--red);
+    border-radius: 50%;
+    margin-left: 3px;
+    vertical-align: middle;
+    position: relative;
+    top: -2px;
+  }
+
+  .masthead-meta {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    text-align: right;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    padding: 0 60px;
+    padding-top: 60px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    min-height: 100vh;
+    border-bottom: 1px solid var(--rule);
+    overflow: hidden;
+    scroll-snap-align: start;
+  }
+
+  .hero-left {
+    padding: 120px 80px 120px 0;
+    border-right: 1px solid var(--rule);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    animation: fadeUp 0.9s 0.2s ease both;
+  }
+
+  @keyframes fadeUp {
+    from { transform: translateY(40px); opacity: 0; }
+    to   { transform: translateY(0);    opacity: 1; }
+  }
+
+  .kicker {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.78rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--red);
+    margin-bottom: 32px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .kicker::before {
+    content: '';
+    display: block;
+    width: 40px;
+    height: 1px;
+    background: var(--red);
+  }
+
+  .hero-headline {
+    font-family: 'Inter', sans-serif;
+    font-size: clamp(3.2rem, 6vw, 6.5rem);
+    font-weight: 800;
+    line-height: 0.95;
+    letter-spacing: -0.045em;
+    margin-bottom: 48px;
+  }
+
+  .hero-headline em {
+    font-style: normal;
+    font-weight: 400;
+    color: var(--blue);
+  }
+
+  .hero-subhead {
+    font-size: 1.2rem;
+    color: var(--muted);
+    max-width: 520px;
+    line-height: 1.75;
+    border-left: 3px solid var(--gold);
+    padding-left: 24px;
+    margin-bottom: 56px;
+  }
+
+  .hero-cta {
+    display: inline-flex;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .btn-primary {
+    background: var(--ink);
+    color: var(--paper);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.78rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    padding: 16px 32px;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.2s, transform 0.15s;
+    display: inline-block;
+  }
+
+  .btn-primary:hover { background: var(--blue); transform: translateY(-2px); }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--ink);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.78rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    padding: 15px 32px;
+    border: 1px solid var(--ink);
+    cursor: pointer;
+    text-decoration: none;
+    transition: border-color 0.2s, color 0.2s, transform 0.15s;
+    display: inline-block;
+  }
+
+  .btn-ghost:hover { border-color: var(--blue); color: var(--blue); transform: translateY(-2px); }
+
+  /* ── HERO RIGHT ── */
+  .hero-right {
+    padding: 120px 0 120px 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: fadeUp 0.9s 0.45s ease both;
+  }
+
+  .schema-mockup {
+    width: 100%;
+    max-width: 440px;
+    background: white;
+    border: 1px solid var(--rule);
+    box-shadow: 12px 16px 0 var(--rule), 24px 32px 0 rgba(0,0,0,0.05);
+    overflow: hidden;
+    position: relative;
+  }
+
+  .schema-topbar {
+    background: var(--ink);
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .schema-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .schema-dot.r { background: #c8302a; }
+  .schema-dot.y { background: #b8902a; }
+  .schema-dot.g { background: #2a8c4e; }
+
+  .schema-title {
+    margin-left: auto;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    color: rgba(255,255,255,0.45);
+    letter-spacing: 0.1em;
+  }
+
+  .schema-body {
+    padding: 28px 24px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    line-height: 1.85;
+    color: #333;
+  }
+
+  .schema-section-label {
+    font-weight: 500;
+    font-size: 0.68rem;
+    color: var(--muted);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    margin-top: 16px;
+    display: block;
+  }
+
+  .schema-section-label:first-child { margin-top: 0; }
+
+  .schema-field {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4px 0;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+  }
+
+  .schema-field-name { color: var(--ink); font-weight: 500; }
+  .schema-field-type { color: var(--blue); font-size: 0.62rem; letter-spacing: 0.08em; text-transform: uppercase; }
+  .schema-field-value { color: var(--muted); font-size: 0.66rem; max-width: 180px; text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  /* ── STATEMENT SECTION ── */
+  .statement {
+    padding: 0 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .statement-inner {
+    max-width: 900px;
+    padding: 0 40px;
+  }
+
+  .statement-text {
+    font-family: 'Inter', sans-serif;
+    font-size: clamp(2.2rem, 4vw, 3.8rem);
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -0.035em;
+  }
+
+  .statement-text em {
+    font-style: normal;
+    font-weight: 400;
+    color: var(--blue);
+  }
+
+  .statement-sub {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.78rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-top: 40px;
+  }
+
+  /* ── ESSAY SECTION ── */
+  .essay-section {
+    padding: 120px 60px;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .essay-section .section-header {
+    margin-bottom: 80px;
+  }
+
+  .essay-columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    max-width: 1100px;
+  }
+
+  .essay-columns p {
+    font-size: 1.1rem;
+    color: var(--muted);
+    line-height: 1.85;
+    margin-bottom: 1.6em;
+  }
+
+  .essay-columns p:last-child {
+    margin-bottom: 0;
+  }
+
+  .essay-lead {
+    font-size: 1.3rem !important;
+    color: var(--ink) !important;
+    font-weight: 500;
+  }
+
+  /* ── SECTION DIVIDER ── */
+  .section-rule {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    padding: 0 60px;
+    margin: 0;
+  }
+
+  .section-rule-line { flex: 1; height: 1px; background: var(--rule); }
+  .section-rule-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.66rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 14px 24px;
+    border-left: 1px solid var(--rule);
+    border-right: 1px solid var(--rule);
+  }
+
+  .section-eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--red);
+    margin-bottom: 20px;
+  }
+
+  .section-title {
+    font-family: 'Inter', sans-serif;
+    font-size: clamp(2.4rem, 4vw, 3.6rem);
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.035em;
+  }
+
+  .section-header {
+    margin-bottom: 56px;
+  }
+
+  /* ── FEATURE GRID ── */
+  .features {
+    padding: 120px 60px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .feature-card {
+    padding: 60px 48px;
+    border-right: 1px solid var(--rule);
+    position: relative;
+    transition: background 0.3s;
+  }
+
+  .feature-card:last-child { border-right: none; }
+  .feature-card:hover { background: var(--cream); }
+
+  .feature-number {
+    font-family: 'Inter', sans-serif;
+    font-size: 6rem;
+    font-weight: 800;
+    color: var(--rule);
+    line-height: 1;
+    margin-bottom: 28px;
+    letter-spacing: -0.04em;
+    transition: color 0.3s;
+  }
+
+  .feature-card:hover .feature-number { color: var(--blue); opacity: 0.25; }
+
+  .feature-title {
+    font-family: 'Inter', sans-serif;
+    font-size: 1.7rem;
+    font-weight: 650;
+    margin-bottom: 18px;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+  }
+
+  .feature-desc {
+    font-size: 1rem;
+    color: var(--muted);
+    line-height: 1.75;
+  }
+
+  .feature-desc code {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.85em;
+    background: var(--cream);
+    padding: 2px 6px;
+  }
+
+  .feature-tag {
+    display: inline-block;
+    margin-top: 28px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--red);
+    border-bottom: 1px solid var(--red);
+    padding-bottom: 2px;
+  }
+
+  /* ── SPECS ── */
+  .specs-section {
+    padding: 120px 60px;
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 100px;
+    border-bottom: 1px solid var(--rule);
+    align-items: start;
+  }
+
+  .specs-label {
+    font-family: 'Inter', sans-serif;
+    font-size: clamp(2.4rem, 4vw, 3.6rem);
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.035em;
+    position: sticky;
+    top: 100px;
+  }
+
+  .specs-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+  }
+
+  .spec-item {
+    padding: 32px 0;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .spec-item:nth-child(odd) { padding-right: 48px; border-right: 1px solid var(--rule); }
+  .spec-item:nth-child(even) { padding-left: 48px; }
+
+  .spec-icon {
+    width: 40px; height: 40px;
+    margin-bottom: 16px;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .spec-icon svg { width: 24px; height: 24px; }
+
+  .spec-name {
+    font-family: 'Instrument Sans', sans-serif;
+    font-weight: 600;
+    font-size: 1rem;
+    margin-bottom: 8px;
+  }
+
+  .spec-detail {
+    font-size: 0.92rem;
+    color: var(--muted);
+    line-height: 1.65;
+  }
+
+  .spec-detail code {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.85em;
+    background: var(--cream);
+    padding: 2px 6px;
+  }
+
+  /* ── PIPELINE SECTION ── */
+  .pipeline-section {
+    padding: 120px 60px;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .pipeline-flow {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    margin-top: 64px;
+    max-width: 1200px;
+  }
+
+  .pipeline-stage {
+    flex: 1;
+    padding: 40px 32px;
+    border: 1px solid var(--rule);
+    border-right: none;
+    position: relative;
+    transition: background 0.3s;
+  }
+
+  .pipeline-stage:last-child { border-right: 1px solid var(--rule); }
+  .pipeline-stage:hover { background: var(--cream); }
+
+  .pipeline-stage-number {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--red);
+    margin-bottom: 16px;
+  }
+
+  .pipeline-stage-title {
+    font-family: 'Inter', sans-serif;
+    font-size: 1.3rem;
+    font-weight: 650;
+    margin-bottom: 12px;
+    letter-spacing: -0.02em;
+  }
+
+  .pipeline-stage-type {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--blue);
+    margin-bottom: 16px;
+    letter-spacing: 0.05em;
+  }
+
+  .pipeline-stage-desc {
+    font-size: 0.92rem;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+
+  .pipeline-arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    flex-shrink: 0;
+    color: var(--rule);
+    font-size: 1.4rem;
+  }
+
+  /* ── MATRIX SECTION ── */
+  .matrix-section {
+    padding: 120px 60px;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .matrix-mockup {
+    margin-top: 64px;
+    border: 1px solid var(--rule);
+    background: white;
+    overflow: hidden;
+    max-width: 1000px;
+  }
+
+  .matrix-topbar {
+    background: var(--ink);
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .matrix-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .matrix-dot.r { background: #c8302a; }
+  .matrix-dot.y { background: #b8902a; }
+  .matrix-dot.g { background: #2a8c4e; }
+
+  .matrix-title-bar {
+    margin-left: auto;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    color: rgba(255,255,255,0.45);
+    letter-spacing: 0.1em;
+  }
+
+  .matrix-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.74rem;
+  }
+
+  .matrix-table thead tr {
+    border-bottom: 2px solid var(--rule);
+  }
+
+  .matrix-table th {
+    padding: 12px 16px;
+    text-align: left;
+    font-size: 0.68rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 500;
+  }
+
+  .matrix-table th.filing-col {
+    text-align: center;
+    color: var(--blue);
+  }
+
+  .matrix-table td {
+    padding: 10px 16px;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+    color: #444;
+  }
+
+  .matrix-table td.center { text-align: center; }
+
+  .matrix-check { color: #2a8c4e; }
+  .matrix-diff { color: #d68a0a; }
+  .matrix-empty { color: var(--rule); }
+
+  /* ── MATH SECTION ── */
+  .math-section {
+    padding: 120px 60px;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .math-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    margin-top: 64px;
+  }
+
+  .math-card {
+    padding: 48px 40px;
+    border-right: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+    transition: background 0.3s;
+  }
+
+  .math-card:nth-child(3n) { border-right: none; }
+  .math-card:nth-child(n+4) { border-bottom: none; }
+  .math-card:hover { background: var(--cream); }
+
+  .math-card-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--red);
+    margin-bottom: 14px;
+  }
+
+  .math-card-title {
+    font-family: 'Inter', sans-serif;
+    font-size: 1.3rem;
+    font-weight: 650;
+    margin-bottom: 12px;
+    letter-spacing: -0.02em;
+    line-height: 1.25;
+  }
+
+  .math-card-desc {
+    font-size: 0.92rem;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+
+  .math-card-desc code {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.85em;
+    background: var(--cream);
+    padding: 2px 6px;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    padding: 48px 60px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid var(--rule);
+    margin-top: 60px;
+  }
+
+  .footer-logo {
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    font-size: 1.15rem;
+    letter-spacing: -0.03em;
+  }
+
+  .footer-note {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-align: right;
+  }
+
+  /* ── SCROLL REVEAL ── */
+  .reveal {
+    opacity: 0;
+    transform: translateY(32px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 900px) {
+    html { scroll-snap-type: y proximity; }
+    .masthead { padding: 14px 24px; }
+    .hero { grid-template-columns: 1fr; padding: 0 24px; padding-top: 60px; min-height: auto; }
+    .hero-left { padding: 60px 0 40px; border-right: none; border-bottom: 1px solid var(--rule); }
+    .hero-right { padding: 40px 0 60px; }
+    .features { grid-template-columns: 1fr; padding: 60px 24px; }
+    .feature-card { border-right: none; border-bottom: 1px solid var(--rule); padding: 40px 0; }
+    .matrix-section, .pipeline-section, .specs-section, .essay-section, .math-section { padding: 80px 24px; }
+    .specs-section { grid-template-columns: 1fr; gap: 48px; }
+    .specs-label { position: static; }
+    .specs-grid { grid-template-columns: 1fr; }
+    .spec-item:nth-child(odd) { padding-right: 0; border-right: none; }
+    .spec-item:nth-child(even) { padding-left: 0; }
+    .essay-columns { grid-template-columns: 1fr; gap: 40px; }
+    .statement { padding: 80px 24px; }
+    .snap-section { min-height: auto; }
+    .pipeline-flow { flex-direction: column; }
+    .pipeline-arrow { width: auto; height: 32px; transform: rotate(90deg); }
+    .math-grid { grid-template-columns: 1fr; }
+    .math-card { border-right: none; border-bottom: 1px solid var(--rule); }
+    .math-card:last-child { border-bottom: none; }
+    footer { padding: 32px 24px; flex-direction: column; gap: 12px; text-align: center; }
+    .footer-note { text-align: center; }
+    .section-rule { padding: 0 24px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- MASTHEAD -->
+<header class="masthead">
+  <div class="masthead-logo"><a href="../index.html">Redliner<span></span></a></div>
+  <div class="masthead-meta">
+    Structured Public Data<br>Schema Engineering
+  </div>
+</header>
+
+<!-- ─── PAGE 1: HERO ─── -->
+<section class="hero">
+  <div class="hero-left">
+    <p class="kicker">Semi-Structured Public Data</p>
+    <h1 class="hero-headline">
+      106,109 pages.<br>
+      All public.<br>
+      <em>All parseable.</em>
+    </h1>
+    <p class="hero-subhead">
+      The Federal Register published 106,109 pages in 2024 &mdash; over 400 pages per business day. Corporate governance documents &mdash; certificates of incorporation, bylaws, committee charters &mdash; are public exhibits attached to SEC filings. A massive, freely available, necessarily public dataset. Not blobs. Not clean tables. Semi-structured documents with internal patterns that make them fascinating for schema extraction and template inference.
+    </p>
+    <div class="hero-cta">
+      <a href="#matrix" class="btn-primary">The Filing Matrix</a>
+      <a href="#pipeline" class="btn-ghost">Schema Pipeline</a>
+    </div>
+  </div>
+
+  <div class="hero-right">
+    <div class="schema-mockup">
+      <div class="schema-topbar">
+        <div class="schema-dot r"></div>
+        <div class="schema-dot y"></div>
+        <div class="schema-dot g"></div>
+        <span class="schema-title">FilingBlueprint.swift</span>
+      </div>
+      <div class="schema-body">
+        <span class="schema-section-label">Registration Statement</span>
+        <div class="schema-field">
+          <span class="schema-field-name">filerName</span>
+          <span class="schema-field-value">New Providence Acq. Corp. III</span>
+        </div>
+        <div class="schema-field">
+          <span class="schema-field-name">domicile</span>
+          <span class="schema-field-value">Cayman Islands</span>
+        </div>
+        <div class="schema-field">
+          <span class="schema-field-name">ein</span>
+          <span class="schema-field-value">98-1234567</span>
+        </div>
+        <div class="schema-field">
+          <span class="schema-field-name">exchange</span>
+          <span class="schema-field-type">Nasdaq</span>
+        </div>
+        <span class="schema-section-label">Exhibits</span>
+        <div class="schema-field">
+          <span class="schema-field-name">Certificate of Incorporation</span>
+          <span class="schema-field-type">doc</span>
+        </div>
+        <div class="schema-field">
+          <span class="schema-field-name">Bylaws</span>
+          <span class="schema-field-type">doc</span>
+        </div>
+        <div class="schema-field">
+          <span class="schema-field-name">Audit Committee Charter</span>
+          <span class="schema-field-type">template</span>
+        </div>
+        <div class="schema-field">
+          <span class="schema-field-name">Code of Ethics</span>
+          <span class="schema-field-type">doc</span>
+        </div>
+        <span class="schema-section-label">Financial Statements</span>
+        <div class="schema-field">
+          <span class="schema-field-name">Balance Sheet</span>
+          <span class="schema-field-type">doc</span>
+        </div>
+        <div class="schema-field">
+          <span class="schema-field-name">Statement of Cash Flows</span>
+          <span class="schema-field-type">template</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── PAGE 2: STATEMENT ─── -->
+<section class="statement snap-section reveal">
+  <div class="statement-inner">
+    <p class="statement-text">
+      These documents have <em>internal structure</em> &mdash; numbered articles, defined terms, cross-references, boilerplate with meaningful variations. The schema should be <em>inferred, not invented.</em>
+    </p>
+    <p class="statement-sub">Structured data engineering on semi-structured public documents.</p>
+  </div>
+</section>
+
+<!-- SECTION RULE -->
+<div class="section-rule snap-section-auto">
+  <div class="section-rule-line"></div>
+  <span class="section-rule-label">The Dataset</span>
+  <div class="section-rule-line"></div>
+</div>
+
+<!-- ─── THE DATASET: ESSAY SECTION ─── -->
+<section class="essay-section reveal snap-section-auto" id="dataset">
+  <div class="section-header">
+    <p class="section-eyebrow">The Source Material</p>
+    <h2 class="section-title">A public corpus with<br>hidden structure.</h2>
+  </div>
+
+  <div class="essay-columns">
+    <div>
+      <p class="essay-lead">
+        Every public company files governance documents with the SEC. Certificates of incorporation, bylaws, committee charters, codes of ethics, warrant agreements &mdash; all attached as exhibits to registration statements and annual reports. All freely downloadable via EDGAR.
+      </p>
+      <p>
+        These are not random text. They follow conventions. Article numbering schemes. Defined term patterns. Cross-reference structures. Boilerplate paragraphs that recur across thousands of filings with small but meaningful variations &mdash; a different threshold here, an added carve-out there. The same document type from two different law firms will share 80% of its language and differ in precisely the places that matter.
+      </p>
+    </div>
+    <div>
+      <p>
+        This makes governance documents a uniquely interesting dataset for structured data engineering. They sit in the gap between unstructured text and clean relational data. Too patterned to treat as blobs. Too variable to treat as fixed schemas. The engineering challenge is to extract the latent structure &mdash; to infer the schema that generated these documents, and to build tooling that operates on that schema rather than on raw text.
+      </p>
+      <p>
+        Redliner treats this corpus as a first-class data engineering problem. The filing matrix cross-references documents across filings. The schema pipeline parses XSD taxonomies into typed fields. The template engine renders structured output from schema-driven forms. Every layer operates on declared structure, not discovered patterns.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION RULE -->
+<div class="section-rule snap-section-auto">
+  <div class="section-rule-line"></div>
+  <span class="section-rule-label">The Filing Matrix</span>
+  <div class="section-rule-line"></div>
+</div>
+
+<!-- ─── PAGE 3: FILING MATRIX ─── -->
+<section class="matrix-section reveal snap-section-auto" id="matrix">
+  <div class="section-header">
+    <p class="section-eyebrow">FilingMatrixView</p>
+    <h2 class="section-title">Every document. Every filing.<br>One cross-reference grid.</h2>
+  </div>
+
+  <div class="essay-columns" style="margin-bottom: 64px;">
+    <div>
+      <p class="essay-lead">
+        The filing matrix organizes documents by type, status, and entity. Rows are exhibit titles. Columns are filings. Cells show presence and diff status at a glance.
+      </p>
+      <p>
+        Each <code>FilingBlueprint</code> contains an array of <code>BlueprintSection</code> objects, each holding an array of <code>BlueprintExhibit</code> entries. The matrix extracts every unique exhibit title across all filings and normalizes them, stripping prefixes like "Form of" and "Amended and Restated" so that matching documents align regardless of naming convention.
+      </p>
+    </div>
+    <div>
+      <p>
+        Real fields from <code>FilingData.swift</code> drive the data: <code>filerName</code>, <code>domicile</code>, <code>sic</code>, <code>ein</code>, <code>registrationNumber</code>, <code>executiveName</code>, <code>serviceUponName</code>. Lawyer data is structured as an array of <code>Lawyer</code> objects, each carrying <code>name1</code>, <code>name2</code>, <code>firm</code>, and a full <code>PostalAddress</code> with <code>street1</code>, <code>street2</code>, <code>city</code>, <code>state</code>, <code>zip</code>, <code>phone</code>.
+      </p>
+      <p>
+        When two exhibits share a title but differ in content, the matrix shows a diff indicator. Click it and the system passes both versions to the comparison view. When they match, a checkmark. When absent, a dash. No ambiguity.
+      </p>
+    </div>
+  </div>
+
+  <div class="matrix-mockup">
+    <div class="matrix-topbar">
+      <div class="matrix-dot r"></div>
+      <div class="matrix-dot y"></div>
+      <div class="matrix-dot g"></div>
+      <span class="matrix-title-bar">FilingMatrixView</span>
+    </div>
+    <table class="matrix-table">
+      <thead>
+        <tr>
+          <th style="width:240px;">Exhibit</th>
+          <th class="filing-col">New Providence III</th>
+          <th class="filing-col">Graubard S-1</th>
+          <th class="filing-col">Kirkland S-1</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Cover Page</td>
+          <td class="center"><span class="matrix-check">&#10003;</span></td>
+          <td class="center"><span class="matrix-check">&#10003;</span></td>
+          <td class="center"><span class="matrix-check">&#10003;</span></td>
+        </tr>
+        <tr>
+          <td>Certificate of Incorporation</td>
+          <td class="center"><span class="matrix-check">&#10003;</span></td>
+          <td class="center"><span class="matrix-diff">&#8644;</span></td>
+          <td class="center"><span class="matrix-check">&#10003;</span></td>
+        </tr>
+        <tr>
+          <td>Bylaws</td>
+          <td class="center"><span class="matrix-check">&#10003;</span></td>
+          <td class="center"><span class="matrix-check">&#10003;</span></td>
+          <td class="center"><span class="matrix-diff">&#8644;</span></td>
+        </tr>
+        <tr>
+          <td>Warrant Agreement</td>
+          <td class="center"><span class="matrix-check">&#10003;</span></td>
+          <td class="center"><span class="matrix-diff">&#8644;</span></td>
+          <td class="center"><span class="matrix-check">&#10003;</span></td>
+        </tr>
+        <tr>
+          <td>Underwriting Agreement</td>
+          <td class="center"><span class="matrix-check">&#10003;</span></td>
+          <td class="center"><span class="matrix-check">&#10003;</span></td>
+          <td class="center"><span class="matrix-check">&#10003;</span></td>
+        </tr>
+        <tr>
+          <td>Audit Committee Charter</td>
+          <td class="center"><span class="matrix-check">&#10003;</span></td>
+          <td class="center"><span class="matrix-check">&#10003;</span></td>
+          <td class="center"><span class="matrix-empty">&mdash;</span></td>
+        </tr>
+        <tr>
+          <td>Compensation Committee Charter</td>
+          <td class="center"><span class="matrix-check">&#10003;</span></td>
+          <td class="center"><span class="matrix-empty">&mdash;</span></td>
+          <td class="center"><span class="matrix-check">&#10003;</span></td>
+        </tr>
+        <tr>
+          <td>Registration Rights Agreement</td>
+          <td class="center"><span class="matrix-check">&#10003;</span></td>
+          <td class="center"><span class="matrix-check">&#10003;</span></td>
+          <td class="center"><span class="matrix-check">&#10003;</span></td>
+        </tr>
+        <tr>
+          <td>Code of Ethics</td>
+          <td class="center"><span class="matrix-check">&#10003;</span></td>
+          <td class="center"><span class="matrix-check">&#10003;</span></td>
+          <td class="center"><span class="matrix-check">&#10003;</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- SECTION RULE -->
+<div class="section-rule snap-section-auto">
+  <div class="section-rule-line"></div>
+  <span class="section-rule-label">Capabilities</span>
+  <div class="section-rule-line"></div>
+</div>
+
+<!-- ─── PAGE 4: FEATURE CARDS ─── -->
+<section class="features reveal snap-section-auto" id="capabilities">
+  <div class="feature-card">
+    <div class="feature-number">01</div>
+    <h3 class="feature-title">Template Engine</h3>
+    <p class="feature-desc">
+      <code>TemplateEngine</code> processes markdown templates with <code>{{variableName}}</code> interpolation, <code>{{#if}}</code> conditionals, <code>{{#each}}</code> loops, <code>{{> partial}}</code> includes, and <code>{{compute}}</code> expressions. Filters like <code>| uppercase</code> and <code>| capitalize</code> transform values inline. A <code>TemplateContext</code> with a scoped stack resolves key paths at render time against live model state.
+    </p>
+    <span class="feature-tag">Render-Time Resolution</span>
+  </div>
+
+  <div class="feature-card">
+    <div class="feature-number">02</div>
+    <h3 class="feature-title">XSD Parsing</h3>
+    <p class="feature-desc">
+      <code>XSDParser</code> reads SEC XBRL taxonomy files and produces a <code>DocumentSchema</code> containing <code>SchemaSection</code> and <code>SchemaField</code> objects. Each field carries a <code>FieldType</code> mapped from XSD types: <code>monetary</code>, <code>shares</code>, <code>perShare</code>, <code>percent</code>, <code>textBlock</code>, <code>domain</code>. Abstract fields become grouping nodes. Concrete fields become form inputs. The schema drives the UI.
+    </p>
+    <span class="feature-tag">Schema-Driven Forms</span>
+  </div>
+
+  <div class="feature-card">
+    <div class="feature-number">03</div>
+    <h3 class="feature-title">Document Blueprints</h3>
+    <p class="feature-desc">
+      A <code>FilingBlueprint</code> defines the full structure of a filing: sections, exhibits, default field values, and lawyer profile. <code>LawyerProfile</code> presets from firms like Graubard Miller, Skadden Arps, Kirkland &amp; Ellis, and Loeb &amp; Loeb generate complete SPAC registration statement structures with correct exhibit lists, committee charters, and financial statement layouts on selection.
+    </p>
+    <span class="feature-tag">Structural Templates</span>
+  </div>
+</section>
+
+<!-- ─── STATEMENT ─── -->
+<section class="statement snap-section reveal">
+  <div class="statement-inner">
+    <p class="statement-text">
+      The schema is the <em>source of truth.</em> The form is a projection. The document is the output. Nothing is ad hoc.
+    </p>
+    <p class="statement-sub">XSD in. Validated document out.</p>
+  </div>
+</section>
+
+<!-- SECTION RULE -->
+<div class="section-rule snap-section-auto">
+  <div class="section-rule-line"></div>
+  <span class="section-rule-label">The Schema Pipeline</span>
+  <div class="section-rule-line"></div>
+</div>
+
+<!-- ─── PAGE 6: DEEP DIVE — SCHEMA PIPELINE ─── -->
+<section class="pipeline-section reveal snap-section-auto" id="pipeline">
+  <div class="section-header">
+    <p class="section-eyebrow">Deep Dive</p>
+    <h2 class="section-title">XSD to rendered form.<br>Four stages. One pipeline.</h2>
+  </div>
+
+  <div class="essay-columns" style="margin-bottom: 0;">
+    <div>
+      <p class="essay-lead">
+        Every governance document in Redliner flows through the same pipeline. An XSD taxonomy defines the schema. The parser extracts sections and fields. The engine generates forms. User input is captured and validated against the schema in real time.
+      </p>
+      <p>
+        <code>XSDParser</code> reads the raw XML and walks <code>xs:element</code> nodes, extracting the <code>name</code>, <code>type</code>, <code>abstract</code>, <code>nillable</code>, <code>xbrli:periodType</code>, and <code>substitutionGroup</code> attributes. Each element becomes a <code>SchemaField</code>. Role types with <code>link:definition</code> become <code>SchemaSection</code> objects, each mapped to an S-K item number like 1602 or 1603.
+      </p>
+    </div>
+    <div>
+      <p>
+        The resulting <code>DocumentSchema</code> holds sorted sections and typed fields. It exposes <code>fillableFields</code> (non-abstract, user-editable), <code>dimensions</code> (axis fields for table breakdowns), and <code>tables</code> (hypercube elements). Fields are grouped by inferred section prefix: Forepart, Prospectus Summary, Dilution, Sponsor, Trust Account, Redemption, De-SPAC Transaction.
+      </p>
+      <p>
+        <code>FilledDocument</code> captures user input against this schema. It stores values as <code>[String: String]</code>, provides typed accessors for <code>Bool</code>, <code>Decimal</code>, and <code>Int</code>, and validates every entry against the schema's type and nillability constraints. Unfilled required fields surface as <code>ValidationIssue.missingRequired</code>. Type mismatches surface as <code>ValidationIssue.typeMismatch</code>. The render method replaces <code>{{fieldName}}</code> placeholders and marks anything unfilled as <code>[MISSING: fieldName]</code>.
+      </p>
+    </div>
+  </div>
+
+  <div class="pipeline-flow">
+    <div class="pipeline-stage">
+      <div class="pipeline-stage-number">Stage 01</div>
+      <div class="pipeline-stage-title">XSD Taxonomy</div>
+      <div class="pipeline-stage-type">XSDParser.parse(data)</div>
+      <div class="pipeline-stage-desc">Raw SEC XBRL taxonomy file. Contains <code>xs:element</code> definitions, <code>link:roleType</code> sections, and <code>link:definition</code> metadata. The parser walks every node.</div>
+    </div>
+    <div class="pipeline-arrow">&rarr;</div>
+    <div class="pipeline-stage">
+      <div class="pipeline-stage-number">Stage 02</div>
+      <div class="pipeline-stage-title">SchemaSection</div>
+      <div class="pipeline-stage-type">roleURI + S-K reference</div>
+      <div class="pipeline-stage-desc">Disclosure sections extracted from role types. Each carries an <code>id</code>, <code>roleURI</code>, <code>title</code>, <code>skReference</code>, and <code>sortKey</code> for deterministic ordering.</div>
+    </div>
+    <div class="pipeline-arrow">&rarr;</div>
+    <div class="pipeline-stage">
+      <div class="pipeline-stage-number">Stage 03</div>
+      <div class="pipeline-stage-title">SchemaField</div>
+      <div class="pipeline-stage-type">FieldType + metadata</div>
+      <div class="pipeline-stage-desc">Typed fields: <code>monetary</code>, <code>shares</code>, <code>perShare</code>, <code>percent</code>, <code>textBlock</code>, <code>boolean</code>, <code>date</code>, <code>duration</code>. Each field knows whether it is abstract, nillable, a dimension, or a table.</div>
+    </div>
+    <div class="pipeline-arrow">&rarr;</div>
+    <div class="pipeline-stage">
+      <div class="pipeline-stage-number">Stage 04</div>
+      <div class="pipeline-stage-title">FilledDocument</div>
+      <div class="pipeline-stage-type">schema + values + metadata</div>
+      <div class="pipeline-stage-desc">User input captured as <code>[String: String]</code>. Validated against the schema in real time. Rendered through <code>TemplateEngine</code> with <code>{{field}}</code> interpolation. Unfilled fields marked <code>[MISSING]</code>.</div>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION RULE -->
+<div class="section-rule snap-section-auto">
+  <div class="section-rule-line"></div>
+  <span class="section-rule-label">Mathematical Depth</span>
+  <div class="section-rule-line"></div>
+</div>
+
+<!-- ─── MATHEMATICAL DEPTH SECTION ─── -->
+<section class="math-section reveal snap-section-auto" id="math">
+  <div class="section-header">
+    <p class="section-eyebrow">Schema Inference</p>
+    <h2 class="section-title">The mathematics of<br>generalizing across documents.</h2>
+  </div>
+
+  <div class="essay-columns" style="margin-bottom: 64px;">
+    <div>
+      <p class="essay-lead">
+        Inferring schemas from semi-structured documents is not a string-matching problem. It is a mathematical one. The corpus contains thousands of instances of the same document types, each a noisy realization of an underlying template. Recovering that template &mdash; and characterizing how instances vary around it &mdash; requires real mathematics.
+      </p>
+      <p>
+        A certificate of incorporation is not a fixed form. It is a point in a high-dimensional space of possible certificates, parameterized by jurisdiction, share structure, protective provisions, amendment thresholds, and dozens of other axes. Two certificates from the same law firm will be nearby in this space. Two from different firms will be further apart but still recognizably on the same manifold.
+      </p>
+    </div>
+    <div>
+      <p>
+        The engineering question is: given N observed documents of a type, what is the minimal schema that explains them? This is an overdetermined system &mdash; more observed constraints (provisions, clauses, structural patterns) than free parameters in the schema. The solution is not exact. It is an approximation problem, and the right tools come from numerical analysis, spectral theory, and information geometry.
+      </p>
+      <p>
+        Redliner's schema pipeline is the foundation for this work. The XSD parser, the typed fields, the template engine &mdash; these are the concrete infrastructure. The mathematical framework below describes the harder problem they are built to support.
+      </p>
+    </div>
+  </div>
+
+  <div class="math-grid">
+    <div class="math-card">
+      <div class="math-card-label">Topology</div>
+      <div class="math-card-title">Document structure as graphs</div>
+      <div class="math-card-desc">Articles, sections, subsections, cross-references, and defined terms form a directed graph. Topological invariants &mdash; connectivity, cycle structure, depth &mdash; distinguish document types and detect structural anomalies across filings.</div>
+    </div>
+    <div class="math-card">
+      <div class="math-card-label">Manifolds</div>
+      <div class="math-card-title">Continuous variation in boilerplate</div>
+      <div class="math-card-desc">Boilerplate is not identical across filings. It varies continuously &mdash; a threshold changes from 50% to 66 2/3%, a carve-out is added or removed. The space of observed variations forms a low-dimensional manifold embedded in the full text space.</div>
+    </div>
+    <div class="math-card">
+      <div class="math-card-label">Spectral Methods</div>
+      <div class="math-card-title">Clustering similar provisions</div>
+      <div class="math-card-desc">Given a similarity matrix over provisions (e.g., redemption clauses across 500 SPAC filings), spectral decomposition of the graph Laplacian reveals natural clusters &mdash; groups of provisions that are functionally equivalent despite surface-level variation.</div>
+    </div>
+    <div class="math-card">
+      <div class="math-card-label">Generating Functions</div>
+      <div class="math-card-title">Template composition</div>
+      <div class="math-card-desc">A document template is a function from parameter values to rendered text. Composing templates &mdash; nesting a share-structure block inside a certificate template inside a filing template &mdash; is function composition. Generating functions encode the combinatorics of valid compositions.</div>
+    </div>
+    <div class="math-card">
+      <div class="math-card-label">Chebyshev Polynomials</div>
+      <div class="math-card-title">Approximating field distributions</div>
+      <div class="math-card-desc">Numerical fields &mdash; authorized shares, par values, offering sizes &mdash; have empirical distributions across the corpus. Chebyshev polynomial approximation provides optimal uniform approximations of these distributions, enabling range validation and outlier detection with minimal terms.</div>
+    </div>
+    <div class="math-card">
+      <div class="math-card-label">Fisher Information</div>
+      <div class="math-card-title">Measuring parameter sensitivity</div>
+      <div class="math-card-desc">Some schema parameters matter more than others. The Fisher information matrix quantifies how sensitively the distribution of observed documents depends on each parameter &mdash; identifying which fields carry the most structural information and which are noise.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── STATEMENT ─── -->
+<section class="statement snap-section reveal">
+  <div class="statement-inner">
+    <p class="statement-text">
+      More constraints than degrees of freedom. An <em>overdetermined system.</em> The schema is the least-squares solution.
+    </p>
+    <p class="statement-sub">Schema inference as numerical analysis.</p>
+  </div>
+</section>
+
+<!-- SECTION RULE -->
+<div class="section-rule snap-section-auto">
+  <div class="section-rule-line"></div>
+  <span class="section-rule-label">Technical Specs</span>
+  <div class="section-rule-line"></div>
+</div>
+
+<!-- ─── PAGE 7: SPECS GRID ─── -->
+<section class="specs-section reveal snap-section-auto">
+  <div class="specs-label">
+    The types<br>behind the<br><em style="color:var(--blue)">documents.</em>
+  </div>
+  <div class="specs-grid">
+    <div class="spec-item">
+      <div class="spec-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+      </div>
+      <div class="spec-name">FilingData</div>
+      <div class="spec-detail">SwiftData <code>@Model</code> with <code>CoverPageData</code>, <code>PostalAddress</code>, and <code>Lawyer</code> value types. Converts to flat <code>[String: TemplateValue]</code> dictionaries for template rendering. Fields: <code>filerName</code>, <code>domicile</code>, <code>sic</code>, <code>ein</code>, <code>registrationNumber</code>, <code>executiveName</code>.</div>
+    </div>
+    <div class="spec-item">
+      <div class="spec-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      </div>
+      <div class="spec-name">FilingBlueprint</div>
+      <div class="spec-detail">Defines filing structure: <code>name</code>, <code>lawyerName</code>, <code>sections: [BlueprintSection]</code>, <code>defaultFields: [String: String]</code>. <code>BlueprintSection</code> holds exhibits with optional <code>templateKey</code> and <code>importedMarkdown</code>. <code>LawyerProfile</code> presets generate complete structures per firm.</div>
+    </div>
+    <div class="spec-item">
+      <div class="spec-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 7h18M3 12h18M3 17h18"/></svg>
+      </div>
+      <div class="spec-name">SchemaField</div>
+      <div class="spec-detail">Parsed from <code>xs:element</code>. Properties: <code>id</code>, <code>name</code>, <code>label</code>, <code>type: FieldType</code>, <code>isAbstract</code>, <code>isNillable</code>, <code>periodType</code>, <code>substitutionGroup</code>. Computed: <code>isFillable</code>, <code>isDimension</code>, <code>isTable</code>, <code>isMember</code>. Labels humanized from camelCase via <code>SchemaField.humanize()</code>.</div>
+    </div>
+    <div class="spec-item">
+      <div class="spec-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-1.447-.894L15 4m0 13V4m0 0L9 7"/></svg>
+      </div>
+      <div class="spec-name">SchemaSection</div>
+      <div class="spec-detail">Disclosure section from XSD <code>link:roleType</code>. Fields: <code>id</code>, <code>roleURI</code>, <code>title</code>, <code>skReference</code>, <code>sortKey</code>. Parses definitions like "99554.2 - Disclosure - S-K 1602, SPAC Registered Offerings" into structured components. Sorted by <code>sortKey</code> for deterministic ordering.</div>
+    </div>
+    <div class="spec-item">
+      <div class="spec-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      </div>
+      <div class="spec-name">TemplateEngine</div>
+      <div class="spec-detail">Renders markdown templates with <code>TemplateContext</code> scope stack. Supports <code>{{var}}</code>, <code>{{var | filter}}</code>, <code>{{#if}}</code>/<code>{{#unless}}</code>, <code>{{#each}}</code>, <code>{{#with}}</code>, <code>{{> partial}}</code>, <code>{{compute expr}}</code>, <code>{{format value "style"}}</code>. Values are <code>TemplateValue</code> enum: <code>.string</code>, <code>.number</code>, <code>.bool</code>, <code>.date</code>, <code>.array</code>, <code>.dictionary</code>.</div>
+    </div>
+    <div class="spec-item">
+      <div class="spec-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1M8 12l4 4m0 0l4-4m-4 4V4"/></svg>
+      </div>
+      <div class="spec-name">FilledDocument</div>
+      <div class="spec-detail">Runtime document instance: <code>schema: DocumentSchema</code>, <code>values: [String: String]</code>, <code>metadata: DocumentMetadata</code>. Typed accessors for <code>Bool</code>, <code>Decimal</code>, <code>Int</code>. Full validation against schema constraints. Template rendering with <code>[MISSING]</code> markers for unfilled placeholders.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── CLOSING ─── -->
+<section class="statement snap-section reveal" style="min-height: 80vh;">
+  <div class="statement-inner">
+    <p class="statement-text">
+      The schema defines the shape. The template defines the layout. The engine connects them. The document <em>assembles itself.</em>
+    </p>
+    <p class="statement-sub">Structured data engineering on public documents.</p>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="snap-section-auto">
+  <div class="footer-logo">Redliner<span style="display:inline-block;width:6px;height:6px;background:#c8302a;border-radius:50%;margin-left:2px;vertical-align:middle;position:relative;top:-1px"></span></div>
+  <div style="text-align:center;">
+    <div style="font-family:'DM Mono',monospace;font-size:0.65rem;color:var(--muted);letter-spacing:0.1em;margin-bottom:6px;">Schema-driven document engineering on public data.</div>
+    <div style="font-family:'DM Mono',monospace;font-size:0.65rem;letter-spacing:0.1em;">
+      <a href="../index.html" style="color:var(--muted);text-decoration:none;border-bottom:1px solid var(--rule);">technical</a>
+      <span style="color:var(--rule);margin:0 8px;">·</span>
+      <span style="color:var(--ink);">governance</span>
+      <span style="color:var(--rule);margin:0 8px;">·</span>
+      <a href="https://github.com/advocatesclose" style="color:var(--muted);text-decoration:none;border-bottom:1px solid var(--rule);">github</a>
+    </div>
+  </div>
+  <div class="footer-note">
+    macOS 15+ · Swift 6 · Apple Frameworks
+  </div>
+</footer>
+
+<script>
+  // Scroll reveal
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.1 });
+  reveals.forEach(el => observer.observe(el));
+
+  // subtle shimmer on hover for schema mockup
+  const mockup = document.querySelector('.schema-mockup');
+  if (mockup) {
+    mockup.addEventListener('mousemove', (e) => {
+      const rect = mockup.getBoundingClientRect();
+      const x = ((e.clientX - rect.left) / rect.width - 0.5) * 6;
+      const y = ((e.clientY - rect.top) / rect.height - 0.5) * 6;
+      mockup.style.transform = `perspective(800px) rotateY(${x}deg) rotateX(${-y}deg)`;
+    });
+    mockup.addEventListener('mouseleave', () => {
+      mockup.style.transform = '';
+      mockup.style.transition = 'transform 0.5s ease';
+    });
+    mockup.addEventListener('mouseenter', () => {
+      mockup.style.transition = 'transform 0.1s ease';
+    });
+  }
+</script>
+</body>
+</html>

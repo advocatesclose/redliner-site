@@ -1,0 +1,1009 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Redliner — Census Data</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=DM+Mono:wght@300;400;500&family=Instrument+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0d0d0e;
+    --paper: #f5f2eb;
+    --cream: #ede9df;
+    --red: #c8302a;
+    --blue: #1e4f9c;
+    --gold: #b8902a;
+    --muted: #7a7570;
+    --rule: #d4cfc4;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html {
+    scroll-behavior: smooth;
+    scroll-snap-type: y mandatory;
+  }
+
+  body {
+    background-color: var(--paper);
+    color: var(--ink);
+    font-family: 'Instrument Sans', sans-serif;
+    font-size: 18px;
+    line-height: 1.65;
+    overflow-x: hidden;
+  }
+
+  /* ── NOISE TEXTURE OVERLAY ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 999;
+    opacity: 0.5;
+  }
+
+  /* ── SCROLL SNAP ── */
+  .snap-section {
+    scroll-snap-align: start;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .snap-section-auto {
+    scroll-snap-align: start;
+  }
+
+  /* ── MASTHEAD ── */
+  .masthead {
+    border-bottom: 2px solid var(--ink);
+    padding: 18px 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: var(--paper);
+    z-index: 100;
+    animation: slideDown 0.6s ease both;
+  }
+
+  @keyframes slideDown {
+    from { transform: translateY(-100%); opacity: 0; }
+    to   { transform: translateY(0);     opacity: 1; }
+  }
+
+  .masthead-logo {
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    font-size: 1.4rem;
+    letter-spacing: -0.03em;
+  }
+
+  .masthead-logo a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .masthead-logo span {
+    display: inline-block;
+    width: 8px; height: 8px;
+    background: var(--red);
+    border-radius: 50%;
+    margin-left: 3px;
+    vertical-align: middle;
+    position: relative;
+    top: -2px;
+  }
+
+  .masthead-meta {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    text-align: right;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    padding: 0 60px;
+    padding-top: 60px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    min-height: 100vh;
+    border-bottom: 1px solid var(--rule);
+    overflow: hidden;
+    scroll-snap-align: start;
+  }
+
+  .hero-left {
+    padding: 120px 80px 120px 0;
+    border-right: 1px solid var(--rule);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    animation: fadeUp 0.9s 0.2s ease both;
+  }
+
+  @keyframes fadeUp {
+    from { transform: translateY(40px); opacity: 0; }
+    to   { transform: translateY(0);    opacity: 1; }
+  }
+
+  .kicker {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.78rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--red);
+    margin-bottom: 32px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .kicker::before {
+    content: '';
+    display: block;
+    width: 40px;
+    height: 1px;
+    background: var(--red);
+  }
+
+  .hero-headline {
+    font-family: 'Inter', sans-serif;
+    font-size: clamp(3rem, 5.5vw, 6rem);
+    font-weight: 800;
+    line-height: 0.95;
+    letter-spacing: -0.045em;
+    margin-bottom: 48px;
+  }
+
+  .hero-headline em {
+    font-style: normal;
+    font-weight: 400;
+    color: var(--blue);
+  }
+
+  .hero-subhead {
+    font-size: 1.2rem;
+    color: var(--muted);
+    max-width: 520px;
+    line-height: 1.75;
+    border-left: 3px solid var(--gold);
+    padding-left: 24px;
+    margin-bottom: 56px;
+  }
+
+  .hero-cta {
+    display: inline-flex;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .btn-primary {
+    background: var(--ink);
+    color: var(--paper);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.78rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    padding: 16px 32px;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.2s, transform 0.15s;
+    display: inline-block;
+  }
+
+  .btn-primary:hover { background: var(--blue); transform: translateY(-2px); }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--ink);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.78rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    padding: 15px 32px;
+    border: 1px solid var(--ink);
+    cursor: pointer;
+    text-decoration: none;
+    transition: border-color 0.2s, color 0.2s, transform 0.15s;
+    display: inline-block;
+  }
+
+  .btn-ghost:hover { border-color: var(--blue); color: var(--blue); transform: translateY(-2px); }
+
+  /* ── HERO RIGHT ── */
+  .hero-right {
+    padding: 120px 0 120px 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: fadeUp 0.9s 0.45s ease both;
+  }
+
+  .doc-mockup {
+    width: 100%;
+    max-width: 440px;
+    background: white;
+    border: 1px solid var(--rule);
+    box-shadow: 12px 16px 0 var(--rule), 24px 32px 0 rgba(0,0,0,0.05);
+    overflow: hidden;
+    position: relative;
+  }
+
+  .doc-topbar {
+    background: var(--ink);
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .doc-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .doc-dot.r { background: #c8302a; }
+  .doc-dot.y { background: #b8902a; }
+  .doc-dot.g { background: #2a8c4e; }
+
+  .doc-title {
+    margin-left: auto;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    color: rgba(255,255,255,0.45);
+    letter-spacing: 0.1em;
+  }
+
+  .doc-body {
+    padding: 32px 28px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    line-height: 1.9;
+    color: #333;
+  }
+
+  .doc-line { display: block; margin-bottom: 4px; }
+  .doc-heading { font-weight: 500; font-size: 0.82rem; color: var(--ink); margin-bottom: 8px; display: block; }
+
+  .doc-degraded {
+    color: var(--muted);
+    opacity: 0.7;
+    letter-spacing: 0.02em;
+  }
+
+  .doc-ocr {
+    color: var(--blue);
+    background: rgba(30,79,156,0.07);
+    padding: 0 2px;
+  }
+
+  .doc-error {
+    color: var(--red);
+    background: rgba(200,48,42,0.07);
+    padding: 0 2px;
+    text-decoration: underline wavy;
+    text-decoration-color: rgba(200,48,42,0.4);
+  }
+
+  .doc-table-line {
+    color: var(--gold);
+  }
+
+  .tag-chip {
+    display: inline-block;
+    font-size: 0.58rem;
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 2px 7px;
+    border-radius: 2px;
+    margin-left: 6px;
+    vertical-align: middle;
+    position: relative;
+    top: -1px;
+  }
+
+  .tag-ocr { background: rgba(30,79,156,0.1); color: var(--blue); }
+  .tag-tbl { background: rgba(184,144,42,0.1); color: var(--gold); }
+  .tag-err { background: rgba(200,48,42,0.1); color: var(--red); }
+
+  .cursor-blink {
+    display: inline-block;
+    width: 2px; height: 12px;
+    background: var(--ink);
+    margin-left: 2px;
+    vertical-align: middle;
+    animation: blink 1.1s step-end infinite;
+  }
+
+  @keyframes blink {
+    50% { opacity: 0; }
+  }
+
+  /* ── STATEMENT SECTION ── */
+  .statement {
+    padding: 0 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .statement-inner {
+    max-width: 900px;
+    padding: 0 40px;
+  }
+
+  .statement-text {
+    font-family: 'Inter', sans-serif;
+    font-size: clamp(2.2rem, 4vw, 3.8rem);
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -0.035em;
+  }
+
+  .statement-text em {
+    font-style: normal;
+    font-weight: 400;
+    color: var(--blue);
+  }
+
+  .statement-sub {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.78rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-top: 40px;
+  }
+
+  /* ── ESSAY SECTION ── */
+  .essay-section {
+    padding: 120px 60px;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .essay-section .section-header {
+    margin-bottom: 80px;
+  }
+
+  .essay-columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    max-width: 1100px;
+  }
+
+  .essay-columns p {
+    font-size: 1.1rem;
+    color: var(--muted);
+    line-height: 1.85;
+    margin-bottom: 1.6em;
+  }
+
+  .essay-columns p:last-child {
+    margin-bottom: 0;
+  }
+
+  .essay-lead {
+    font-size: 1.3rem !important;
+    color: var(--ink) !important;
+    font-weight: 500;
+  }
+
+  /* ── SECTION DIVIDER ── */
+  .section-rule {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    padding: 0 60px;
+    margin: 0;
+  }
+
+  .section-rule-line { flex: 1; height: 1px; background: var(--rule); }
+  .section-rule-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.66rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 14px 24px;
+    border-left: 1px solid var(--rule);
+    border-right: 1px solid var(--rule);
+  }
+
+  .section-eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--red);
+    margin-bottom: 20px;
+  }
+
+  .section-title {
+    font-family: 'Inter', sans-serif;
+    font-size: clamp(2.4rem, 4vw, 3.6rem);
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.035em;
+  }
+
+  .section-header {
+    margin-bottom: 56px;
+  }
+
+  /* ── FEATURE GRID ── */
+  .features {
+    padding: 120px 60px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .feature-card {
+    padding: 60px 48px;
+    border-right: 1px solid var(--rule);
+    position: relative;
+    transition: background 0.3s;
+  }
+
+  .feature-card:last-child { border-right: none; }
+  .feature-card:hover { background: var(--cream); }
+
+  .feature-number {
+    font-family: 'Inter', sans-serif;
+    font-size: 6rem;
+    font-weight: 800;
+    color: var(--rule);
+    line-height: 1;
+    margin-bottom: 28px;
+    letter-spacing: -0.04em;
+    transition: color 0.3s;
+  }
+
+  .feature-card:hover .feature-number { color: var(--blue); opacity: 0.25; }
+
+  .feature-title {
+    font-family: 'Inter', sans-serif;
+    font-size: 1.7rem;
+    font-weight: 650;
+    margin-bottom: 18px;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+  }
+
+  .feature-desc {
+    font-size: 1rem;
+    color: var(--muted);
+    line-height: 1.75;
+  }
+
+  .feature-desc code {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.85em;
+    background: var(--cream);
+    padding: 2px 6px;
+  }
+
+  .feature-tag {
+    display: inline-block;
+    margin-top: 28px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--red);
+    border-bottom: 1px solid var(--red);
+    padding-bottom: 2px;
+  }
+
+  /* ── SPECS ── */
+  .specs-section {
+    padding: 120px 60px;
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 100px;
+    border-bottom: 1px solid var(--rule);
+    align-items: start;
+  }
+
+  .specs-label {
+    font-family: 'Inter', sans-serif;
+    font-size: clamp(2.4rem, 4vw, 3.6rem);
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.035em;
+    position: sticky;
+    top: 100px;
+  }
+
+  .specs-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+  }
+
+  .spec-item {
+    padding: 32px 0;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .spec-item:nth-child(odd) { padding-right: 48px; border-right: 1px solid var(--rule); }
+  .spec-item:nth-child(even) { padding-left: 48px; }
+
+  .spec-icon {
+    width: 40px; height: 40px;
+    margin-bottom: 16px;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .spec-icon svg { width: 24px; height: 24px; }
+
+  .spec-name {
+    font-family: 'Instrument Sans', sans-serif;
+    font-weight: 600;
+    font-size: 1rem;
+    margin-bottom: 8px;
+  }
+
+  .spec-detail {
+    font-size: 0.92rem;
+    color: var(--muted);
+    line-height: 1.65;
+  }
+
+  /* ── DATA CALLOUT (DARK SECTION) ── */
+  .data-callout {
+    margin: 0 60px;
+    border: 1px solid var(--ink);
+    padding: 72px 80px;
+    background: var(--ink);
+    color: var(--paper);
+    margin-bottom: 0;
+  }
+
+  .data-callout-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 40px;
+  }
+
+  .data-callout-title {
+    font-family: 'Inter', sans-serif;
+    font-size: 2.2rem;
+    font-weight: 650;
+    margin-bottom: 48px;
+    line-height: 1.2;
+    letter-spacing: -0.025em;
+  }
+
+  .data-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 48px;
+  }
+
+  .data-stat {
+    border-left: 1px solid rgba(245,242,235,0.15);
+    padding-left: 28px;
+  }
+
+  .data-number {
+    font-family: 'Inter', sans-serif;
+    font-size: 2.8rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+    margin-bottom: 8px;
+    color: var(--paper);
+  }
+
+  .data-unit {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 12px;
+  }
+
+  .data-desc {
+    font-size: 0.92rem;
+    color: rgba(245,242,235,0.6);
+    line-height: 1.65;
+  }
+
+  .data-badges {
+    display: flex;
+    gap: 14px;
+    margin-top: 48px;
+    flex-wrap: wrap;
+  }
+
+  .data-badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.66rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 9px 16px;
+    border: 1px solid rgba(245,242,235,0.2);
+    color: rgba(245,242,235,0.6);
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    padding: 48px 60px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid var(--rule);
+    margin-top: 60px;
+  }
+
+  .footer-logo {
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    font-size: 1.15rem;
+    letter-spacing: -0.03em;
+  }
+
+  .footer-note {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-align: right;
+  }
+
+  /* ── SCROLL REVEAL ── */
+  .reveal {
+    opacity: 0;
+    transform: translateY(32px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 900px) {
+    html { scroll-snap-type: y proximity; }
+    .masthead { padding: 14px 24px; }
+    .hero { grid-template-columns: 1fr; padding: 0 24px; padding-top: 60px; min-height: auto; }
+    .hero-left { padding: 60px 0 40px; border-right: none; border-bottom: 1px solid var(--rule); }
+    .hero-right { padding: 40px 0 60px; }
+    .features { grid-template-columns: 1fr; padding: 60px 24px; }
+    .feature-card { border-right: none; border-bottom: 1px solid var(--rule); padding: 40px 0; }
+    .specs-section, .essay-section { padding: 80px 24px; }
+    .specs-section { grid-template-columns: 1fr; gap: 48px; }
+    .specs-label { position: static; }
+    .specs-grid { grid-template-columns: 1fr; }
+    .spec-item:nth-child(odd) { padding-right: 0; border-right: none; }
+    .spec-item:nth-child(even) { padding-left: 0; }
+    .data-callout { margin: 0 24px; padding: 48px 32px; }
+    .data-grid { grid-template-columns: 1fr; gap: 32px; }
+    .essay-columns { grid-template-columns: 1fr; gap: 40px; }
+    .statement { padding: 80px 24px; }
+    .snap-section { min-height: auto; }
+    footer { padding: 32px 24px; flex-direction: column; gap: 12px; text-align: center; }
+    .footer-note { text-align: center; }
+    .section-rule { padding: 0 24px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- MASTHEAD -->
+<header class="masthead">
+  <div class="masthead-logo"><a href="../index.html">Redliner<span></span></a></div>
+  <div class="masthead-meta">
+    Historical Data<br>Computational Methods
+  </div>
+</header>
+
+<!-- ─── PAGE 1: HERO ─── -->
+<section class="hero">
+  <div class="hero-left">
+    <p class="kicker">U.S. Census</p>
+    <h1 class="hero-headline">
+      22 volumes.<br>
+      Eight years<br>
+      <em>to count.</em>
+    </h1>
+    <p class="hero-subhead">
+      The 1880 census took more than eight years to tabulate by hand. Herman Hollerith built a machine to solve it. His company became IBM. The entire computing industry was born from this one problem: how do you process census data?
+    </p>
+    <div class="hero-cta">
+      <a href="#hollerith" class="btn-primary">The Hollerith Story</a>
+      <a href="#methods" class="btn-ghost">Methods</a>
+    </div>
+  </div>
+
+  <div class="hero-right">
+    <div class="doc-mockup">
+      <div class="doc-topbar">
+        <div class="doc-dot r"></div>
+        <div class="doc-dot y"></div>
+        <div class="doc-dot g"></div>
+        <span class="doc-title">census_1880_vol_1_p0347.tiff</span>
+      </div>
+      <div class="doc-body">
+        <span class="doc-heading">TABLE IX. -- POPULATION BY COUNTIES</span>
+        <span class="doc-line doc-degraded">
+          &#9474; County &nbsp;&nbsp;&nbsp;&#9474; White &nbsp;&#9474; Col'd &nbsp;&#9474; Total &nbsp;&#9474;
+        </span>
+        <span class="doc-line doc-degraded">
+          &#9474;----------&#9474;-------&#9474;-------&#9474;-------&#9474;
+        </span>
+        <span class="doc-line">
+          &#9474; <span class="doc-ocr">Albany</span> &nbsp;&nbsp;&#9474; <span class="doc-ocr">154,890</span> &#9474; <span class="doc-error">l,203</span> &#9474; 156,093 &#9474;
+        </span>
+        <span class="doc-line">
+          &#9474; <span class="doc-ocr">Allegany</span> &#9474; <span class="doc-ocr">41,881</span> &nbsp;&#9474; <span class="doc-ocr">209</span> &nbsp;&nbsp;&#9474; &nbsp;42,090 &#9474;
+        </span>
+        <span class="doc-line" style="margin-top:12px; color: #999">
+          &#8627; pipeline/
+        </span>
+        <span class="doc-line" style="margin-top:4px">
+          &nbsp;&nbsp;tesseract --psm 6 <span class="tag-chip tag-ocr">ocr</span>
+        </span>
+        <span class="doc-line" style="margin-top:4px">
+          &nbsp;&nbsp;table_detect <span class="tag-chip tag-tbl">grid</span>
+        </span>
+        <span class="doc-line" style="margin-top:4px">
+          &nbsp;&nbsp;<span class="doc-error">l,203 -> 1,203</span> <span class="tag-chip tag-err">fix</span><span class="cursor-blink"></span>
+        </span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── PAGE 2: THE HOLLERITH STORY ─── -->
+<section class="essay-section snap-section-auto reveal" id="hollerith">
+  <div class="section-header">
+    <p class="section-eyebrow">The Origin</p>
+    <h2 class="section-title">The census has always been<br>a computational frontier.</h2>
+  </div>
+  <div class="essay-columns">
+    <div>
+      <p class="essay-lead">
+        In 1880, the United States Census Bureau attempted to count 50 million Americans. The census produced 22 volumes covering population, manufactures, agriculture, transportation, petroleum, ship building, fisheries, printing, and social statistics. It took more than eight years to tabulate the results. By the time the count was finished, the data was obsolete.
+      </p>
+      <p>
+        Herman Hollerith, a young statistician at the Census Bureau, understood the problem. The bottleneck was not collection -- it was processing. Every record had to be read, classified, cross-tabulated, and aggregated by hand. Thousands of clerks, years of work, millions of dollars. Hollerith built an electromechanical tabulating machine that encoded census data onto punch cards and sorted them automatically.
+      </p>
+    </div>
+    <div>
+      <p>
+        For the 1890 census, Hollerith's machine completed the initial population count in six months. The full detailed tabulation -- all cross-tabulations, all demographic breakdowns, all geographic aggregations -- finished in two years. The Bureau saved an estimated $5 million and more than two years of labor compared to the 1880 method.
+      </p>
+      <p>
+        Hollerith founded the Tabulating Machine Company to commercialize his invention. In 1911, it merged with three other firms to form the Computing-Tabulating-Recording Company. In 1924, CTR was renamed International Business Machines Corporation. IBM. The entire computing industry -- every mainframe, every personal computer, every server -- traces its commercial lineage to a Census Bureau statistician who looked at 22 volumes of data and asked: how do I process this?
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ─── PAGE 3: STATEMENT ─── -->
+<section class="statement snap-section reveal">
+  <div class="statement-inner">
+    <p class="statement-text">
+      Tens of thousands of pages. No PDF/A. Every table had to be <em>Tesseract'd and reconstructed.</em>
+    </p>
+    <p class="statement-sub">19th-century typography. Degraded scans. Complex table headers. None of it born-digital.</p>
+  </div>
+</section>
+
+<!-- SECTION RULE -->
+<div class="section-rule snap-section-auto">
+  <div class="section-rule-line"></div>
+  <span class="section-rule-label">Engineering</span>
+  <div class="section-rule-line"></div>
+</div>
+
+<!-- ─── PAGE 4: FEATURE CARDS ─── -->
+<section class="features reveal snap-section-auto" id="methods">
+  <div class="feature-card">
+    <div class="feature-number">01</div>
+    <h3 class="feature-title">Historical OCR</h3>
+    <p class="feature-desc">
+      Tesseract on 19th-century printing. Varying typefaces across decades -- the 1850 census uses different fonts than the 1880. Ink density varies within a single page. Paper has degraded over a century. Scan quality depends on the institution that digitized it. The OCR engine must handle all of this without manual tuning per page, producing character-level confidence scores that downstream systems use for error correction.
+    </p>
+    <span class="feature-tag">Tesseract OCR</span>
+  </div>
+
+  <div class="feature-card">
+    <div class="feature-number">02</div>
+    <h3 class="feature-title">Table Reconstruction</h3>
+    <p class="feature-desc">
+      Finding table boundaries in a page that mixes prose, headers, footnotes, and tabular data. Detecting ruled lines. Parsing multi-level column headers where a single spanning header covers three sub-columns. Handling merged cells. Extracting footnote markers embedded in data cells and linking them to the footnotes at the bottom. Reconstructing the 2D spatial relationships that a human reader grasps instantly.
+    </p>
+    <span class="feature-tag">Computer Vision</span>
+  </div>
+
+  <div class="feature-card">
+    <div class="feature-number">03</div>
+    <h3 class="feature-title">Cross-Volume Reconciliation</h3>
+    <p class="feature-desc">
+      Population counts in Volume 1 must reconcile with manufacturing data in Volume 5 and agricultural data in Volume 7. County totals must sum to state totals. State totals must sum to national totals. When they don't -- and they often don't, because OCR introduces errors -- the redundant constraints become a system of equations that can be solved to identify and correct the errors.
+    </p>
+    <span class="feature-tag">Error Correction</span>
+  </div>
+</section>
+
+<!-- ─── PAGE 5: MATHEMATICAL STATEMENT ─── -->
+<section class="statement snap-section reveal" style="border-bottom: 1px solid var(--rule);">
+  <div class="statement-inner">
+    <p class="statement-text">
+      Census data has <em>mathematical structure.</em><br>The processing should exploit it.
+    </p>
+    <p class="statement-sub">Topology. Connected components. Overdetermined systems.</p>
+  </div>
+</section>
+
+<!-- SECTION RULE -->
+<div class="section-rule snap-section-auto">
+  <div class="section-rule-line"></div>
+  <span class="section-rule-label">Mathematical Foundations</span>
+  <div class="section-rule-line"></div>
+</div>
+
+<!-- ─── PAGE 6: SPECS GRID ─── -->
+<section class="specs-section reveal snap-section-auto">
+  <div class="specs-label">
+    The math<br>behind<br><em style="color:var(--blue)">the parsing.</em>
+  </div>
+  <div class="specs-grid">
+    <div class="spec-item">
+      <div class="spec-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><path d="M12 3v18M3 12h18M5.6 5.6l12.8 12.8M18.4 5.6L5.6 18.4"/></svg>
+      </div>
+      <div class="spec-name">Topology</div>
+      <div class="spec-detail">Geographic hierarchies -- nation, state, county, township, enumeration district -- form a tree. Statistical aggregation must respect this tree structure. Totals propagate upward. Breakdowns propagate downward. Errors at any node are detectable by checking consistency with parent and child nodes.</div>
+    </div>
+    <div class="spec-item">
+      <div class="spec-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="4" y="4" width="16" height="16" rx="0"/><path d="M4 10h16M10 4v16"/><circle cx="7" cy="7" r="1" fill="currentColor"/><circle cx="7" cy="14" r="1" fill="currentColor"/><circle cx="14" cy="7" r="1" fill="currentColor"/><circle cx="14" cy="14" r="1" fill="currentColor"/></svg>
+      </div>
+      <div class="spec-name">Connected Components</div>
+      <div class="spec-detail">Table detection is a connected components problem. Pixels belonging to ruled lines, text, and whitespace form connected regions. Identifying which connected components constitute a table -- versus a paragraph, a header, or a footnote -- requires analyzing spatial adjacency and geometric regularity.</div>
+    </div>
+    <div class="spec-item">
+      <div class="spec-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 20c4-2 6-8 8-14s4-4 10 0"/><circle cx="7" cy="14" r="2"/><circle cx="17" cy="8" r="2"/></svg>
+      </div>
+      <div class="spec-name">Manifolds</div>
+      <div class="spec-detail">Census form design evolves smoothly across decades. The 1850 form is a perturbation of the 1840 form. The 1860 form perturbs the 1850. Each decennial census occupies a point on a low-dimensional manifold of form designs, and understanding this manifold helps predict layout conventions for forms the parser has not yet seen.</div>
+    </div>
+    <div class="spec-item">
+      <div class="spec-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 4h16v16H4z"/><path d="M4 12h16M12 4v16"/><path d="M4 4l16 16"/><path d="M20 4L4 20"/></svg>
+      </div>
+      <div class="spec-name">Overdetermined Systems</div>
+      <div class="spec-detail">A census table has more constraints than degrees of freedom. Row totals, column totals, and grand totals create redundant equations. When OCR produces a digit that violates these constraints, the system is overdetermined and the least-squares solution identifies the most likely error locations and corrections.</div>
+    </div>
+    <div class="spec-item">
+      <div class="spec-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 17l4-4 4 4 4-8 6 6"/><path d="M17 7h4v4"/></svg>
+      </div>
+      <div class="spec-name">Hough Transforms</div>
+      <div class="spec-detail">Detecting ruled lines in degraded scans. The Hough transform maps edge pixels in image space to curves in parameter space. Intersections in parameter space reveal lines in image space -- even when the lines are broken, faded, or partially obscured by overprinted text.</div>
+    </div>
+    <div class="spec-item">
+      <div class="spec-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 3v18"/><path d="M5 8c2-3 5-4 7-4s5 1 7 4"/><path d="M5 16c2 3 5 4 7 4s5-1 7-4"/></svg>
+      </div>
+      <div class="spec-name">Non-Stationary Structure</div>
+      <div class="spec-detail">Table layouts and typographic conventions change across decades. The 1790 census is a simple enumeration list. The 1880 census uses complex multi-level headers with merged cells. A parser that assumes stationarity -- that all censuses look the same -- will fail. The structure of the document is itself a function of time.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── PAGE 7: DATA SCALE CALLOUT ─── -->
+<div class="data-callout reveal snap-section-auto">
+  <p class="data-callout-label">Historical Data at Scale</p>
+  <h3 class="data-callout-title">The archive. None of it born-digital. All of it requiring OCR.</h3>
+  <div class="data-grid">
+    <div class="data-stat">
+      <div class="data-number">22</div>
+      <div class="data-unit">Volumes (1880)</div>
+      <div class="data-desc">Population, manufactures, agriculture, transportation, petroleum, ship building, fisheries, printing, social statistics. Each volume hundreds of pages. All scanned images, not searchable text.</div>
+    </div>
+    <div class="data-stat">
+      <div class="data-number">23</div>
+      <div class="data-unit">Decennial Censuses</div>
+      <div class="data-desc">From 1790 to 2020. The 19th-century reports are the hardest: pre-digital typography, inconsistent layouts, degraded paper, and no standardized table format across decades.</div>
+    </div>
+    <div class="data-stat">
+      <div class="data-number">8+</div>
+      <div class="data-unit">Years to Tabulate</div>
+      <div class="data-desc">The 1880 census took more than eight years by hand. Hollerith's machine did 1890 in two. The problem has always been the same: how do you turn pages into data?</div>
+    </div>
+  </div>
+  <div class="data-badges">
+    <span class="data-badge">Tesseract OCR</span>
+    <span class="data-badge">Table Detection</span>
+    <span class="data-badge">Cross-Volume Reconciliation</span>
+    <span class="data-badge">On-Device Processing</span>
+  </div>
+</div>
+
+<!-- ─── PAGE 8: CLOSING ─── -->
+<section class="statement snap-section reveal" style="min-height: 80vh;">
+  <div class="statement-inner">
+    <p class="statement-text">
+      The census has always been a <em>computational frontier.</em><br>Hollerith built punch cards. We build parsers.
+    </p>
+    <p class="statement-sub">The lineage is direct.</p>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="snap-section-auto">
+  <div class="footer-logo">Redliner<span style="display:inline-block;width:6px;height:6px;background:#c8302a;border-radius:50%;margin-left:2px;vertical-align:middle;position:relative;top:-1px"></span></div>
+  <div style="text-align:center;">
+    <div style="font-family:'DM Mono',monospace;font-size:0.65rem;color:var(--muted);letter-spacing:0.1em;margin-bottom:6px;">Historical data. Computational methods.</div>
+    <div style="font-family:'DM Mono',monospace;font-size:0.65rem;letter-spacing:0.1em;">
+      <a href="../index.html" style="color:var(--muted);text-decoration:none;border-bottom:1px solid var(--rule);">technical</a>
+      <span style="color:var(--rule);margin:0 8px;">·</span>
+      <a href="../congress/index.html" style="color:var(--muted);text-decoration:none;border-bottom:1px solid var(--rule);">congress</a>
+      <span style="color:var(--rule);margin:0 8px;">·</span>
+      <span style="color:var(--ink);">census</span>
+      <span style="color:var(--rule);margin:0 8px;">·</span>
+      <a href="https://github.com/advocatesclose" style="color:var(--muted);text-decoration:none;border-bottom:1px solid var(--rule);">github</a>
+    </div>
+  </div>
+  <div class="footer-note">
+    macOS 15+ · Swift 6 · Apple Frameworks
+  </div>
+</footer>
+
+<script>
+  // Scroll reveal
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.1 });
+  reveals.forEach(el => observer.observe(el));
+
+  // subtle shimmer on hover for mockup
+  const mockup = document.querySelector('.doc-mockup');
+  if (mockup) {
+    mockup.addEventListener('mousemove', (e) => {
+      const rect = mockup.getBoundingClientRect();
+      const x = ((e.clientX - rect.left) / rect.width - 0.5) * 6;
+      const y = ((e.clientY - rect.top) / rect.height - 0.5) * 6;
+      mockup.style.transform = `perspective(800px) rotateY(${x}deg) rotateX(${-y}deg)`;
+    });
+    mockup.addEventListener('mouseleave', () => {
+      mockup.style.transform = '';
+      mockup.style.transition = 'transform 0.5s ease';
+    });
+    mockup.addEventListener('mouseenter', () => {
+      mockup.style.transition = 'transform 0.1s ease';
+    });
+  }
+</script>
+</body>
+</html>

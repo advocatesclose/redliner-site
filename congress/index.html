@@ -1,0 +1,1009 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Redliner — Legislative Data</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=DM+Mono:wght@300;400;500&family=Instrument+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0d0d0e;
+    --paper: #f5f2eb;
+    --cream: #ede9df;
+    --red: #c8302a;
+    --blue: #1e4f9c;
+    --gold: #b8902a;
+    --muted: #7a7570;
+    --rule: #d4cfc4;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html {
+    scroll-behavior: smooth;
+    scroll-snap-type: y mandatory;
+  }
+
+  body {
+    background-color: var(--paper);
+    color: var(--ink);
+    font-family: 'Instrument Sans', sans-serif;
+    font-size: 18px;
+    line-height: 1.65;
+    overflow-x: hidden;
+  }
+
+  /* ── NOISE TEXTURE OVERLAY ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 999;
+    opacity: 0.5;
+  }
+
+  /* ── SCROLL SNAP ── */
+  .snap-section {
+    scroll-snap-align: start;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .snap-section-auto {
+    scroll-snap-align: start;
+  }
+
+  /* ── MASTHEAD ── */
+  .masthead {
+    border-bottom: 2px solid var(--ink);
+    padding: 18px 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: var(--paper);
+    z-index: 100;
+    animation: slideDown 0.6s ease both;
+  }
+
+  @keyframes slideDown {
+    from { transform: translateY(-100%); opacity: 0; }
+    to   { transform: translateY(0);     opacity: 1; }
+  }
+
+  .masthead-logo {
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    font-size: 1.4rem;
+    letter-spacing: -0.03em;
+  }
+
+  .masthead-logo a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .masthead-logo span {
+    display: inline-block;
+    width: 8px; height: 8px;
+    background: var(--red);
+    border-radius: 50%;
+    margin-left: 3px;
+    vertical-align: middle;
+    position: relative;
+    top: -2px;
+  }
+
+  .masthead-meta {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    text-align: right;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    padding: 0 60px;
+    padding-top: 60px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    min-height: 100vh;
+    border-bottom: 1px solid var(--rule);
+    overflow: hidden;
+    scroll-snap-align: start;
+  }
+
+  .hero-left {
+    padding: 120px 80px 120px 0;
+    border-right: 1px solid var(--rule);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    animation: fadeUp 0.9s 0.2s ease both;
+  }
+
+  @keyframes fadeUp {
+    from { transform: translateY(40px); opacity: 0; }
+    to   { transform: translateY(0);    opacity: 1; }
+  }
+
+  .kicker {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.78rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--red);
+    margin-bottom: 32px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .kicker::before {
+    content: '';
+    display: block;
+    width: 40px;
+    height: 1px;
+    background: var(--red);
+  }
+
+  .hero-headline {
+    font-family: 'Inter', sans-serif;
+    font-size: clamp(3rem, 5.5vw, 6rem);
+    font-weight: 800;
+    line-height: 0.95;
+    letter-spacing: -0.045em;
+    margin-bottom: 48px;
+  }
+
+  .hero-headline em {
+    font-style: normal;
+    font-weight: 400;
+    color: var(--blue);
+  }
+
+  .hero-subhead {
+    font-size: 1.2rem;
+    color: var(--muted);
+    max-width: 520px;
+    line-height: 1.75;
+    border-left: 3px solid var(--gold);
+    padding-left: 24px;
+    margin-bottom: 56px;
+  }
+
+  .hero-cta {
+    display: inline-flex;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .btn-primary {
+    background: var(--ink);
+    color: var(--paper);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.78rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    padding: 16px 32px;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.2s, transform 0.15s;
+    display: inline-block;
+  }
+
+  .btn-primary:hover { background: var(--blue); transform: translateY(-2px); }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--ink);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.78rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    padding: 15px 32px;
+    border: 1px solid var(--ink);
+    cursor: pointer;
+    text-decoration: none;
+    transition: border-color 0.2s, color 0.2s, transform 0.15s;
+    display: inline-block;
+  }
+
+  .btn-ghost:hover { border-color: var(--blue); color: var(--blue); transform: translateY(-2px); }
+
+  /* ── HERO RIGHT ── */
+  .hero-right {
+    padding: 120px 0 120px 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: fadeUp 0.9s 0.45s ease both;
+  }
+
+  .doc-mockup {
+    width: 100%;
+    max-width: 440px;
+    background: white;
+    border: 1px solid var(--rule);
+    box-shadow: 12px 16px 0 var(--rule), 24px 32px 0 rgba(0,0,0,0.05);
+    overflow: hidden;
+    position: relative;
+  }
+
+  .doc-topbar {
+    background: var(--ink);
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .doc-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .doc-dot.r { background: #c8302a; }
+  .doc-dot.y { background: #b8902a; }
+  .doc-dot.g { background: #2a8c4e; }
+
+  .doc-title {
+    margin-left: auto;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    color: rgba(255,255,255,0.45);
+    letter-spacing: 0.1em;
+  }
+
+  .doc-body {
+    padding: 32px 28px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    line-height: 1.9;
+    color: #333;
+  }
+
+  .doc-line { display: block; margin-bottom: 4px; }
+  .doc-heading { font-weight: 500; font-size: 0.82rem; color: var(--ink); margin-bottom: 8px; display: block; }
+
+  .doc-section-label {
+    color: var(--blue);
+    font-weight: 500;
+  }
+
+  .doc-amendment {
+    color: var(--red);
+    background: rgba(200,48,42,0.07);
+    padding: 0 2px;
+  }
+
+  .doc-insert {
+    color: var(--blue);
+    background: rgba(30,79,156,0.07);
+    padding: 0 2px;
+  }
+
+  .doc-xref {
+    color: var(--gold);
+    text-decoration: underline;
+    text-decoration-color: rgba(184,144,42,0.4);
+  }
+
+  .tag-chip {
+    display: inline-block;
+    font-size: 0.58rem;
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 2px 7px;
+    border-radius: 2px;
+    margin-left: 6px;
+    vertical-align: middle;
+    position: relative;
+    top: -1px;
+  }
+
+  .tag-xml { background: rgba(30,79,156,0.1); color: var(--blue); }
+  .tag-html { background: rgba(200,48,42,0.1); color: var(--red); }
+  .tag-dag { background: rgba(184,144,42,0.1); color: var(--gold); }
+
+  .cursor-blink {
+    display: inline-block;
+    width: 2px; height: 12px;
+    background: var(--ink);
+    margin-left: 2px;
+    vertical-align: middle;
+    animation: blink 1.1s step-end infinite;
+  }
+
+  @keyframes blink {
+    50% { opacity: 0; }
+  }
+
+  /* ── STATEMENT SECTION ── */
+  .statement {
+    padding: 0 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .statement-inner {
+    max-width: 900px;
+    padding: 0 40px;
+  }
+
+  .statement-text {
+    font-family: 'Inter', sans-serif;
+    font-size: clamp(2.2rem, 4vw, 3.8rem);
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -0.035em;
+  }
+
+  .statement-text em {
+    font-style: normal;
+    font-weight: 400;
+    color: var(--blue);
+  }
+
+  .statement-sub {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.78rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-top: 40px;
+  }
+
+  /* ── ESSAY SECTION ── */
+  .essay-section {
+    padding: 120px 60px;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .essay-section .section-header {
+    margin-bottom: 80px;
+  }
+
+  .essay-columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    max-width: 1100px;
+  }
+
+  .essay-columns p {
+    font-size: 1.1rem;
+    color: var(--muted);
+    line-height: 1.85;
+    margin-bottom: 1.6em;
+  }
+
+  .essay-columns p:last-child {
+    margin-bottom: 0;
+  }
+
+  .essay-lead {
+    font-size: 1.3rem !important;
+    color: var(--ink) !important;
+    font-weight: 500;
+  }
+
+  /* ── SECTION DIVIDER ── */
+  .section-rule {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    padding: 0 60px;
+    margin: 0;
+  }
+
+  .section-rule-line { flex: 1; height: 1px; background: var(--rule); }
+  .section-rule-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.66rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 14px 24px;
+    border-left: 1px solid var(--rule);
+    border-right: 1px solid var(--rule);
+  }
+
+  .section-eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--red);
+    margin-bottom: 20px;
+  }
+
+  .section-title {
+    font-family: 'Inter', sans-serif;
+    font-size: clamp(2.4rem, 4vw, 3.6rem);
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.035em;
+  }
+
+  .section-header {
+    margin-bottom: 56px;
+  }
+
+  /* ── FEATURE GRID ── */
+  .features {
+    padding: 120px 60px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .feature-card {
+    padding: 60px 48px;
+    border-right: 1px solid var(--rule);
+    position: relative;
+    transition: background 0.3s;
+  }
+
+  .feature-card:last-child { border-right: none; }
+  .feature-card:hover { background: var(--cream); }
+
+  .feature-number {
+    font-family: 'Inter', sans-serif;
+    font-size: 6rem;
+    font-weight: 800;
+    color: var(--rule);
+    line-height: 1;
+    margin-bottom: 28px;
+    letter-spacing: -0.04em;
+    transition: color 0.3s;
+  }
+
+  .feature-card:hover .feature-number { color: var(--blue); opacity: 0.25; }
+
+  .feature-title {
+    font-family: 'Inter', sans-serif;
+    font-size: 1.7rem;
+    font-weight: 650;
+    margin-bottom: 18px;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+  }
+
+  .feature-desc {
+    font-size: 1rem;
+    color: var(--muted);
+    line-height: 1.75;
+  }
+
+  .feature-desc code {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.85em;
+    background: var(--cream);
+    padding: 2px 6px;
+  }
+
+  .feature-tag {
+    display: inline-block;
+    margin-top: 28px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--red);
+    border-bottom: 1px solid var(--red);
+    padding-bottom: 2px;
+  }
+
+  /* ── SPECS ── */
+  .specs-section {
+    padding: 120px 60px;
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 100px;
+    border-bottom: 1px solid var(--rule);
+    align-items: start;
+  }
+
+  .specs-label {
+    font-family: 'Inter', sans-serif;
+    font-size: clamp(2.4rem, 4vw, 3.6rem);
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.035em;
+    position: sticky;
+    top: 100px;
+  }
+
+  .specs-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+  }
+
+  .spec-item {
+    padding: 32px 0;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .spec-item:nth-child(odd) { padding-right: 48px; border-right: 1px solid var(--rule); }
+  .spec-item:nth-child(even) { padding-left: 48px; }
+
+  .spec-icon {
+    width: 40px; height: 40px;
+    margin-bottom: 16px;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .spec-icon svg { width: 24px; height: 24px; }
+
+  .spec-name {
+    font-family: 'Instrument Sans', sans-serif;
+    font-weight: 600;
+    font-size: 1rem;
+    margin-bottom: 8px;
+  }
+
+  .spec-detail {
+    font-size: 0.92rem;
+    color: var(--muted);
+    line-height: 1.65;
+  }
+
+  /* ── DATA CALLOUT (DARK SECTION) ── */
+  .data-callout {
+    margin: 0 60px;
+    border: 1px solid var(--ink);
+    padding: 72px 80px;
+    background: var(--ink);
+    color: var(--paper);
+    margin-bottom: 0;
+  }
+
+  .data-callout-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 40px;
+  }
+
+  .data-callout-title {
+    font-family: 'Inter', sans-serif;
+    font-size: 2.2rem;
+    font-weight: 650;
+    margin-bottom: 48px;
+    line-height: 1.2;
+    letter-spacing: -0.025em;
+  }
+
+  .data-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 48px;
+  }
+
+  .data-stat {
+    border-left: 1px solid rgba(245,242,235,0.15);
+    padding-left: 28px;
+  }
+
+  .data-number {
+    font-family: 'Inter', sans-serif;
+    font-size: 2.8rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+    margin-bottom: 8px;
+    color: var(--paper);
+  }
+
+  .data-unit {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 12px;
+  }
+
+  .data-desc {
+    font-size: 0.92rem;
+    color: rgba(245,242,235,0.6);
+    line-height: 1.65;
+  }
+
+  .data-badges {
+    display: flex;
+    gap: 14px;
+    margin-top: 48px;
+    flex-wrap: wrap;
+  }
+
+  .data-badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.66rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 9px 16px;
+    border: 1px solid rgba(245,242,235,0.2);
+    color: rgba(245,242,235,0.6);
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    padding: 48px 60px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid var(--rule);
+    margin-top: 60px;
+  }
+
+  .footer-logo {
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    font-size: 1.15rem;
+    letter-spacing: -0.03em;
+  }
+
+  .footer-note {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-align: right;
+  }
+
+  /* ── SCROLL REVEAL ── */
+  .reveal {
+    opacity: 0;
+    transform: translateY(32px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 900px) {
+    html { scroll-snap-type: y proximity; }
+    .masthead { padding: 14px 24px; }
+    .hero { grid-template-columns: 1fr; padding: 0 24px; padding-top: 60px; min-height: auto; }
+    .hero-left { padding: 60px 0 40px; border-right: none; border-bottom: 1px solid var(--rule); }
+    .hero-right { padding: 40px 0 60px; }
+    .features { grid-template-columns: 1fr; padding: 60px 24px; }
+    .feature-card { border-right: none; border-bottom: 1px solid var(--rule); padding: 40px 0; }
+    .specs-section, .essay-section { padding: 80px 24px; }
+    .specs-section { grid-template-columns: 1fr; gap: 48px; }
+    .specs-label { position: static; }
+    .specs-grid { grid-template-columns: 1fr; }
+    .spec-item:nth-child(odd) { padding-right: 0; border-right: none; }
+    .spec-item:nth-child(even) { padding-left: 0; }
+    .data-callout { margin: 0 24px; padding: 48px 32px; }
+    .data-grid { grid-template-columns: 1fr; gap: 32px; }
+    .essay-columns { grid-template-columns: 1fr; gap: 40px; }
+    .statement { padding: 80px 24px; }
+    .snap-section { min-height: auto; }
+    footer { padding: 32px 24px; flex-direction: column; gap: 12px; text-align: center; }
+    .footer-note { text-align: center; }
+    .section-rule { padding: 0 24px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- MASTHEAD -->
+<header class="masthead">
+  <div class="masthead-logo"><a href="../index.html">Redliner<span></span></a></div>
+  <div class="masthead-meta">
+    Legislative Data<br>Computational Methods
+  </div>
+</header>
+
+<!-- ─── PAGE 1: HERO ─── -->
+<section class="hero">
+  <div class="hero-left">
+    <p class="kicker">Congress.gov</p>
+    <h1 class="hero-headline">
+      106,109<br>
+      pages.<br>
+      <em>Freely available.</em>
+    </h1>
+    <p class="hero-subhead">
+      The Federal Register published 106,109 pages in 2024 alone. Over 400 pages per business day. Every word spoken on the floor of Congress is transcribed. All of it is necessarily public data. All of it is parseable.
+    </p>
+    <div class="hero-cta">
+      <a href="#dataset" class="btn-primary">The Dataset</a>
+      <a href="#methods" class="btn-ghost">Methods</a>
+    </div>
+  </div>
+
+  <div class="hero-right">
+    <div class="doc-mockup">
+      <div class="doc-topbar">
+        <div class="doc-dot r"></div>
+        <div class="doc-dot y"></div>
+        <div class="doc-dot g"></div>
+        <span class="doc-title">hr_3684_iija.uslm.xml</span>
+      </div>
+      <div class="doc-body">
+        <span class="doc-heading">TITLE I -- FEDERAL-AID HIGHWAYS</span>
+        <span class="doc-line">
+          <span class="doc-section-label">SEC. 11101.</span> Authorization of appropriations.
+        </span>
+        <span class="doc-line" style="margin-top:8px">
+          <span class="doc-amendment">(a) IN GENERAL.--</span>Section 104(a) of
+        </span>
+        <span class="doc-line">
+          title 23, United States Code, is amended--
+        </span>
+        <span class="doc-line" style="margin-top:8px">
+          &nbsp;&nbsp;(1) by <span class="doc-amendment">striking</span> "$46,365,092,000"
+        </span>
+        <span class="doc-line">
+          &nbsp;&nbsp;and <span class="doc-insert">inserting</span> "$72,406,000,000"
+        </span>
+        <span class="doc-line" style="margin-top:12px; color: #999">
+          ↳ cross-references/
+        </span>
+        <span class="doc-line" style="margin-top:4px">
+          &nbsp;&nbsp;<span class="doc-xref">23 USC 104(a)</span> <span class="tag-chip tag-dag">dag</span>
+        </span>
+        <span class="doc-line" style="margin-top:4px">
+          &nbsp;&nbsp;USLM structure <span class="tag-chip tag-xml">xml</span>
+        </span>
+        <span class="doc-line" style="margin-top:4px">
+          &nbsp;&nbsp;amendment instruction <span class="tag-chip tag-html">parse</span><span class="cursor-blink"></span>
+        </span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── PAGE 2: THE DATASET ─── -->
+<section class="essay-section snap-section-auto reveal" id="dataset">
+  <div class="section-header">
+    <p class="section-eyebrow">The Dataset</p>
+    <h2 class="section-title">One of the most interesting<br>semi-structured datasets on earth.</h2>
+  </div>
+  <div class="essay-columns">
+    <div>
+      <p class="essay-lead">
+        Congress.gov is the official source for U.S. federal legislative information, maintained by the Library of Congress. It contains every bill and resolution introduced in Congress, every amendment offered, every vote cast, every word spoken on the floor.
+      </p>
+      <p>
+        The 118th Congress (2023-2024) saw over 19,000 bills and resolutions introduced in the House alone. The Congressional Record documents every floor statement verbatim. Committee reports explain legislative intent. Conference reports reconcile differences between chambers. Treaty documents record the Senate's advice and consent.
+      </p>
+    </div>
+    <div>
+      <p>
+        This data exists in multiple representations: USLM XML with deep structural markup, HTML renderings for web display, plain text for search, PDF for official publication. Same content, different serializations. A single bill might amend dozens of sections across multiple titles of the United States Code, each amendment carrying its own effective date, sunset clause, and cross-reference network.
+      </p>
+      <p>
+        All of this is freely available. It belongs to the American people. It is, by constitutional design, public information. The question is not access. The question is what you do with it once you have it.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ─── PAGE 3: STATEMENT ─── -->
+<section class="statement snap-section reveal">
+  <div class="statement-inner">
+    <p class="statement-text">
+      Not a database. Not a blob. Something <em>in between</em> that requires real computational methods.
+    </p>
+    <p class="statement-sub">Semi-structured data is the hardest kind to parse correctly.</p>
+  </div>
+</section>
+
+<!-- SECTION RULE -->
+<div class="section-rule snap-section-auto">
+  <div class="section-rule-line"></div>
+  <span class="section-rule-label">Engineering</span>
+  <div class="section-rule-line"></div>
+</div>
+
+<!-- ─── PAGE 4: FEATURE CARDS ─── -->
+<section class="features reveal snap-section-auto" id="methods">
+  <div class="feature-card">
+    <div class="feature-number">01</div>
+    <h3 class="feature-title">Legislative Graph</h3>
+    <p class="feature-desc">
+      Bills amend statutes. Statutes are codified into titles. Titles cross-reference other titles. Amendments modify specific sections of existing law. Conference reports reconcile divergent versions. This is a directed acyclic graph -- not a flat document. The parser models it as one: each <code>SECBlock</code> carries typed edges to the nodes it modifies, with <code>heading1</code>, <code>heading2</code>, <code>definition</code>, and <code>listItem</code> types preserving the hierarchy.
+    </p>
+    <span class="feature-tag">Directed Acyclic Graph</span>
+  </div>
+
+  <div class="feature-card">
+    <div class="feature-number">02</div>
+    <h3 class="feature-title">Semi-Structured Parsing</h3>
+    <p class="feature-desc">
+      Legislative markup varies: XML (USLM format), HTML, plain text, PDF. The parser infrastructure handles all of them. <code>SECHTMLParser</code> uses compiled regex to extract paragraph-level blocks from HTML, classifying each by its attribute soup -- <code>class="H1"</code> becomes <code>.heading1</code>, bullet entities become <code>.listItem</code>. The <code>HTMLVisitor</code> walks the tree node by node, emitting structured output. <code>stripTags(from:)</code> strips internal markup to clean text.
+    </p>
+    <span class="feature-tag">Multi-Format Parser</span>
+  </div>
+
+  <div class="feature-card">
+    <div class="feature-number">03</div>
+    <h3 class="feature-title">On-Device Classification</h3>
+    <p class="feature-desc">
+      The <code>NaturalLanguage</code> framework provides tokenization, entity recognition, and sentiment analysis -- all on-device, all without a network call. <code>AtlasMLManager</code> records semantic tagging events as JSONL training data: each entry captures a label, a cleaned text via <code>NLTokenizer(unit: .word)</code>, and the raw context. <code>AtlasTagger</code> extracts tagged chunks from <code>NSTextStorage</code> by enumerating the custom <code>.atlasSemanticTag</code> attribute.
+    </p>
+    <span class="feature-tag">NaturalLanguage Framework</span>
+  </div>
+</section>
+
+<!-- ─── PAGE 5: MATHEMATICAL STATEMENT ─── -->
+<section class="statement snap-section reveal" style="border-bottom: 1px solid var(--rule);">
+  <div class="statement-inner">
+    <p class="statement-text">
+      Legislation has <em>mathematical structure.</em><br>The methods should respect it.
+    </p>
+    <p class="statement-sub">Topology. Spectral methods. Information geometry.</p>
+  </div>
+</section>
+
+<!-- SECTION RULE -->
+<div class="section-rule snap-section-auto">
+  <div class="section-rule-line"></div>
+  <span class="section-rule-label">Mathematical Foundations</span>
+  <div class="section-rule-line"></div>
+</div>
+
+<!-- ─── PAGE 6: SPECS GRID ─── -->
+<section class="specs-section reveal snap-section-auto">
+  <div class="specs-label">
+    The math<br>behind<br><em style="color:var(--blue)">the parsing.</em>
+  </div>
+  <div class="specs-grid">
+    <div class="spec-item">
+      <div class="spec-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><path d="M12 3v18M3 12h18M5.6 5.6l12.8 12.8M18.4 5.6L5.6 18.4"/></svg>
+      </div>
+      <div class="spec-name">Topology</div>
+      <div class="spec-detail">Legislative structure forms directed acyclic graphs. Bills amend statutes, which are codified into titles, which cross-reference other titles. Understanding connectivity, cycles, and reachability is a topological problem.</div>
+    </div>
+    <div class="spec-item">
+      <div class="spec-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 20l4-16h8l4 16"/><path d="M6 12h12"/></svg>
+      </div>
+      <div class="spec-name">Spectral Methods</div>
+      <div class="spec-detail">Eigendecomposition of bill similarity matrices enables clustering across sessions. Bills that amend the same statute, share sponsors, or use similar language cluster in spectral space even when introduced years apart.</div>
+    </div>
+    <div class="spec-item">
+      <div class="spec-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 20c4-2 6-8 8-14s4-4 10 0"/><circle cx="7" cy="14" r="2"/><circle cx="17" cy="8" r="2"/></svg>
+      </div>
+      <div class="spec-name">Manifolds</div>
+      <div class="spec-detail">Each amendment is a small perturbation in document space. Successive drafts of a bill trace a smooth curve on a manifold of legislative texts, and the geometry of that manifold encodes the drafting process itself.</div>
+    </div>
+    <div class="spec-item">
+      <div class="spec-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 4h16v16H4z"/><path d="M4 12h16M12 4v16"/><circle cx="8" cy="8" r="1.5" fill="currentColor"/><circle cx="16" cy="16" r="1.5" fill="currentColor"/></svg>
+      </div>
+      <div class="spec-name">Fisher Information</div>
+      <div class="spec-detail">What do co-sponsorship patterns actually tell you about bill content? Fisher information quantifies the information that observable variables (sponsors, committees, vote counts) carry about latent legislative dimensions.</div>
+    </div>
+    <div class="spec-item">
+      <div class="spec-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 17l4-4 4 4 4-8 6 6"/><path d="M17 7h4v4"/></svg>
+      </div>
+      <div class="spec-name">Non-Stationary Time Series</div>
+      <div class="spec-detail">Legislative language evolves. "Interstate commerce" means something different in 1935 and 2025. Drafting conventions shift across administrations. The statistical properties of the text stream change with time -- stationarity cannot be assumed.</div>
+    </div>
+    <div class="spec-item">
+      <div class="spec-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 3v18"/><path d="M5 8c2-3 5-4 7-4s5 1 7 4"/><path d="M5 16c2 3 5 4 7 4s5-1 7-4"/></svg>
+      </div>
+      <div class="spec-name">Convergence</div>
+      <div class="spec-detail">Conference committees are optimization in action. House and Senate versions of a bill are two points in document space; the conference report is the result of a constrained convergence process where political and procedural constraints define the feasible set.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── PAGE 7: DATA SCALE CALLOUT ─── -->
+<div class="data-callout reveal snap-section-auto">
+  <p class="data-callout-label">Public Data at Scale</p>
+  <h3 class="data-callout-title">The numbers. All public. All parseable. All on your machine.</h3>
+  <div class="data-grid">
+    <div class="data-stat">
+      <div class="data-number">106,109</div>
+      <div class="data-unit">Federal Register Pages</div>
+      <div class="data-desc">Published in 2024. Over 400 pages per business day. Final rules, proposed rules, notices, presidential documents -- the full output of the federal regulatory apparatus.</div>
+    </div>
+    <div class="data-stat">
+      <div class="data-number">19,000+</div>
+      <div class="data-unit">Bills Per Congress</div>
+      <div class="data-desc">Introduced in the House alone during the 118th Congress. Each one with its own structure, its own amendment history, its own cross-reference network into existing law.</div>
+    </div>
+    <div class="data-stat">
+      <div class="data-number">&infin;</div>
+      <div class="data-unit">Congressional Record</div>
+      <div class="data-desc">Every word spoken on the floor of Congress is transcribed. Every amendment debated, every procedural motion, every unanimous consent request. Continuous since 1873.</div>
+    </div>
+  </div>
+  <div class="data-badges">
+    <span class="data-badge">USLM XML</span>
+    <span class="data-badge">Bulk Data API</span>
+    <span class="data-badge">GPO GovInfo</span>
+    <span class="data-badge">On-Device Processing</span>
+  </div>
+</div>
+
+<!-- ─── PAGE 8: CLOSING ─── -->
+<section class="statement snap-section reveal" style="min-height: 80vh;">
+  <div class="statement-inner">
+    <p class="statement-text">
+      Public data requires <em>public tools.</em><br>On-device. No server. No API key.
+    </p>
+    <p class="statement-sub">The data belongs to everyone. The processing stays on your machine.</p>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="snap-section-auto">
+  <div class="footer-logo">Redliner<span style="display:inline-block;width:6px;height:6px;background:#c8302a;border-radius:50%;margin-left:2px;vertical-align:middle;position:relative;top:-1px"></span></div>
+  <div style="text-align:center;">
+    <div style="font-family:'DM Mono',monospace;font-size:0.65rem;color:var(--muted);letter-spacing:0.1em;margin-bottom:6px;">Legislative data. Computational methods.</div>
+    <div style="font-family:'DM Mono',monospace;font-size:0.65rem;letter-spacing:0.1em;">
+      <a href="../index.html" style="color:var(--muted);text-decoration:none;border-bottom:1px solid var(--rule);">technical</a>
+      <span style="color:var(--rule);margin:0 8px;">·</span>
+      <span style="color:var(--ink);">congress</span>
+      <span style="color:var(--rule);margin:0 8px;">·</span>
+      <a href="https://github.com/advocatesclose" style="color:var(--muted);text-decoration:none;border-bottom:1px solid var(--rule);">github</a>
+    </div>
+  </div>
+  <div class="footer-note">
+    macOS 15+ · Swift 6 · Apple Frameworks
+  </div>
+</footer>
+
+<script>
+  // Scroll reveal
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.1 });
+  reveals.forEach(el => observer.observe(el));
+
+  // subtle shimmer on hover for mockup
+  const mockup = document.querySelector('.doc-mockup');
+  if (mockup) {
+    mockup.addEventListener('mousemove', (e) => {
+      const rect = mockup.getBoundingClientRect();
+      const x = ((e.clientX - rect.left) / rect.width - 0.5) * 6;
+      const y = ((e.clientY - rect.top) / rect.height - 0.5) * 6;
+      mockup.style.transform = `perspective(800px) rotateY(${x}deg) rotateX(${-y}deg)`;
+    });
+    mockup.addEventListener('mouseleave', () => {
+      mockup.style.transform = '';
+      mockup.style.transition = 'transform 0.5s ease';
+    });
+    mockup.addEventListener('mouseenter', () => {
+      mockup.style.transition = 'transform 0.1s ease';
+    });
+  }
+</script>
+</body>
+</html>
