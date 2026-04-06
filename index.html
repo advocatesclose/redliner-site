@@ -734,7 +734,7 @@
 <header class="masthead">
   <div class="masthead-logo">Redliner<span></span></div>
   <div class="masthead-meta">
-    Advocates Close<br>New York
+    Native macOS<br>Document Engine
   </div>
 </header>
 
@@ -805,24 +805,24 @@
 <!-- ─── PAGE 3: ESSAY ─── -->
 <section class="essay-section snap-section-auto reveal" id="thesis">
   <div class="section-header">
-    <p class="section-eyebrow">On Complexity</p>
-    <h2 class="section-title">Tools that do not degrade<br>with scale.</h2>
+    <p class="section-eyebrow">On Architecture</p>
+    <h2 class="section-title">One source of truth.<br>Every format at once.</h2>
   </div>
   <div class="essay-columns">
     <div>
       <p class="essay-lead">
-        Computer programmers as we know them today have existed for less than a century. They are not credentialed or licensed. They do not sit an exam.
+        Most document tools treat each output format as a separate workflow. Edit the Word file, then export to PDF. Run a diff, then format the redline. Each step is manual, sequential, and error-prone.
       </p>
       <p>
-        And yet the things entrusted to computer programs are not somehow less important than the things entrusted to professionals who do. A Boeing 747 does not stay aloft because it is required by law to do so. It stays aloft because it is governed by computer programs that make it able to do so. How this is possible is worth understanding.
+        Redliner inverts this. You edit a document once. The system projects that edit into every output format simultaneously — HTML, PDF, DOCX, redline — through dedicated XPC services running in parallel.
       </p>
     </div>
     <div>
       <p>
-        Over a remarkably short period, programmers have developed tools, practices, and protocols for building large-scale systems that interoperate with one another. iPhones are not less useful when three billion people have one. The tools do not degrade with scale.
+        Each service runs in its own process with its own memory space. No document content crosses the process boundary. File coordination prevents conflicts. Structured concurrency manages lifecycle.
       </p>
       <p>
-        Laws, by contrast, become harder to use when the number of people who must apply them increases. It is not obvious that this limitation reflects some fundamental constraint. It may simply reflect a gap in tooling.
+        The result is a system where adding a new output format means adding a new service — not rewriting the pipeline. The architecture scales because the components are isolated.
       </p>
     </div>
   </div>
@@ -834,7 +834,7 @@
     <p class="statement-text">
       Print to Word. Print to PDF. Generate a redline. That is not three things. It is <em>one thing, three times.</em>
     </p>
-    <p class="statement-sub">Prices are projections. Redlines are projections. We add bases.</p>
+    <p class="statement-sub">One source. Parallel projections. Zero duplication.</p>
   </div>
 </section>
 
@@ -1026,12 +1026,11 @@
       <span style="color:var(--rule);margin:0 8px;">·</span>
       <a href="https://advocatesclose.github.io/redliner-terminal/" style="color:var(--muted);text-decoration:none;border-bottom:1px solid var(--rule);">terminal</a>
       <span style="color:var(--rule);margin:0 8px;">·</span>
-      <a href="https://advocatesclose.github.io/redliner-thesis/" style="color:var(--muted);text-decoration:none;border-bottom:1px solid var(--rule);">thesis</a>
+      <a href="https://github.com/advocatesclose" style="color:var(--muted);text-decoration:none;border-bottom:1px solid var(--rule);">github</a>
     </div>
   </div>
   <div class="footer-note">
-    Advocates Close · New York<br>
-    <span style="opacity:0.5">macOS 15+ · Swift 6 · Apple Frameworks</span>
+    macOS 15+ · Swift 6 · Apple Frameworks
   </div>
 </footer>
 
